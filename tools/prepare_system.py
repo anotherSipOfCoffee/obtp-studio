@@ -11,3 +11,12 @@ if target.exists():
     shutil.rmtree(target)
 shutil.copytree(source / lock["source_path"], target)
 print("Prepared System " + head)
+
+# Every deployed Studio revision gets distinct nested-page and asset URLs.
+revision = subprocess.check_output(["git", "-C", str(root), "rev-parse", "HEAD"], text=True).strip()
+for relative in ["dist/index.html", "dist/v2/index.html", "dist/v2/app.js"]:
+    file = root / relative
+    text = file.read_text()
+    if "__STUDIO_BUILD__" not in text:
+        raise SystemExit("Missing deployment version token: " + relative)
+    file.write_text(text.replace("__STUDIO_BUILD__", revision))
