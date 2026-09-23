@@ -1,0 +1,17 @@
+const { chromium } = require('playwright');
+const assert = require('node:assert/strict');
+(async()=>{const browser=await chromium.launch({headless:true,args:['--use-gl=angle','--use-angle=swiftshader','--enable-webgl']});
+try{const page=await browser.newPage();const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('http://127.0.0.1:8765/');
+const v2=page.frameLocator('#v2');await v2.locator('#status').filter({hasText:'28 component instances · ready'}).waitFor();
+assert.equal(await v2.locator('#schedule tr').count(),4);
+await v2.locator('#layer').selectOption('floor');await v2.locator('#status').filter({hasText:'1 component instances · ready'}).waitFor();
+await page.locator('summary').click();await page.locator('[data-version="v1"]').click();
+const v1=page.frameLocator('#v1');await v1.locator('#part-count').filter({hasText:/\d/}).waitFor();assert.ok(await v1.locator('#scene polygon').count()>0);
+await v1.locator('#workroom').click();const size=await v1.locator('#model-size').textContent();
+await page.locator('summary').click();await page.locator('[data-version="v2"]').click();assert.equal(await v2.locator('#layer').inputValue(),'floor');
+await v2.locator('#layer').selectOption('all');await v2.locator('#status').filter({hasText:'28 component instances · ready'}).waitFor();
+await page.screenshot({path:'studio-v2-desktop.png',fullPage:true});
+await page.locator('summary').click();await page.locator('[data-version="v1"]').click();assert.equal(await v1.locator('#model-size').textContent(),size);
+await page.setViewportSize({width:390,height:844});await page.locator('summary').click();await page.locator('[data-version="v2"]').click();await page.screenshot({path:'studio-v2-mobile.png',fullPage:true});
+assert.deepEqual(errors,[]);console.log('PASS: v2 source assembly/layers, v1 geometry, switching state, desktop/mobile; no page errors');
+}finally{await browser.close();}})().catch(e=>{console.error(e);process.exit(1)});
