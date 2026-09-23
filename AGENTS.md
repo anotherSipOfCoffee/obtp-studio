@@ -10,3 +10,6 @@ Snapshot updates occur when requested. Preserve prior dated snapshots, pin all t
 
 ## Studio variations
 The original generator is preserved in dist/v1/index.html as the v1 reference. Keep it inside Studio; do not move it into System. The shell provides a Variations selector. V2 consumes the pinned System catalogue, meshes and renderer copied during deployment by tools/prepare_system.py; System remains their editable source. Do not duplicate or invent placement rules in Studio, stretch WikiHouse geometry or enable unsupported building controls. Update system.lock.json intentionally and verify the v1 reference and v2 assembly before deployment.
+
+## Current configuration limits
+The owner selected automatic structural opening placement, then required precise WikiHouse opening instructions before finishing it. Keep window/door controls unfinished and disabled until those instructions are verified for the pinned source. End-wall corner trials failed; do not imply closure is solved. Floor/roof seam ties now come from System's source-socket placements; see System docs/SEAM_CONNECTIONS.md and docs/OPENINGS_AND_ENDWALLS_CHECKPOINT.md.

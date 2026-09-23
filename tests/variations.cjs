@@ -14,11 +14,11 @@ const v1=page.frameLocator('#v1');await v1.locator('#part-count').filter({hasTex
 await v1.locator('#workroom').click();const size=await v1.locator('#model-size').textContent();
 await page.locator('summary').click();await page.locator('[data-version="v2"]').click();assert.equal(await v2.locator('#layer').inputValue(),'floor');
 await v2.locator('#layer').selectOption('all');await v2.locator('#status').filter({hasText:'28 component instances · ready'}).waitFor();
-await v2.locator('#bays').selectOption('4');await v2.locator('#status').filter({hasText:'184 component instances · ready'}).waitFor();assert.equal(await v2.locator('#assembly-title').textContent(),'4 module open assembly');
-await v2.locator('#bays').selectOption('8');await v2.locator('#status').filter({hasText:'392 component instances · ready'}).waitFor();
+await v2.locator('#bays').selectOption('4');await v2.locator('#status').filter({hasText:'262 component instances · ready'}).waitFor();assert.equal(await v2.locator('#assembly-title').textContent(),'4 module open assembly');
+await v2.locator('#bays').selectOption('8');await v2.locator('#status').filter({hasText:'574 component instances · ready'}).waitFor();
 assert.equal(await v2.locator('canvas').evaluate(c=>c.getContext('webgl').getError()),0);
 await v2.locator('#layer').selectOption('floor');await v2.locator('#status').filter({hasText:'8 component instances · ready'}).waitFor();
-await v2.locator('#bays').selectOption('4');await v2.locator('#layer').selectOption('all');await v2.locator('#status').filter({hasText:'184 component instances · ready'}).waitFor();
+await v2.locator('#bays').selectOption('4');await v2.locator('#layer').selectOption('all');await v2.locator('#status').filter({hasText:'262 component instances · ready'}).waitFor();
 await v2.locator('#explode').fill('50');await v2.locator('#explode').dispatchEvent('input');await v2.locator('#reset').click();
 await page.screenshot({path:'studio-v2-desktop.png',fullPage:true});
 await page.locator('summary').click();await page.locator('[data-version="v1"]').click();assert.equal(await v1.locator('#model-size').textContent(),size);
