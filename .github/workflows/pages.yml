@@ -33,7 +33,9 @@ jobs:
           ref: ${{ steps.system.outputs.commit }}
           path: _system
       - name: Prepare pinned System modules
-        run: python tools/prepare_system.py
+        run: |
+          python tools/prepare_system.py
+          node _system/tests/catalogue.cjs
       - name: Install browser verification
         run: |
           npm install --no-save playwright
