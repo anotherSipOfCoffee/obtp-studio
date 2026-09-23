@@ -1,0 +1,40 @@
+name: Check Studio development variations (no deployment)
+on:
+  push:
+    branches: ['dev/obtp-independent-v1-20260923']
+permissions:
+  contents: read
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Read System pin
+        id: system
+        run: python -c "import json,os; d=json.load(open('system.lock.json')); open(os.environ['GITHUB_OUTPUT'],'a').write('commit='+d['commit']+'\n')"
+      - uses: actions/checkout@v4
+        with:
+          repository: anotherSipOfCoffee/obtp-system
+          ref: ${{ steps.system.outputs.commit }}
+          path: _system
+      - run: python tools/prepare_system.py
+      - run: node _system/tests/catalogue.cjs
+      - run: node _system/tests/cassette.cjs
+      - run: npm install --no-save playwright@1.55.0
+      - run: npx playwright install --with-deps chromium
+      - name: Browser regression
+        run: |
+          python3 -m http.server 8765 --directory dist > /tmp/studio-server.log 2>&1 &
+          node tests/variations.cjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: studio-development-preview
+          path: |
+            dist/
+            studio-*.png
+            cassette-validation.json
+          retention-days: 30

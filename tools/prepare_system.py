@@ -14,7 +14,7 @@ print("Prepared System " + head)
 
 # Every deployed Studio revision gets distinct nested-page and asset URLs.
 revision = subprocess.check_output(["git", "-C", str(root), "rev-parse", "HEAD"], text=True).strip()
-for relative in ["dist/index.html", "dist/v2/index.html", "dist/v2/app.js"]:
+for relative in ["dist/index.html", "dist/v2/index.html", "dist/v2/app.js", "dist/v3/index.html"]:
     file = root / relative
     text = file.read_text()
     if "__STUDIO_BUILD__" not in text:
