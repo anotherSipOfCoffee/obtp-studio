@@ -1,7 +1,7 @@
 const { chromium } = require('playwright');
 const assert = require('node:assert/strict');
 (async()=>{const browser=await chromium.launch({headless:true,args:['--use-gl=angle','--use-angle=swiftshader','--enable-webgl']});
-try{const page=await browser.newPage();const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('http://127.0.0.1:8765/');
+try{const page=await browser.newPage();const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto((process.env.OBTP_BASE_URL || 'http://127.0.0.1:8765/'));
 const v2=page.frameLocator('#v2');await v2.locator('#status').filter({hasText:'28 component instances · ready'}).waitFor();
 assert.equal(await v2.locator('#schedule tr').count(),4);
 assert.match(await page.locator('#v2').getAttribute('src'), /[?]build=[a-f0-9]{40}$/);
