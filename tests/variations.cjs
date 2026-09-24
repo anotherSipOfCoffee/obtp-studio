@@ -3,7 +3,7 @@ const assert = require('node:assert/strict');
 (async()=>{const browser=await chromium.launch({headless:true,args:['--use-gl=angle','--use-angle=swiftshader','--enable-webgl']});
 try{const page=await browser.newPage();const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto((process.env.OBTP_BASE_URL || 'http://127.0.0.1:8765/'));
 async function version(key){const id=await page.locator('iframe:not([hidden])').getAttribute('id');await page.frameLocator('#'+id).locator('#studio-version').selectOption(key);}
-const v2=page.frameLocator('#v2');await v2.locator('#status').filter({hasText:'28 component instances · ready'}).waitFor();
+const v2=page.frameLocator('#v2');try { await v2.locator('#status').filter({hasText:'28 component instances · ready'}).waitFor(); } catch (error) { console.error('Startup diagnostics', {url:page.url(),frames:page.frames().map(f=>f.url()),errors,status:await v2.locator('#status').textContent({timeout:2000}).catch(()=>null)}); throw error; }
 assert.equal(await v2.locator('#schedule tr').count(),4);
 assert.match(await page.locator('#v2').getAttribute('src'), /[?]build=[a-f0-9]{40}$/);
 assert.equal(await v2.locator('label[for="bays"]').textContent(),'Number of modules');

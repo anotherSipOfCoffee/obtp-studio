@@ -80,16 +80,25 @@ jobs:
         uses: actions/upload-pages-artifact@v4
         with:
           path: dist
+          name: github-pages-${{ github.run_attempt }}
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
+        with:
+          artifact_name: github-pages-${{ github.run_attempt }}
       - name: Verify published Studio variations
         env:
           OBTP_BASE_URL: https://anothersipofcoffee.github.io/obtp-studio/
-        run: node tests/variations.cjs
+        run: |
+          for attempt in 1 2 3; do
+            node tests/variations.cjs && exit 0
+            if [ "$attempt" -lt 3 ]; then sleep 20; fi
+          done
+          exit 1
       - name: Save live verification screenshots
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: studio-live-variation-check
           path: studio-*.png
+
