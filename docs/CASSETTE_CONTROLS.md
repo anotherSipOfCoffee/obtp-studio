@@ -14,4 +14,9 @@ Both v2 and v3 display the actual pinned System revision, substituted during pre
 
 Run the development workflow on `dev/cassette-connections-studio-controls-20260924`. It prepares the exact dependency, runs both System geometry suites and tests the browser UI. The expanded test covers all 32 module/layer settings in v3, schedules, fixed comparison height, no inspector embedding, source revision display, explode/reset, switching state, WebGL, mobile overflow and the connection-report link. The workflow uploads an expiring prepared preview and screenshots; source remains durable in GitHub.
 
-This branch is for review. No new live deployment or Drive baseline update is part of this batch. Drive baseline v76 remains behind these GitHub changes. Architecture has no System dependency and is unchanged. For design evidence and physical-validation holds, read System `docs/cassette/CONNECTIONS.md` or the prepared `system-source/cassette/connections.html`.
+The owner authorized the System-first release followed by Studio. This continuation publishes the previously prepared Studio-owned controls after System validation. No Drive baseline update is part of this batch. Drive baseline v76 remains behind these GitHub changes. Architecture has no System dependency and is unchanged. For design evidence and physical-validation holds, read System `docs/cassette/CONNECTIONS.md` or the prepared `system-source/cassette/connections.html`.
+
+
+
+## Inspection continuation
+Studio explicitly requests revised R90 geometry from the tested System pin. Each regenerated model is registered, including end/intermediate variants when module count changes. Version is injected as the first design parameter in each variation by the parent shell; the preserved v1 file is unchanged. The separate header Variations menu is removed. Detailed part/connector/connection inspection remains in System. Software validation does not approve construction.
