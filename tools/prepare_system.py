@@ -19,4 +19,5 @@ for relative in ["dist/index.html", "dist/v2/index.html", "dist/v2/app.js", "dis
     text = file.read_text()
     if "__STUDIO_BUILD__" not in text:
         raise SystemExit("Missing deployment version token: " + relative)
-    file.write_text(text.replace("__STUDIO_BUILD__", revision))
+    file.write_text(text.replace("__STUDIO_BUILD__", revision).replace("__SYSTEM_COMMIT_SHORT__", head[:12]).replace("__SYSTEM_COMMIT__", head))
+

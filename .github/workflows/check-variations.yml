@@ -1,7 +1,7 @@
 name: Check Studio development variations (no deployment)
 on:
   push:
-    branches: ['dev/obtp-independent-v1-20260923']
+    branches: ['dev/obtp-independent-v1-20260923', 'dev/cassette-connections-studio-controls-20260924']
 permissions:
   contents: read
 jobs:
@@ -38,3 +38,4 @@ jobs:
             studio-*.png
             cassette-validation.json
           retention-days: 30
+
