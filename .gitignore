@@ -6,3 +6,10 @@ node_modules/
 Thumbs.db
 *.log
 tmp/
+
+_system/
+dist/system-source/
+studio-*.png
+cassette-validation.json
+__pycache__/
+*.pyc

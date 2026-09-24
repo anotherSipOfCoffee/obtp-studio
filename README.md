@@ -1,12 +1,9 @@
 # OBTP Studio
 
-Independent repository for the Studio project. Website files are in `dist/`.
-Static HTML/CSS/JavaScript; no build or server required.
+Three variations in the selector: v1 original conceptual reference, v2 WikiHouse, v3 independent OBTP Cassette 01 research prototype. The default remains v2.
 
-## GitHub Pages
-The deployment workflow in `.github/workflows/pages.yml` publishes `dist/` on pushes to `main` or a manual workflow run. No build step is required.
+System is the source for v2/v3 geometry and assembly rules. system.lock.json pins its exact commit; tools/prepare_system.py verifies the checked-out commit and copies its dist tree to dist/system-source. Do not commit that reproducible copy. Studio v1 remains byte-identical to the pre-task reference.
 
-One-time setup: in repository Settings → Pages → Build and deployment, select **GitHub Actions** as the source. Then run **Deploy GitHub Pages** from Actions, or re-run the initial failed run. The connected plugin cannot change the Pages source setting.
+Read 00_START_HERE.md and AGENTS.md for the Drive master / GitHub development policy. Changes are on dev/obtp-independent-v1-20260923; main/live are unchanged. The new read-only Check Studio development variations workflow builds and tests a downloadable preview, without deploying.
 
-## Status
-Imported from OBTP Project System v74 into this public GitHub repository with owner approval. Website files are in dist/. GitHub Pages deployment workflow is committed. A successful deployment has not yet been verified. GitHub Pages is the selected hosting target.
+The existing Pages workflow publishes on main or manual execution. It is preserved but not authorized to run in this task. For local inspection of a prepared preview, serve its dist folder with python -m http.server 8765 --directory dist and open http://localhost:8765/#v3.
