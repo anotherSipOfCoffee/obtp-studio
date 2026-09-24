@@ -24,9 +24,39 @@ await page.screenshot({path:'studio-v2-desktop.png',fullPage:true});
 await page.locator('summary').click();await page.locator('[data-version="v1"]').click();assert.equal(await v1.locator('#model-size').textContent(),size);
 await page.setViewportSize({width:390,height:844});await page.locator('summary').click();await page.locator('[data-version="v2"]').click();await page.screenshot({path:'studio-v2-mobile.png',fullPage:true});
 await page.locator('summary').click();await page.locator('[data-version="v3"]').click();
-const v3=page.frameLocator('#v3').frameLocator('iframe');await v3.locator('#status').filter({hasText:'30 cassette instances · geometry ready'}).waitFor();
-await v3.locator('#bays').selectOption('8');await v3.locator('#status').filter({hasText:'46 cassette instances'}).waitFor();
-await page.setViewportSize({width:1440,height:1050});await page.screenshot({path:'studio-v3-desktop.png',fullPage:true});
+const v3=page.frameLocator('#v3');await v3.locator('#status').filter({hasText:'30 cassette instances · geometry ready'}).waitFor();
+assert.equal(await v3.locator('iframe').count(),0,'Studio must not embed the System inspector');
+assert.equal(await v3.locator('#mode').count(),0);
+assert.equal(await v3.locator('#height').count(),0);
+assert.equal(await v3.locator('label[for="bays"]').textContent(),await v2.locator('label[for="bays"]').textContent());
+assert.deepEqual(await v3.locator('#bays option').evaluateAll(opts=>opts.map(o=>o.value)),await v2.locator('#bays option').evaluateAll(opts=>opts.map(o=>o.value)));
+assert.deepEqual(await v3.locator('#layer option').evaluateAll(opts=>opts.map(o=>o.value)),await v2.locator('#layer option').evaluateAll(opts=>opts.map(o=>o.value)));
+assert.match(await v3.locator('script[src*="app.js"]').getAttribute('src'), /[?]build=[a-f0-9]{40}$/);
+assert.match(await v3.locator('a[href*="/tree/"]').textContent(),/^[a-f0-9]{12}$/);
+for(let n=1;n<=8;n++){
+ await v3.locator('#bays').selectOption(String(n));
+ for(const layer of ['floor','walls','roof','all']){
+  await v3.locator('#layer').selectOption(layer);
+  const expected=layer==='floor'?n:layer==='walls'?3*n+14:4*n+14;
+  await v3.locator('#status').filter({hasText:expected+' cassette instances · geometry ready'}).waitFor();
+  const actual=await v3.locator('canvas').evaluate(()=>({items:OBTPStudioV3.items.length,bays:OBTPStudioV3.bays,height:OBTPStudioV3.scene.height,skin:OBTPStudioV3.scene.models.some(m=>m.assets.some(a=>a.material==='plywood'))}));
+  assert.deepEqual(actual,{items:expected,bays:n,height:2100,skin:false});
+  assert.equal(await v3.locator('#schedule tr td:last-child').evaluateAll(cells=>cells.reduce((n,c)=>n+Number(c.textContent),0)),expected);
+ }
+}
+await v3.locator('#explode').fill('50');await v3.locator('#explode').dispatchEvent('input');
+assert.equal(await v3.locator('#amount').textContent(),'50%');
+assert.equal(await v3.locator('canvas').evaluate(()=>OBTPStudioV3.renderer.explode),.5);
+await v3.locator('#reset').click();assert.equal(await v3.locator('#explode').inputValue(),'0');
+assert.equal(await v3.locator('canvas').evaluate(c=>c.getContext('webgl').getError()),0);
+assert(await v3.locator('body').evaluate(()=>document.documentElement.scrollWidth<=innerWidth),'v3 mobile overflow');
+await page.screenshot({path:'studio-v3-mobile.png',fullPage:true});
+await page.setViewportSize({width:1440,height:1050});
+await v3.locator('#bays').selectOption('4');
+await page.screenshot({path:'studio-v3-desktop.png',fullPage:true});
 await page.locator('summary').click();await page.locator('[data-version="v2"]').click();assert.equal(await v2.locator('#bays').inputValue(),'4');
-assert.deepEqual(errors,[]);console.log('PASS: v2 source assembly/layers, v1 geometry, switching state, desktop/mobile; no page errors');
+await page.locator('summary').click();await page.locator('[data-version="v3"]').click();assert.equal(await v3.locator('#bays').inputValue(),'4');
+const reportUrl=await v3.locator('a[href$="connections.html"]').evaluate(a=>a.href);
+const response=await page.request.get(reportUrl);assert.equal(response.status(),200);assert.match(await response.text(),/WHT/);
+assert.deepEqual(errors,[]);console.log('PASS: v1/v2 preserved; Studio-owned v3 controls, 32 cassette configurations, quantities, explode/reset, state, source pin, research, WebGL and mobile overflow; no page errors');
 }finally{await browser.close();}})().catch(e=>{console.error(e);process.exit(1)});
