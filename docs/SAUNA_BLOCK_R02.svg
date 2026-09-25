@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 690" role="img" aria-labelledby="title description">
+ <title id="title">Sauna block R02 nominal equipment fit</title>
+ <desc id="description">Nominal 1800 by 2400 millimetre allocated rectangle. Entry candidate at front west, upper and foot benches across rear, reference electric heater against east wall near the front. Coordinates are reservations, not finished construction dimensions.</desc>
+ <style>
+  text{font-family:system-ui,sans-serif;fill:#24332e} .small{font-size:13px} .label{font-size:15px;font-weight:650} .rule{stroke:#52665c;stroke-width:1.2} .hold{fill:none;stroke:#b3975b;stroke-width:3;stroke-dasharray:6 5}
+ </style>
+ <rect width="760" height="690" fill="#f5f4ed"/>
+ <text x="80" y="36" font-size="23" font-weight="700">Sauna block R02 · nominal plan trial</text>
+ <text x="80" y="59" class="small">Coordination lines and study reservations · no physical wall, opening or heater generated</text>
+ <rect x="110" y="100" width="360" height="480" rx="2" fill="#fffef9" stroke="#244f40" stroke-width="3" stroke-dasharray="8 5"/>
+ <rect x="130" y="460" width="320" height="120" fill="#dfeaab" stroke="#244f40" stroke-width="1.5"/>
+ <text x="290" y="515" text-anchor="middle" class="label">Upper bench</text>
+ <text x="290" y="537" text-anchor="middle" class="small">1,600 × 600 mm reserved</text>
+ <rect x="130" y="370" width="250" height="90" fill="#e6e5d6" stroke="#52665c" stroke-width="1.5"/>
+ <text x="255" y="414" text-anchor="middle" class="label">Foot bench / step</text>
+ <text x="255" y="435" text-anchor="middle" class="small">1,250 × 450 mm</text>
+ <rect x="418" y="160" width="52" height="86" fill="#b3975b" stroke="#24332e" stroke-width="1.5"/>
+ <text x="480" y="183" class="label">Reference heater</text>
+ <text x="480" y="204" class="small">SW80 · 260 × 430 mm</text>
+ <text x="480" y="224" class="small">Wall bracket and guard on hold</text>
+ <path d="M130 100H290" stroke="#fffef9" stroke-width="8"/>
+ <path d="M130 100H290" class="hold"/>
+ <text x="132" y="85" class="small">Candidate 800 mm entry edge</text>
+ <text x="120" y="330" class="small">Open approach</text>
+ <line x1="110" y1="606" x2="470" y2="606" class="rule"/>
+ <path d="M110 600v12m360-12v12" class="rule"/>
+ <text x="290" y="628" text-anchor="middle" class="small">1,800 mm allocated width</text>
+ <line x1="73" y1="100" x2="73" y2="580" class="rule"/>
+ <path d="M67 100h12m-12 480h12" class="rule"/>
+ <text x="58" y="340" transform="rotate(-90 58 340)" text-anchor="middle" class="small">2,400 mm allocated length</text>
+ <text x="110" y="662" class="small">Front / changing-rest boundary</text>
+ <text x="480" y="274" class="small">Vent inlet near heater: study</text>
+ <text x="480" y="297" class="small">Exhaust away from heater: study</text>
+ <text x="480" y="347" class="small">Dashed perimeter = grid allocation</text>
+ <text x="480" y="370" class="small">Dashed opening = candidate only</text>
+ <text x="480" y="420" class="small">Bench height and finished faces</text>
+ <text x="480" y="443" class="small">must be solved in section.</text>
+ <text x="480" y="500" class="small">See SAUNA_BLOCK_R02.md</text>
+ </svg>
