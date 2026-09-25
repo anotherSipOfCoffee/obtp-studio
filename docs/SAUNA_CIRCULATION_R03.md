@@ -4,6 +4,8 @@ Status: **manual spatial research**. All three studies keep the same Cassette 01
 
 Follow-up: [R04 nominal whole-plan route study](SAUNA_ROUTE_R04.md) locates candidate side doors, a crossing band, changing seat, wet-room doors and a shower in study A. It also records the wet/dry traffic conflict that the block diagram alone cannot resolve.
 
+Further comparison: [R05 wet-lobby plan](SAUNA_WET_LOBBY_R05.md) adds two cassette rows (12 modules total) to retain the R01 wet-room shapes and dry changing allocation while reserving a distinct 1,200 mm deep wet landing. R05 is a separate circulation study within Sauna, not a new structural preset or a solved wet assembly.
+
 ![Three whole-plan Sauna circulation studies](SAUNA_CIRCULATION_R03.svg)
 
 ## Fixed geometry for this comparison
