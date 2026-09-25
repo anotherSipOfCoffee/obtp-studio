@@ -10,21 +10,29 @@
  });
  // A spatial planning layer only. Coordinates follow the 600 mm cassette
  // setting-out; no internal walls or openings are added to System geometry.
- function saunaPlan({bays,saunaWidth=3,saunaLength=3,washLength=3}={}){
+ function saunaPlan({bays,saunaWidth=3,saunaLength=3,washLength=3,circulation='shared'}={}){
   if(!Number.isInteger(bays)||bays<8||bays>18)throw Error('Sauna needs 8–18 cassette modules');
+  if(!['shared','sharedTwoAccess','deadEnd','through'].includes(circulation))throw Error('Unknown Sauna circulation study');
   const columns=6,rows=bays-1,washWidth=columns-saunaWidth;
   if(![saunaWidth,saunaLength,washLength].every(Number.isInteger)||saunaWidth<2||saunaWidth>4||saunaLength<2||washLength<2)
    throw Error('Sauna block dimensions must be whole 600 mm steps within their ranges');
-  const wetLength=Math.max(saunaLength,washLength),changingLength=rows-wetLength;
+  const shared=circulation==='shared'||circulation==='sharedTwoAccess';
+  const wetLength=shared?Math.max(saunaLength,washLength):saunaLength+washLength,changingLength=rows-wetLength;
   if(changingLength<2)throw Error('Changing/rest block needs at least two 600 mm steps');
-  const blocks=[
+  const blocks=shared?[
    {id:'changing',label:'Changing / rest + access',x:0,y:0,width:columns,length:changingLength},
    {id:'sauna',label:'Sauna',x:0,y:changingLength,width:saunaWidth,length:saunaLength},
    {id:'washing',label:'Washing / bathing',x:saunaWidth,y:changingLength,width:washWidth,length:washLength}
+  ]:[
+   {id:'corridor',label:'Side corridor / access',x:0,y:0,width:2,length:rows},
+   {id:'changing',label:'Changing / rest',x:2,y:0,width:4,length:changingLength},
+   {id:'washing',label:'Washing / bathing',x:2,y:changingLength,width:4,length:washLength},
+   {id:'sauna',label:'Sauna',x:2,y:changingLength+washLength,width:4,length:saunaLength}
   ];
-  if(saunaLength<wetLength)blocks.push({id:'service',label:'Service / unassigned',x:0,y:changingLength+saunaLength,width:saunaWidth,length:wetLength-saunaLength});
-  if(washLength<wetLength)blocks.push({id:'service',label:'Service / unassigned',x:saunaWidth,y:changingLength+washLength,width:washWidth,length:wetLength-washLength});
-  return {columns,rows,blocks,stepMm:600,gridWidthMm:3600,gridLengthMm:rows*600,changingLength,access:'Entry through changing/rest; both wet blocks meet its rear boundary',valid:true};
+  if(shared&&saunaLength<wetLength)blocks.push({id:'service',label:'Service / unassigned',x:0,y:changingLength+saunaLength,width:saunaWidth,length:wetLength-saunaLength});
+  if(shared&&washLength<wetLength)blocks.push({id:'service',label:'Service / unassigned',x:saunaWidth,y:changingLength+washLength,width:washWidth,length:wetLength-washLength});
+  const access={shared:'One outside entry into changing/rest; both wet blocks meet its rear boundary',sharedTwoAccess:'Two candidate outside side entrances cross changing/rest; both wet blocks meet its rear boundary',deadEnd:'One candidate outside end entrance; side corridor terminates at rear',through:'Candidate outside end entrances at both ends of a continuous side corridor'}[circulation];
+  return {columns,rows,blocks,stepMm:600,gridWidthMm:3600,gridLengthMm:rows*600,changingLength,circulation,access,exteriorAccessCandidates:circulation==='shared'||circulation==='deadEnd'?1:2,corridorAreaM2:shared?0:1200*rows*600/1e6,valid:true};
  }
  function bounds(api,scene,filter){
   const models=new Map(scene.models.map(m=>[m.id,m])),low=[Infinity,Infinity,Infinity],high=[-Infinity,-Infinity,-Infinity];
