@@ -26,7 +26,7 @@
  const PROGRAMS=Object.freeze({
   studio:{name:'Studio',use:'Non-residential creative / hobby workspace',zones:['Open workspace','Optional service / storage'],shares:[.8,.2],defaultBays:4,minBays:1},
   workshop:{name:'Workshop',use:'Non-residential auxiliary workshop',zones:['Uninterrupted work area','Work bench / storage allowance'],shares:[.85,.15],defaultBays:8,minBays:1},
-  sauna:{name:'Sauna',use:'Non-residential sauna / pirtis',zones:['Sauna room allowance','Washing allowance','Changing / rest allowance','Technical allowance'],shares:[.35,.2,.35,.1],defaultBays:10,minBays:8},
+  sauna:{name:'Sauna',use:'Non-residential sauna / pirtis',zones:['Hot room','Small indoor hall','Outside shower study'],shares:[.66,.28,.06],defaultBays:4,minBays:8},
   matrix:{name:'Matrix',use:'Non-residential open grid · research prototype',zones:['Unassigned open grid'],shares:[1],defaultBays:4,minBays:1}
  });
  // A spatial planning layer only. Coordinates follow the 600 mm cassette
@@ -58,6 +58,22 @@
   if(shared&&washLength<wetLength)blocks.push({id:'service',label:'Service / unassigned',x:saunaWidth,y:wetY+washLength,width:washWidth,length:wetLength-washLength});
   const access={shared:'One outside entry into changing/rest; both wet blocks meet its rear boundary',sharedTwoAccess:'Two candidate outside side entrances cross changing/rest; both wet blocks meet its rear boundary',wetLobby:'Two candidate outside side entrances cross dry changing/rest; a wet lobby separates both wet-room approaches',deadEnd:'One candidate outside end entrance; side corridor terminates at rear',through:'Candidate outside end entrances at both ends of a continuous side corridor'}[circulation];
   return {columns,rows,blocks,stepMm:600,gridWidthMm:3600,gridLengthMm:rows*600,changingLength,circulation,access,exteriorAccessCandidates:circulation==='shared'||circulation==='deadEnd'?1:2,corridorAreaM2:shared?0:1200*rows*600/1e6,lobbyAreaM2:lobby?6*2*600*600/1e6:0,valid:true};
+ }
+ // Current product brief: a compact hot room, a small indoor threshold and a
+ // mandatory unroofed outside shower. Historical layout studies remain above.
+ function compactSaunaPlan(size='m',storage=false){
+  if(!Object.hasOwn({s:1,m:1,l:1},size))throw Error('Sauna size must be S, M or L');
+  if(typeof storage!=='boolean')throw Error('Sauna storage choice must be boolean');
+  const hotLength={s:3,m:4,l:5}[size],rows=hotLength+(storage?2:0),bays=rows+1;
+  return {bays,columns:6,rows,stepMm:600,gridWidthMm:3600,gridLengthMm:rows*600,
+   circulation:'compact',showerMode:'outdoor',size,storage,changingLength:hotLength,
+   blocks:[
+    {id:'sauna',label:'Sauna',x:0,y:0,width:4,length:hotLength},
+    {id:'hall',label:'Little entrance hall / towel shelf',x:4,y:0,width:2,length:hotLength},
+    ...(storage?[{id:'storage',label:'Shallow storage room · rear outside entry',x:0,y:hotLength,width:6,length:2}]:[])
+   ],
+   access:'Front outside entry to the little hall; hall connects to sauna and exterior shower'+(storage?'; separate rear outside entry to storage':''),
+   exteriorAccessCandidates:storage?3:2,corridorAreaM2:0,lobbyAreaM2:0,valid:true};
  }
  function bounds(api,scene,filter){
   const models=new Map(scene.models.map(m=>[m.id,m])),low=[Infinity,Infinity,Infinity],high=[-Infinity,-Infinity,-Infinity];
@@ -91,7 +107,9 @@
  }
  function create(api,{preset='studio',bays=4,columns=4,rows=4,height=2100,layer='all',saunaBlocks,saunaSelection}={}){
   if(!Object.hasOwn(PROGRAMS,preset))throw Error('Unknown non-residential preset');
-  const curated=preset==='sauna'&&saunaSelection?curatedSauna(saunaSelection.size,saunaSelection.circulation,saunaSelection.shower):null;
+  const compact=preset==='sauna'&&saunaSelection&&Object.hasOwn(saunaSelection,'storage')?compactSaunaPlan(saunaSelection.size||'m',saunaSelection.storage):null;
+  const curated=preset==='sauna'&&saunaSelection&&!compact?curatedSauna(saunaSelection.size,saunaSelection.circulation,saunaSelection.shower):null;
+  if(compact)bays=compact.bays;
   if(curated){bays=curated.bays;saunaBlocks=curated.blocks;}
   if(preset==='matrix'){
    if(height!==2100)throw Error('Matrix prototype has fixed 2,100 mm walls');
@@ -107,13 +125,14 @@
    const scene=root.OBTPMatrix.generate({columns,rows,layer,skin:false});
    return {scene,metrics,program:PROGRAMS.matrix,preset,valid:false,geometryValid:true,researchHold:true,classificationVerified:false,openingsEnabled:false};
   }
-  if(!Number.isInteger(bays)||bays<PROGRAMS[preset].minBays||bays>18)throw Error('Module count outside supported preset range');
+  if(!Number.isInteger(bays)||bays<(compact?4:PROGRAMS[preset].minBays)||bays>18)throw Error('Module count outside supported preset range');
   // Full roof and outside skins are always measured, even in a filtered frame view.
   const full=api.generate({bays,height,layer:'all',skin:true,connectionRevision:'revised'});
   const metrics=measure(api,full);
   if(!metrics.valid)throw Error('Outside LT I-group dimensional envelope: '+Object.entries(metrics.checks).filter(([,ok])=>!ok).map(([key])=>key).join(', '));
   const scene=api.generate({bays,height,layer,skin:false,connectionRevision:'revised'});
-  const plan=preset==='sauna'?saunaPlan({bays,...saunaBlocks}):null;
+  const plan=preset==='sauna'?(compact||saunaPlan({bays,...saunaBlocks})):null;
+  if(compact)plan.selection={size:compact.size,storage:compact.storage,shower:'outdoor',circulation:'compact'};
   if(curated){
    plan.selection={size:curated.size,circulation:curated.circulation,shower:curated.shower};
    plan.showerMode=curated.shower;
@@ -135,15 +154,15 @@
    plan.shellLengthMm=scene.length||scene.spec.pitch*bays;
    const block=plan.blocks.find(b=>b.id==='sauna');
    plan.nominalVolumeM3=block.width*plan.stepMm*block.length*plan.stepMm*scene.clear[2]/1e9;
-   plan.referenceHeater={model:'Harvia The Wall SW80',minVolumeM3:7,maxVolumeM3:12};
-   plan.referenceHeaterVolumeInRange=plan.nominalVolumeM3>=7&&plan.nominalVolumeM3<=12;
+   plan.referenceHeater=compact?({s:{model:'Harvia The Wall SW80',minVolumeM3:7,maxVolumeM3:12},m:{model:'Harvia The Wall SW90',minVolumeM3:8,maxVolumeM3:14},l:{model:'Harvia Club K13.5G',minVolumeM3:11,maxVolumeM3:20}})[compact.size]:{model:'Harvia The Wall SW80',minVolumeM3:7,maxVolumeM3:12};
+   plan.referenceHeaterVolumeInRange=plan.nominalVolumeM3>=plan.referenceHeater.minVolumeM3&&plan.nominalVolumeM3<=plan.referenceHeater.maxVolumeM3;
    plan.subblocks=subblocks.solve(plan);
-   plan.functionallyValid=plan.subblocks.status==='spatial-candidate'&&curated?.shower!=='outdoor'; // Exterior-only winter washing remains a research hold.
+   plan.functionallyValid=plan.subblocks.status==='spatial-candidate'&&plan.showerMode!=='outdoor'; // Exterior-only winter washing remains a research hold.
    plan.technicalValid=false; // Nominal heater volume never proves finished fit or installation.
   }
-  return {scene,metrics,program:PROGRAMS[preset],preset,plan,bays,valid:true,researchHold:curated?.shower==='outdoor',classificationVerified:false,openingsEnabled:false};
+  return {scene,metrics,program:PROGRAMS[preset],preset,plan,bays,valid:true,researchHold:plan?.showerMode==='outdoor',classificationVerified:false,openingsEnabled:false};
  }
- const exported={LIMITS,PROGRAMS,SAUNA_CATALOGUE,SAUNA_OUTDOOR,curatedSauna,bounds,measure,saunaPlan,create};
+ const exported={LIMITS,PROGRAMS,SAUNA_CATALOGUE,SAUNA_OUTDOOR,curatedSauna,compactSaunaPlan,bounds,measure,saunaPlan,create};
  if(typeof module!=='undefined')module.exports=exported;
  root.OBTPStudioPresets=exported;
 })(typeof window==='undefined'?globalThis:window);

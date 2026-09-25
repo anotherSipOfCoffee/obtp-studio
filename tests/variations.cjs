@@ -86,10 +86,10 @@ await page.screenshot({path:'studio-workshop.png',fullPage:true});
 await v3.locator('#preset').selectOption('sauna');
 assert(!(await v3.locator('#bays-field').isVisible()),'Sauna size replaces the raw module-count control');
 assert.equal(await v3.locator('#sauna-size').inputValue(),'m');
-assert(await v3.locator('#sauna-indoor').isChecked());
-assert(!(await v3.locator('#sauna-outdoor').isChecked()));
-assert(await v3.locator('#sauna-wet-lobby').isDisabled());
-for(const [size,bays,area] of [['s',9,'24.93'],['m',11,'30.44'],['l',14,'38.72']]){
+assert(!(await v3.locator('#sauna-storage').isChecked()));
+assert.equal(await v3.locator('#sauna-indoor').count(),0);
+assert.equal(await v3.locator('#sauna-wet-lobby').count(),0);
+for(const [size,bays,area] of [['s',4,'11.14'],['m',5,'13.90'],['l',6,'16.66']]){
  await v3.locator('#sauna-size').selectOption(size);
  assert.equal(await v3.locator('canvas').evaluate(()=>OBTPStudioV3.bays),bays);
  assert.equal(await v3.locator('canvas').evaluate(()=>OBTPStudioV3.plan.selection.size),size);
@@ -99,42 +99,26 @@ for(const [size,bays,area] of [['s',9,'24.93'],['m',11,'30.44'],['l',14,'38.72']
  assert(await v3.locator('#download-cad').isEnabled());
  await page.screenshot({path:'studio-sauna-'+size+'.png',fullPage:true});
 }
-assert(await v3.locator('#sauna-wet-lobby').isChecked());
-assert.equal(await v3.locator('#diagram').evaluate(()=>OBTPStudioV3.plan.subblocks.outside.length),1);
-await v3.locator('#sauna-outdoor').check();
-assert.equal(await v3.locator('canvas').evaluate(()=>OBTPStudioV3.plan.selection.shower),'both');
-assert.equal(await v3.locator('canvas').evaluate(()=>OBTPStudioV3.plan.subblocks.components.filter(c=>c.kind.includes('shower')).length),2);
-assert.equal(await v3.locator('canvas').evaluate(()=>OBTPStudioV3.renderer.items.some(i=>i.stage==='study-outdoor-shower')),true);
 await v3.locator('[data-view="plan"]').click();
-assert.equal(await v3.locator('#floor-plan [data-cad-block]').count(),6);
-assert.equal(await v3.locator('#floor-plan [data-cad-door]').count(),5);
-assert.equal(await v3.locator('#floor-plan [data-cad-block="outside-shower"]').count(),1);
-await page.screenshot({path:'studio-sauna-both-plan.png',fullPage:true});
-await v3.locator('#sauna-indoor').uncheck();
-assert.equal(await v3.locator('#sauna-size').inputValue(),'l');
-assert.equal(await v3.locator('canvas').evaluate(()=>OBTPStudioV3.bays),12);
+assert.equal(await v3.locator('#floor-plan [data-block]').count(),2);
 assert.equal(await v3.locator('#floor-plan [data-cad-block="shower"]').count(),0);
 assert.equal(await v3.locator('#floor-plan [data-cad-block="outside-shower"]').count(),1);
-assert.match(await v3.locator('#function-screen').textContent(),/needs a task-specific revision/);
-assert(await v3.locator('#download-cad').isEnabled(),'Exterior CAD study stays downloadable without implying functional approval');
+await v3.locator('#sauna-storage').check();
+assert.equal(await v3.locator('#floor-plan [data-block]').count(),3);
+assert.equal(await v3.locator('#floor-plan [data-cad-door]').count(),4);
+assert.equal(await v3.locator('canvas').evaluate(()=>OBTPStudioV3.bays),8);
+assert.equal(await v3.locator('canvas').evaluate(()=>OBTPStudioV3.plan.subblocks.outside.some(d=>d.id==='storage-entry-rear')),true);
+assert.equal(await v3.locator('canvas').evaluate(()=>OBTPStudioV3.plan.subblocks.components.some(c=>c.kind==='storage')),true);
 assert.equal(await v3.locator('canvas').evaluate(()=>OBTPStudioCAD.exportDXF(OBTPStudioV3.plan.subblocks,OBTPStudioV3.plan,OBTPStudioV3.scene).includes('OBTP_OUTDOOR_SHOWER_STUDY')),true);
-await page.screenshot({path:'studio-sauna-outdoor-l-plan.png',fullPage:true});
-for(const [size,bays,area] of [['s',8,'22.17'],['m',9,'24.93'],['l',12,'33.20']]){
+await page.screenshot({path:'studio-sauna-l-storage-plan.png',fullPage:true});
+for(const [size,bays,area] of [['s',6,'16.66'],['m',7,'19.41'],['l',8,'22.17']]){
  await v3.locator('#sauna-size').selectOption(size);
  assert.equal(await v3.locator('canvas').evaluate(()=>OBTPStudioV3.bays),bays);
  assert.match(await v3.locator('#envelope').textContent(),new RegExp(area+' / 50.00'));
- assert.equal(await v3.locator('#floor-plan [data-cad-block="outside-shower"]').count(),1);
 }
-await v3.locator('#sauna-outdoor').uncheck();
-assert(await v3.locator('#sauna-indoor').isChecked(),'Both showers cannot be switched off');
-await v3.locator('#sauna-through').check();
-assert(!(await v3.locator('#sauna-wet-lobby').isChecked()));
-assert.equal(await v3.locator('canvas').evaluate(()=>OBTPStudioV3.plan.exteriorAccessCandidates),2);
-await v3.locator('#sauna-outdoor').check();
-assert(!(await v3.locator('#sauna-through').isChecked()),'The exterior shower removes the unsupported three-access through combination');
+await v3.locator('#sauna-storage').uncheck();
+assert.equal(await v3.locator('#floor-plan [data-block]').count(),2);
 await v3.locator('#sauna-size').selectOption('s');
-assert(await v3.locator('#sauna-through').isDisabled());
-assert(!(await v3.locator('#sauna-wet-lobby').isChecked()));
 await v3.locator('#preset').selectOption('studio');
 assert(!(await v3.locator('#sauna-fields').isVisible()));
 await v3.locator('#bays').selectOption('8');

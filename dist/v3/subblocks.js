@@ -40,8 +40,44 @@
   const seat={x:changing.x+t,y:changing.y+changing.h-t-550,w:1200,h:550};
   return [component('heater','heater','sauna',heater,side),component('upper-bench','bench','sauna',upper,'rear'),component('foot-bench','foot-bench','sauna',foot,'rear'),...(indoor?[component('shower','shower','washing',shower,'rear/east')]:[]),component('changing-seat','seat','changing',seat,'west')];
  }
+ function solveCompact(plan,rooms){
+  const sauna=rooms.sauna,hall=rooms.hall,storage=rooms.storage,failures=[],warnings=[];
+  if(!sauna||!hall)return {status:'no-fit',failures:['Sauna and little hall required'],warnings,rooms,components:[],doors:[],outside:[]};
+  const upper={x:sauna.x+60,y:sauna.y+sauna.h-660,w:sauna.w-120,h:600};
+  const foot={x:sauna.x+60,y:upper.y-450,w:sauna.w-920,h:450};
+  const heater={x:sauna.x+60,y:sauna.y+100,w:plan.size==='l'?505:260,h:430};
+  const components=[
+   component('heater','heater','sauna',heater,'west'),
+   component('upper-bench','bench','sauna',upper,'rear'),
+   component('foot-bench','foot-bench','sauna',foot,'rear')
+  ];
+  if(plan.storage&&storage)components.push(component('storage-shelf','storage','storage',{x:storage.x+60,y:storage.y+storage.h-450,w:1200,h:300},'rear'));
+  const doorCandidate=door('hall-sauna','hall','sauna',rooms,{width:800,offset:250});
+  if(!doorCandidate)failures.push('No candidate 800 mm sauna door fits the shared wall');
+  else for(const item of components.filter(c=>c.room==='sauna'))if(overlap(doorCandidate.sweep,item.rect,40))failures.push('Sauna door swing intersects '+item.id);
+  for(const item of components)if(!inside(item.rect,rooms[item.room]))failures.push(item.id+' exceeds its nominal room');
+  if(overlap(heater,foot)||overlap(heater,upper))failures.push('Heater intersects the bench study');
+  const guard={x:heater.x+heater.w,y:heater.y-70,w:300,h:heater.h+140};
+  if(overlap(guard,foot))failures.push('Heater approach study intersects foot bench');
+  const outside=[entry('entry-front','hall',rooms,'front',900),entry('shower-access','hall',rooms,'east',900,hall.y+750),
+   ...(plan.storage?[entry('storage-entry-rear','storage',rooms,'rear',900)]:[])];
+  if(outside.some(x=>!x))failures.push('Hall entrance or exterior shower access does not fit');
+  if(!Number.isFinite(plan.shellWidthMm))failures.push('Exterior wall geometry is required for outside shower');
+  else{
+   const wallOffset=(plan.shellWidthMm-plan.gridWidthMm)/2;
+   components.push(component('outside-shower','outdoor-shower','exterior',
+    {x:plan.shellWidthMm-wallOffset+100,y:hall.y+750,w:900,h:900},'east'));
+  }
+  warnings.push('The outside shower is unroofed study geometry beside an uncut wall; frost-safe supply, wastewater, ice-safe access and privacy need design.');
+  warnings.push('Candidate hall, sauna, shower and optional rear storage doors are not built; finished linings, door hardware, heater guard and bench anchorage are unresolved.');
+  if(!plan.referenceHeaterVolumeInRange)failures.push('Reference heater nominal volume outside its published range');
+  return {status:failures.length?'no-fit':'spatial-candidate',rooms,components,doors:doorCandidate?[doorCandidate]:[],outside:outside.filter(Boolean),
+   failures:[...new Set(failures)],warnings,route:'front outside → hall → sauna; hall → outside shower'+(plan.storage?'; rear outside → storage':''),technicalValid:false,
+   source:'OBTP System shell; program furniture and exterior fixture are planning geometry'};
+ }
  function solve(plan,options={}){
   const rooms=Object.fromEntries(plan.blocks.map(b=>[b.id,box(b)]));
+  if(plan.circulation==='compact')return solveCompact(plan,rooms);
   const warnings=[],failures=[],candidates=[];
   const {sauna,washing,changing}=rooms;
   if(!sauna||!washing||!changing)return {status:'no-fit',failures:['Three main room blocks are required'],warnings,rooms,components:[],doors:[]};

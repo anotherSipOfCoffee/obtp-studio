@@ -53,11 +53,11 @@
   if(plan){
    const ox=(w-plan.gridWidthMm)/2,oy=(l-plan.gridLengthMm)/2;
    for(const block of plan.blocks){const x=ox+block.x*600,y=oy+block.y*600,bw=block.width*600,bh=block.length*600;
-    const g=element('g',{'data-block':block.id});g.append(element('rect',{x,y,width:bw,height:bh,fill:({sauna:'#dfeaab',washing:'#d3e4e4',changing:'#e6e5d6',lobby:'#c7ded9',corridor:'#d4ddcd',service:'#f0eadc'})[block.id]||'#f0eadc','fill-opacity':'.7',stroke:'#547061','stroke-width':16,'stroke-dasharray':'85 60'}));
-    const label=element('text',{x:x+bw/2,y:y+bh/2,'text-anchor':'middle','dominant-baseline':'middle','font-size':Math.min(160,Math.max(110,bw/12)),fill:'#24332e'});label.textContent=block.id==='washing'&&plan.showerMode==='outdoor'?'Wet transition':({sauna:'Sauna',washing:'Washing',changing:'Changing / rest',lobby:'Wet lobby',corridor:'Corridor',service:'Service study'})[block.id];g.append(label);svg.append(g);
+    const g=element('g',{'data-block':block.id});g.append(element('rect',{x,y,width:bw,height:bh,fill:({sauna:'#dfeaab',washing:'#d3e4e4',changing:'#e6e5d6',hall:'#e6e5d6',storage:'#f0eadc',lobby:'#c7ded9',corridor:'#d4ddcd',service:'#f0eadc'})[block.id]||'#f0eadc','fill-opacity':'.7',stroke:'#547061','stroke-width':16,'stroke-dasharray':'85 60'}));
+    const label=element('text',{x:x+bw/2,y:y+bh/2,'text-anchor':'middle','dominant-baseline':'middle','font-size':Math.min(160,Math.max(110,bw/12)),fill:'#24332e'});label.textContent=block.id==='washing'&&plan.showerMode==='outdoor'?'Wet transition':({sauna:'Sauna',washing:'Washing',changing:'Changing / rest',hall:'Little hall',storage:'Storage',lobby:'Wet lobby',corridor:'Corridor',service:'Service study'})[block.id];g.append(label);svg.append(g);
    }
    if(subblocks){
-    const fill={heater:'#b36a40',bench:'#b49763','foot-bench':'#cab88d',shower:'#80afbb','outdoor-shower':'#80afbb',seat:'#a8ae8a'};
+    const fill={heater:'#b36a40',bench:'#b49763','foot-bench':'#cab88d',shower:'#80afbb','outdoor-shower':'#80afbb',seat:'#a8ae8a',storage:'#b6ac83'};
     for(const item of subblocks.components){const b=item.rect,g=element('g',{'data-cad-block':item.id,'aria-label':item.kind+' candidate'});
      g.append(element('rect',{x:ox+b.x,y:oy+b.y,width:b.w,height:b.h,fill:fill[item.kind],stroke:'#24332e','stroke-width':12,...(item.kind==='outdoor-shower'?{'stroke-dasharray':'70 40'}:{})}));
      const name=element('text',{x:ox+b.x+b.w/2,y:oy+b.y+b.h/2,'text-anchor':'middle','dominant-baseline':'middle','font-size':Math.min(125,Math.max(85,b.w/11)),fill:'#24332e'});name.textContent=item.kind==='outdoor-shower'?'OUTDOOR':item.kind;g.append(name);svg.append(g);
