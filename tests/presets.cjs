@@ -1,5 +1,6 @@
 const assert=require('node:assert/strict');
 const api=require('../dist/system-source/cassette/system.js');
+require('../dist/system-source/cassette/matrix.js');
 const p=require('../dist/v3/presets.js');
 for(const preset of ['studio','workshop','sauna']){
  assert.equal(p.PROGRAMS[preset].zones.length,p.PROGRAMS[preset].shares.length);
@@ -22,4 +23,15 @@ const wide={...api,worldBounds(item,asset){const b=api.worldBounds(item,asset);i
 assert.throws(()=>p.create(wide,{preset:'studio',bays:18}),/area/);
 const longSpan={...api,worldBounds(item,asset){const b=api.worldBounds(item,asset);if(item.stage==='roof')return [b[0],[b[1][0]+2000,b[1][1],b[1][2]]];return b;}};
 assert.throws(()=>p.create(longSpan,{preset:'studio'}),/supportSpacing/);
+const compact=p.create(api,{preset:'matrix',columns:4,rows:4});
+const matrix=p.create(api,{preset:'matrix',columns:8,rows:15});
+assert.equal(compact.metrics.area,7.918596);
+assert.equal(matrix.metrics.area,49.084596);
+assert.equal(matrix.metrics.height,2576);
+assert.equal(matrix.metrics.supportSpacing,4800);
+assert.equal(matrix.valid,false,'Structural study must not be treated as a released preset');
+assert.equal(matrix.researchHold,true);
+assert.equal(matrix.scene.allJoints.every(j=>j.capacity===null&&j.fasteners===null),true);
+assert.throws(()=>p.create(api,{preset:'matrix',columns:8,rows:16}),/area/);
+assert.throws(()=>p.create(api,{preset:'matrix',columns:9,rows:4}),/columns/);
 console.log('PASS: shared Studio / Workshop / Sauna module, 49.75 m² bound, internal distinction, height and support gates');

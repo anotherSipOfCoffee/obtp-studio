@@ -1,7 +1,7 @@
 name: Check Studio development variations (no deployment)
 on:
   push:
-    branches: ['dev/obtp-independent-v1-20260923', 'dev/cassette-connections-studio-controls-20260924', 'dev/studio-presets-envelope-20260925']
+    branches: ['dev/obtp-independent-v1-20260923', 'dev/cassette-connections-studio-controls-20260924', 'dev/studio-presets-envelope-20260925', 'dev/matrix-study-20260925']
 permissions:
   contents: read
 jobs:
@@ -23,6 +23,7 @@ jobs:
       - run: python tools/prepare_system.py
       - run: node _system/tests/catalogue.cjs
       - run: node _system/tests/cassette.cjs
+      - run: node _system/tests/matrix.cjs
       - run: node tests/presets.cjs
       - run: npm install --no-save playwright@1.55.0
       - run: npx playwright install --with-deps chromium
