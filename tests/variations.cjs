@@ -40,7 +40,7 @@ await v3.locator('[data-view="3d"]').click();
 assert(await v3.locator('canvas').evaluate(()=>OBTPStudioV3.scene.models.some(m=>m.id.startsWith('FOUNDATION'))));
 await v3.locator('#component-details summary').click();
 assert(await v3.locator('#schedule tr').count()>0);
-await v3.locator('#technical-notes summary').click();
+await v3.locator('#technical-notes > summary').click();
 assert.match(await v3.locator('#envelope').textContent(),/generated shell only/);
 await v3.locator('#studio-version').selectOption('v2');
 await v2.locator('#status').filter({hasText:/component instances · ready/}).waitFor();
