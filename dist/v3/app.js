@@ -32,7 +32,7 @@
    if(hash!==entry.sha256)throw Error('Model export checksum mismatch');
    const next=JSON.parse(new TextDecoder().decode(bytes));if(request!==serial)return;
    if(next.source_revision!==catalogue.source_revision||!Object.values(next.checks).every(Boolean))throw Error('Invalid or mismatched model export');scene=next;
-   const m=scene.metrics;$('status').textContent=`${scene.authoring_version} · ${scene.items.length} modeled parts · design study`;
+   const m=scene.metrics;$('status').textContent='Your sauna preview.';
    $('sauna-circulation-note').textContent=`Outdoor shower · ${s.terrace*600} mm entrance terrace · ${s.window} mm sauna window on entrance façade.`;
    $('wood-total').textContent=`Modeled wood: ${m.total_wood_m3.toFixed(3)} m³ · structure, plywood, lining, cladding and deck; furniture and waste excluded`;
    $('envelope').replaceChildren();for(const text of ['LT I-group dimensional screen',`Conservative roof/terrace area bound: ${m.building_area_bound_m2.toFixed(2)} / 50.00 m² ✓`,`Height: ${(m.height_mm/1000).toFixed(2)} / 5.00 m ✓`,`Maximum support spacing: ${(m.max_bearing_line_span_mm/1000).toFixed(2)} / 6.00 m ✓`,`Main internal rectangle before finishes: ${m.main_clear_floor_less_partition_m2.toFixed(2)} m²`,`Terrace: ${m.terrace_area_m2.toFixed(2)} m²`,'Site and land-use conditions must be checked separately. The conservative area bound is not a certified legal area calculation.']){const p=document.createElement('p');p.textContent=text;$('envelope').append(p);}
