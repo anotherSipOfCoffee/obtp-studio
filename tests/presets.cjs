@@ -2,6 +2,8 @@ const assert=require('node:assert/strict');
 const api=require('../dist/system-source/cassette/system.js');
 const p=require('../dist/v3/presets.js');
 for(const preset of ['studio','workshop','sauna']){
+ assert.equal(p.PROGRAMS[preset].zones.length,p.PROGRAMS[preset].shares.length);
+ assert(Math.abs(p.PROGRAMS[preset].shares.reduce((a,b)=>a+b,0)-1)<1e-9);
  const small=p.create(api,{preset,bays:p.PROGRAMS[preset].minBays});
  const near=p.create(api,{preset,bays:18});
  assert.equal(small.valid,true);assert.equal(near.valid,true);
