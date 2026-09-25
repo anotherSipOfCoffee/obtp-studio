@@ -34,4 +34,20 @@ assert.equal(matrix.researchHold,true);
 assert.equal(matrix.scene.allJoints.every(j=>j.capacity===null&&j.fasteners===null),true);
 assert.throws(()=>p.create(api,{preset:'matrix',columns:8,rows:16}),/area/);
 assert.throws(()=>p.create(api,{preset:'matrix',columns:9,rows:4}),/columns/);
+for(const bays of [8,10,18])for(const saunaWidth of [2,3,4])for(let saunaLength=2;saunaLength<=bays-3;saunaLength++)for(let washLength=2;washLength<=bays-3;washLength++){
+ const result=p.create(api,{preset:'sauna',bays,saunaBlocks:{saunaWidth,saunaLength,washLength}}),plan=result.plan;
+ assert.equal(plan.valid,true);assert(plan.changingLength>=2);
+ const cells=new Set();for(const block of plan.blocks)for(let y=block.y;y<block.y+block.length;y++)for(let x=block.x;x<block.x+block.width;x++){
+  const key=x+','+y;assert(!cells.has(key),'Blocks overlap at '+key);cells.add(key);
+ }
+ assert.equal(cells.size,plan.columns*plan.rows,'Every grid cell must be allocated');
+ assert(plan.blocks.filter(b=>b.id==='sauna'||b.id==='washing').every(b=>b.y===plan.changingLength));
+ assert(plan.gridWidthMm<=result.scene.clear[0]&&plan.gridLengthMm<=result.scene.clear[1]);
+ assert(result.metrics.area<=50&&result.metrics.height<=5000&&result.metrics.supportSpacing<=6000);
+}
+assert.throws(()=>p.create(api,{preset:'sauna',bays:8,saunaBlocks:{saunaLength:6}}),/Changing\/rest/);
+assert.throws(()=>p.create(api,{preset:'sauna',bays:8,saunaBlocks:{saunaWidth:5}}),/block dimensions/);
+const studio=p.create(api,{preset:'studio',bays:10}),workshop=p.create(api,{preset:'workshop',bays:10}),sauna=p.create(api,{preset:'sauna',bays:10}),again=p.create(api,{preset:'studio',bays:10});
+assert.deepEqual([studio.metrics.area,workshop.metrics.area,sauna.metrics.area,again.metrics.area],Array(4).fill(studio.metrics.area));
+assert.equal(again.plan,null);
 console.log('PASS: shared Studio / Workshop / Sauna module, 49.75 m² bound, internal distinction, height and support gates');
