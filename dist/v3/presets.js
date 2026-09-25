@@ -101,7 +101,8 @@
   // cassette crosswise width is used conservatively for the bearing span.
   const wallPitch=scene.spec.pitch;
   const supportSpacing=Math.max(roofWidth,wallPitch);
-  const height=all.high[2]-Math.min(0,all.low[2]);
+  // Bearing study is entirely below the assumed grade datum z=0.
+  const height=all.high[2];
   const checks={area:area>0&&area<=LIMITS.outsidePlanAreaM2+1e-9,height:height>0&&height<=LIMITS.heightMm,supportSpacing:supportSpacing>0&&supportSpacing<=LIMITS.supportSpacingMm};
   return {area,internalArea,height,supportSpacing,planWidth,planLength,checks,valid:Object.values(checks).every(Boolean)};
  }
@@ -127,7 +128,7 @@
   }
   if(!Number.isInteger(bays)||bays<(compact?4:PROGRAMS[preset].minBays)||bays>18)throw Error('Module count outside supported preset range');
   // Full roof and outside skins are always measured, even in a filtered frame view.
-  const full=api.generate({bays,height,layer:'all',skin:true,connectionRevision:'revised'});
+  const full=api.generate({bays,height,layer:'all',skin:true,connectionRevision:'revised',includeFoundation:true});
   const metrics=measure(api,full);
   if(compact?.storage){
    // Enclose the proposed side room in a conservative full-length bounding
@@ -139,7 +140,7 @@
    metrics.valid=Object.values(metrics.checks).every(Boolean);
   }
   if(!metrics.valid)throw Error('Outside LT I-group dimensional envelope: '+Object.entries(metrics.checks).filter(([,ok])=>!ok).map(([key])=>key).join(', '));
-  const scene=api.generate({bays,height,layer,skin:false,connectionRevision:'revised'});
+  const scene=api.generate({bays,height,layer,skin:false,connectionRevision:'revised',includeFoundation:true});
   const plan=preset==='sauna'?(compact||saunaPlan({bays,...saunaBlocks})):null;
   if(compact)plan.selection={size:compact.size,storage:compact.storage,shower:'outdoor',circulation:'compact'};
   if(curated){

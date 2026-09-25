@@ -3,7 +3,7 @@
  const $=id=>document.getElementById(id),api=window.OBTPCassette,presets=window.OBTPStudioPresets,linked=window.OBTPStudioLinkedView,functionScreen=window.OBTPStudioFunctionScreen;
  let renderer;
  try {renderer=new SourceMeshView($('diagram'));}
- catch(e){$('status').textContent=e.message;return;}
+ catch(e){$('status').textContent=e.message+' The solved 2D plans remain available.';renderer={meshes:new Map(),gl:{deleteBuffer(){}},register(){},setScene(){},draw(){},reset(){},zoom:1};for(const b of document.querySelectorAll('[data-view="3d"],[data-view="cut"]'))b.disabled=true;}
  // Architecture's fixed view: 45° in plan, with wheel zoom still available.
  // The cut and plan buttons show generated geometry; solved is the owner's
  // source drawing and remains independent of the generated cassette shell.
@@ -13,7 +13,7 @@
  let view='3d',currentScene=null,currentPlan=null,currentStudy=null,cut=null;
  function showView(){
   const isPlan=view==='plan',isSolved=view==='solved'&&currentPlan?.selection;
-  $('diagram').hidden=Boolean(isPlan||isSolved);$('floor-plan').toggleAttribute('hidden',!isPlan);$('solved-plan').hidden=!isSolved;
+  $('diagram').hidden=Boolean(isPlan||isSolved);$('floor-plan').toggleAttribute('hidden',!isPlan);$('solved-scroll').hidden=!isSolved;
   $('solved-view').hidden=!currentPlan?.selection;
   for(const button of document.querySelectorAll('[data-view]'))button.setAttribute('aria-pressed',String(button.dataset.view===view));
   if(currentPlan?.selection){const {size}=currentPlan.selection;
@@ -30,7 +30,7 @@
    const source=preset==='matrix'?window.OBTPMatrix.generate({columns,rows,layer:'all',skin:true}):api.generate({bays,height,layer:'all',skin:true,connectionRevision:'revised'});
    linked.renderPlan($('floor-plan'),api,source,currentPlan,currentPlan?.subblocks);
   }else{if(view==='cut'&&!cut){cut=linked.cutScene(api,currentScene);cut.models.forEach(m=>renderer.register(m));}
-   renderer.setScene(view==='cut'?cut.items:[...currentScene.items,...(currentStudy?.items||[])],{explode:Number($('explode').value)/100});fixedCamera();renderer.draw();}
+   renderer.setScene(view==='cut'?[...cut.items,...(currentStudy?.items||[]).filter(i=>i.stage==='study-furniture')]:[...currentScene.items,...(currentStudy?.items||[])],{explode:Number($('explode').value)/100});fixedCamera();renderer.draw();}
  }
  // Studio owns configuration; System alone defines and places modules.
  const height=2100;
@@ -109,9 +109,11 @@
     for(const reason of [...functionResult.reasons,...functionResult.holds.slice(0,2)]){const line=document.createElement('p');line.textContent='• '+reason;$('function-screen').append(line);}
     const detail=document.createElement('a');detail.href='https://github.com/anotherSipOfCoffee/obtp-studio/blob/main/docs/FUNCTIONAL_VARIANTS_R01.md';detail.target='_blank';detail.rel='noopener';detail.textContent='Read variant comparison and remaining checks ↗';$('function-screen').append(detail);}
    $('schedule').replaceChildren();
+   const volume=isMatrix?null:api.woodVolume(api.generate({bays,height,layer:'all',skin:true,connectionRevision:'revised',includeFoundation:true}));
+   $('wood-total').textContent=volume?`Modelled wood in generated cassette shell: ${volume.total.toFixed(3)} m³ · timber ${volume.timber.toFixed(3)} + plywood ${volume.plywood.toFixed(3)} m³${sauna?' · solved-plan fit and side storage excluded':''}`:'Wood quantity awaits a verified Matrix material schedule';
    for(const row of api.schedule(scene)){
     const tr=document.createElement('tr');
-    const role=row.id.startsWith('F600')||row.id.startsWith('M-F')?'Floor cassette':row.id.startsWith('R600')||row.id.startsWith('M-R')?'Roof cassette':row.id.startsWith('M-CORNER')?'Corner study':'Wall cassette';
+    const role=row.id.startsWith('FOUNDATION')?'Foundation bearing study':row.id.startsWith('F600')||row.id.startsWith('M-F')?'Floor cassette':row.id.startsWith('R600')||row.id.startsWith('M-R')?'Roof cassette':row.id.startsWith('M-CORNER')?'Corner study':'Wall cassette';
     for(const value of [row.id,role,row.count]){const td=document.createElement('td');td.textContent=value;tr.append(td);}
     $('schedule').append(tr);
    }
@@ -130,5 +132,5 @@
  for(const button of document.querySelectorAll('[data-view]'))button.addEventListener('click',()=>{view=button.dataset.view;showView();});
  $('explode').addEventListener('input',()=>{$('amount').textContent=$('explode').value+'%';renderer.explode=Number($('explode').value)/100;renderer.draw();});
  $('reset').addEventListener('click',()=>{$('explode').value='0';$('amount').textContent='0%';renderer.explode=0;renderer.reset();});
- limitMatrix('rows');render();
+ limitMatrix('rows');$('preset').dispatchEvent(new Event('change'));
 })();
