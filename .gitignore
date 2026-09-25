@@ -13,3 +13,6 @@ studio-*.png
 cassette-validation.json
 __pycache__/
 *.pyc
+
+# Built from pinned canonical GH/Python source during deployment
+dist/v3/generated/

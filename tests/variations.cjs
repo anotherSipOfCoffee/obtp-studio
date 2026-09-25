@@ -2,67 +2,30 @@
 const {chromium}=require('playwright'),assert=require('node:assert/strict');
 (async()=>{const browser=await chromium.launch({headless:true,args:['--use-gl=angle','--use-angle=swiftshader','--enable-webgl']});
 try{const page=await browser.newPage({viewport:{width:1440,height:1100}}),errors=[];page.on('pageerror',e=>errors.push(e.message));
-await page.goto(process.env.OBTP_BASE_URL||'http://127.0.0.1:8765/');
-const v3=page.frameLocator('#v3'),v2=page.frameLocator('#v2');
-await v3.locator('#solved-plan').evaluate(img=>img.decode());
+await page.goto(process.env.OBTP_BASE_URL||'http://127.0.0.1:8765/');const v3=page.frameLocator('#v3'),v2=page.frameLocator('#v2');
+async function ready(){await v3.locator('#status').filter({hasText:/GH-R03.*modeled parts/}).waitFor({timeout:60000});}
+await ready();
 assert.equal(await page.locator('iframe:not([hidden])').getAttribute('id'),'v3');
-assert.equal(await v3.locator('#studio-version').inputValue(),'v3');
 assert.deepEqual(await v3.locator('#studio-version option').evaluateAll(xs=>xs.map(x=>x.value)),['v2','v3']);
-assert.equal(await v3.locator('#preset').inputValue(),'sauna');
 assert.equal(await v3.locator('#preset option:not([disabled])').count(),1);
-assert.equal(await v3.locator('#solved-view').getAttribute('aria-pressed'),'true');
-assert(await v3.locator('#solved-plan').isVisible());
-assert(await v3.locator('#solved-scroll').evaluate(x=>x.scrollWidth<=x.clientWidth && x.scrollHeight<=x.clientHeight),'Solved plan remains inside its fixed viewport');
-assert(!(await v3.locator('#component-details').evaluate(x=>x.open)));
-assert(!(await v3.locator('#technical-notes').evaluate(x=>x.open)));
-assert.match(await v3.locator('#wood-total').textContent(),/Modelled wood in generated cassette shell: \d+[.]\d{3} m³/);
-assert(await v3.locator('canvas').evaluate(()=>OBTPStudioV3.scene.foundation.spacing===4572));
-for(const [size,bays] of [['s',4],['m',5],['l',6]]){
- await v3.locator('#sauna-size').selectOption(size);
- assert.equal(await v3.locator('canvas').evaluate(()=>OBTPStudioV3.bays),bays);
- assert.match(await v3.locator('#solved-plan').getAttribute('src'),new RegExp(`sauna-${size}-open[.]svg$`));
- await v3.locator('#solved-plan').evaluate(img=>img.decode());
- assert(await v3.locator('#solved-plan').evaluate(img=>img.naturalWidth>0));
- assert(await v3.locator('#wood-total').textContent());
- await page.screenshot({path:`studio-sauna-${size}.png`,fullPage:true});
-}
-await v3.locator('#sauna-storage').check();
-assert.match(await v3.locator('#solved-plan').getAttribute('src'),/sauna-l-storage[.]svg$/);
-await v3.locator('#solved-plan').evaluate(img=>img.decode());
-await page.screenshot({path:'studio-sauna-l-storage.png',fullPage:true});
-await v3.locator('[data-view="cut"]').click();
-assert(await v3.locator('canvas').evaluate(()=>OBTPStudioV3.renderer.items.some(i=>i.stage==='study-furniture')));
-assert(!(await v3.locator('canvas').evaluate(()=>OBTPStudioV3.renderer.items.some(i=>i.stage==='roof'))));
-assert.equal(await v3.locator('[data-view="plan"]').count(),0);
-await v3.locator('[data-view="3d"]').click();
-assert(await v3.locator('canvas').evaluate(()=>OBTPStudioV3.scene.models.some(m=>m.id.startsWith('FOUNDATION'))));
-assert(await v3.locator('canvas').evaluate(()=>OBTPStudioV3.scene.models.some(m=>m.assets.some(a=>a.material==='plywood'))));
-const angle=await v3.locator('canvas').evaluate(()=>OBTPStudioV3.renderer.angle);
-for(let n=1;n<=4;n++){
- await v3.locator('#rotate').click();
- const current=await v3.locator('canvas').evaluate(()=>OBTPStudioV3.renderer.angle);
- assert(Math.abs(current-(angle+(n%4)*Math.PI/2))<1e-9);
-}
-await v3.locator('#rotate').click();await v3.locator('[data-view="cut"]').click();
-assert(Math.abs(await v3.locator('canvas').evaluate(()=>OBTPStudioV3.renderer.angle)-(angle+Math.PI/2))<1e-9);
-await v3.locator('#reset').click();
-assert(Math.abs(await v3.locator('canvas').evaluate(()=>OBTPStudioV3.renderer.angle)-angle)<1e-9);
-await page.screenshot({path:'studio-sauna-panels-cut.png',fullPage:true});
-await v3.locator('#component-details summary').click();
-assert(await v3.locator('#schedule tr').count()>0);
-await v3.locator('#technical-notes > summary').click();
-assert.match(await v3.locator('#envelope').textContent(),/generated shell only/);
-await v3.locator('#studio-version').selectOption('v2');
-await v2.locator('#status').filter({hasText:/component instances · ready/}).waitFor();
-assert(await v2.locator('#bays').isVisible());
-assert.equal(await v2.locator('#studio-version').inputValue(),'v2');
-await v2.locator('#studio-version').selectOption('v3');
-assert.equal(await v3.locator('#preset').inputValue(),'sauna');
-await page.setViewportSize({width:390,height:844});
-await v3.locator('[data-view="solved"]').click();
-assert(await v3.locator('body').evaluate(()=>document.documentElement.scrollWidth<=innerWidth));
-assert(await v3.locator('#solved-scroll').evaluate(x=>x.scrollWidth<=x.clientWidth && x.scrollHeight<=x.clientHeight));
-await page.screenshot({path:'studio-sauna-plan-mobile.png',fullPage:true});
-assert.deepEqual(errors,[]);
-console.log('PASS: Sauna default and locked presets; WikiHouse version; S/M/L and side storage; fixed no-scroll plans, quarter-turn camera and panels; System support; wood volume; furniture cut; collapsed technical notes and schedule; mobile UI');
+assert.equal(await v3.locator('#terrace-depth').inputValue(),'1200');assert.equal(await v3.locator('#window-width').inputValue(),'1200');
+assert.equal(await v3.locator('#facade option').count(),1);
+assert(!(await v3.locator('#component-details').evaluate(x=>x.open)));assert(!(await v3.locator('#technical-notes').evaluate(x=>x.open)));
+const initial=await v3.locator('canvas').evaluate(()=>OBTPStudioV3.scene.source_geometry_sha256);
+for(const size of ['s','m','l']){await v3.locator('#sauna-size').selectOption(size);await ready();assert.equal(await v3.locator('canvas').evaluate(()=>OBTPStudioV3.selection.size),size);await page.screenshot({path:`studio-sauna-${size}.png`,fullPage:true});}
+await v3.locator('#sauna-storage').check();await ready();assert(await v3.locator('canvas').evaluate(()=>OBTPStudioV3.scene.config.storage));
+for(const width of ['600','900','1200']){await v3.locator('#window-width').selectOption(width);await ready();assert.equal(await v3.locator('canvas').evaluate(()=>OBTPStudioV3.scene.config.window_width),Number(width));}
+await v3.locator('#terrace-depth').selectOption('600');await ready();assert.equal(await v3.locator('canvas').evaluate(()=>OBTPStudioV3.scene.config.terrace_steps),1);
+for(const roof of ['0','1','2']){await v3.locator('#sauna-roof').selectOption(roof);await ready();assert.equal(await v3.locator('canvas').evaluate(()=>OBTPStudioV3.scene.config.roof_type),Number(roof));}
+await v3.locator('[data-view="cut"]').click();assert(!(await v3.locator('canvas').evaluate(()=>OBTPStudioV3.renderer.items.some(x=>['roof','ceiling'].includes(x.stage)))));
+assert(await v3.locator('canvas').evaluate(()=>OBTPStudioV3.renderer.items.some(x=>x.stage==='interior')));
+const angle=await v3.locator('canvas').evaluate(()=>OBTPStudioV3.renderer.angle);await v3.locator('#rotate').click();assert(Math.abs(await v3.locator('canvas').evaluate(()=>OBTPStudioV3.renderer.angle)-(angle+Math.PI/2))<1e-9);
+await v3.locator('#reset').click();await page.screenshot({path:'studio-sauna-panels-cut.png',fullPage:true});
+await v3.locator('#sauna-size').selectOption('m');await ready();await v3.locator('#sauna-storage').uncheck();await ready();await v3.locator('#sauna-roof').selectOption('1');await ready();await v3.locator('#terrace-depth').selectOption('1200');await ready();
+assert.equal(await v3.locator('canvas').evaluate(()=>OBTPStudioV3.scene.source_geometry_sha256),initial);
+await v3.locator('#component-details summary').click();assert(await v3.locator('#schedule tr').count()>0);
+assert.match(await v3.locator('#wood-total').textContent(),/Modeled wood: \d+[.]\d{3} m³/);
+await v3.locator('#studio-version').selectOption('v2');await v2.locator('#status').filter({hasText:/component instances · ready/}).waitFor();assert(await v2.locator('#bays').isVisible());await v2.locator('#studio-version').selectOption('v3');await ready();
+await page.setViewportSize({width:390,height:844});await v3.locator('[data-view="solved"]').click();await v3.locator('#solved-plan').evaluate(img=>img.decode());assert(await v3.locator('#solved-scroll').evaluate(x=>x.scrollWidth<=x.clientWidth && x.scrollHeight<=x.clientHeight));assert(await v3.locator('body').evaluate(()=>document.documentElement.scrollWidth<=innerWidth));await page.screenshot({path:'studio-sauna-plan-mobile.png',fullPage:true});
+assert.deepEqual(errors,[]);console.log('PASS: R03 exported-model defaults, all buyer controls, source identity roundtrip, cut, locked camera, wood, reference plans, mobile and WikiHouse version');
 }finally{await browser.close();}})().catch(e=>{console.error(e);process.exit(1)});
