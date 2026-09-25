@@ -73,7 +73,7 @@ assert.equal(await v3.locator('.sauna-block.service').count(),1);
 assert.deepEqual(await v3.locator('canvas').evaluate(()=>OBTPStudioV3.plan.blocks.map(b=>[b.id,b.width,b.length])),[['changing',6,3],['sauna',4,4],['washing',2,3],['service',2,1]]);
 await page.screenshot({path:'studio-sauna-blocks-compact.png',fullPage:true});
 await v3.locator('#bays').selectOption('18');await v3.locator('#sauna-length').selectOption('15');
-assert.equal(await v3.locator('#wash-length option[value="16"]').isDisabled(),true);
+assert.equal(await v3.locator('#wash-length option[value="15"]').isDisabled(),false);
 assert.equal(await v3.locator('#envelope').textContent().then(x=>x.includes('49.75 / 50.00')),true);
 await page.screenshot({path:'studio-sauna-blocks-long.png',fullPage:true});
 await v3.locator('#bays').selectOption('8');assert.equal(await v3.locator('#sauna-length').inputValue(),'5');
