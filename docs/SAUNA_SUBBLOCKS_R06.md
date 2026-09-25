@@ -1,0 +1,38 @@
+# Sauna R06 · generative equipment and door sub-blocks
+
+Status: **parametric CAD planning study** on top of the same System Cassette 01 shell. Nothing here cuts a wall or builds a partition, bench, shower, heater mount or wet floor. The solver enumerates candidate *adjacent room edges* and offsets; it never rotates a fixed R02 sketch onto an incompatible plan or marks the technical Sauna as solved. It drives the linked floor-plan overlay and a downloadable CAD file for each compatible configuration.
+
+## Researched adjacency rules
+
+| Sub-block | Candidate wall relationship | Placement and rejection rule |
+|---|---|---|
+| Sauna door | Prefer the shared Sauna–washing partition in the compact one-entry layout; open **out of the Sauna** into washing. In wet-lobby and side-corridor variants, open toward the selected adjoining access block. | Detect a real shared grid edge, find a nominal 800 mm edge span with 150 mm end reservations, and fit a full 800 × 800 mm conservative swing envelope inside the receiving block. Try offsets at 100 mm steps; reject if any receiving-room equipment/swing intersects. Sauna-door outward motion and no lock follow [Finlandia Sauna](https://finlandiasauna.com/specifications/sauna-door/). This is not a Lithuanian door width or egress certification. |
+| Heater | Wall opposite a side-entry edge; side wall away from a front-entry edge. | Use the [Harvia SW80](https://www.harvia.com/en/products/HSW800400M/the-wall-sw80-80-kw-blacksteel) published **260 mm depth × 430 mm width**, **7–12 m³** nominal volume range. Move the heater along the front wall of a shallow room until its study approach zone does not overlap the foot bench; reserve an unverified 300 mm no-touch approach zone. Manufacturer safety/installation clearances, actual heated volume, electrical supply and guard must be checked against the current manual. |
+| Upper bench | Opposite the entry/front side, along the rear room face. | 600 mm nominal depth, 60 mm *hypothetical* offset from planning boundaries. [Harvia's bench guidance](https://www.harvia.com/en/ideas-and-trends/products/choosing-sauna-benches/) suggests at least 500 mm seat depth, about 600 mm per sitter, 1,100–1,200 mm headroom to ceiling and about 350 mm steps. No support anchorage or actual seat capacity is certified. |
+| Foot bench | Immediately before the rear upper bench, stopping short of the entry side to preserve a nominal approach strip. | 450 mm study depth; reject heater or approach-zone overlap. Bench elevation and guard are unbuilt. |
+| Shower | Far side/rear of the washing block, away from the preferred Sauna door swing. | 900 × 900 mm reservation, consistent with a common [manufacturer tray dimension](https://files.cdn.kaldewei.com/data/sprachen/englisch/prospekte/rest/Steel_Enamel_Baths_and_Shower_Trays.pdf); not a selected product. Full shower use, screened splash, drain, falls, waterproofing and service route remain unverified. |
+| Changing seat | Rear/side of the changing/rest block, away from the default front entry and the preferred washing/lobby door swing. | 1,200 × 550 mm study rectangle; no occupancy or furniture compliance claim. |
+| Outside access | Front changing wall in the one-entry variant; paired side positions in the two-access variants; front/rear of the corridor when full-pass is selected. | 900 mm candidate edge, projected from the program grid onto the actual exterior shell in Plan and CAD. The grid has a **486 mm transverse offset** at ten/twelve modules relative to the modeled 4,572 mm shell. The connecting jamb/partition and structural opening are unbuilt. This projection must not be mistaken for an approved wall cut. |
+
+The designer's [door/bench/heater advice](https://sunsauna.fi/en/blog/the-right-place-for-the-heater-and-the-door-in-the-sauna-room/) explains why these decisions are coupled and why the shower-side furniture must be considered before choosing a sauna door. The [Finnish Sauna Society](https://sauna.fi/saunatietoa/saunan-rakentaminen-ja-kaytto/saunan-rakennevaatimukset/) also calls attention to the moisture-sensitive Sauna–washing partition. No ventilation opening is generated: [Harvia's ventilation guidance](https://support.harvia.com/hc/en-gb/articles/21953036825628-Ventilation-in-the-sauna) requires a scheme matched to heater, exhaust and temperature sensor rather than a universal hole position.
+
+## Actual generative trials
+
+All coordinates below are nominal millimetres measured from the **program grid**, front west corner. The shell remains larger; the CAD exporter positions the grid inside System's outside dimensions. These trials are recalculated whenever the Sauna module count, wet-block width/length or circulation study changes.
+
+| Brief | Heat → washing/changing route | Heater body | Upper bench | Shower | Result |
+|---|---|---|---|---|---|
+| 10 modules, shared one-entry | Sauna → washing → changing; direct partition door at x=1,800, y=3,250–4,050 | x=60–320, y=3,320–3,750 (west wall) | x=60–1,740, y=4,740–5,340 | x=2,640–3,540, y=4,440–5,340 | Nominal spatial fit; changes the R02 heater wall because the Sauna door now faces washing. |
+| 12 modules, wet lobby | Sauna → wet lobby → changing; washing → wet lobby; three separate interior door candidates | x=60–320, y=4,520–4,950 | x=60–1,740, y=5,940–6,540 | x=2,640–3,540, y=5,640–6,540 | Nominal spatial fit with distinct wet landing; two outside side-door candidates remain site dependent. |
+| 10 modules, full-pass | Sauna, washing and changing open to a 1,200 mm allocated corridor | x=3,280–3,540, y=3,770–4,200 | x=1,260–3,540, y=4,740–5,340 | x=2,640–3,540, y=2,640–3,540 | Nominal fit after heater moves toward the front of the shallower 2,400 × 1,800 mm Sauna. Bench, corridor finished width and both end-wall entries need detailed testing. |
+
+The 100 mm offset search and 40 mm candidate swing buffer are **planning tolerances**, not code clearances. The solver checks nominal room containment, equipment overlaps, receiving-room swing squares, reference volume and room adjacency. It fails with a reason when these simple constraints cannot fit. Subsequent finished-wall thickness, door-leaf/jamb geometry, seat heights, user count, heater installation distance and real wet circulation can overturn any candidate.
+
+## CAD delivery
+
+- [10-module one-entry CAD blocks](../dist/v3/cad/sauna-10-shared-r06.dxf)
+- [12-module wet-lobby CAD blocks](../dist/v3/cad/sauna-12-wet-lobby-r06.dxf)
+
+The **Download CAD blocks · DXF** button in Studio v3 generates the current Sauna configuration from the same sub-block solution. Files are millimetre [DXF drawings with six named reusable `BLOCK` definitions and placed `INSERT` references](https://help.autodesk.com/cloudhelp/2021/ENU/AutoCAD-DXF/files/GUID-28FA4CFB-9D5E-4880-9F11-36C97578252F.htm); shell and program lines are separate reference layers. A CAD editor can open the DXF and save it as **DWG**, but this environment has no verified DWG writer. No `.dwg` binary is produced or mislabelled. The two checked-in samples were opened with ezdxf and verified to contain six named OBTP blocks, 8 and 10 placed references respectively, and millimetre drawing units.
+
+Before moving any candidate to construction geometry, specify finished room assemblies and a selected heater manual; resolve the cassette wall-opening and header/jamb connections; detail waterproofing, drainage and ventilation; redraw the door swings at finished faces; and re-run the three-dimensional regulatory envelope and site review. The presently generated building shell and its hard dimensional screen are unchanged.
