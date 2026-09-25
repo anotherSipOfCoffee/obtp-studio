@@ -7,7 +7,8 @@
  for(const event of ['onpointerdown','onpointermove','onpointerup','onpointercancel'])$('diagram')[event]=null;
  const selection=()=>({size:$('sauna-size').value,storage:$('sauna-storage').checked,roof:Number($('sauna-roof').value),terrace:Number($('terrace-depth').value)/600,window:Number($('window-width').value),facade:Number($('facade').value)});
  const key=s=>`sauna-${s.size}-${s.storage?'storage':'open'}-r${s.roof}-t${s.terrace}-w${s.window}-f${s.facade}`;
- const manifest=fetch('generated/manifest.json').then(r=>{if(!r.ok)throw Error('Authoring catalogue unavailable');return r.json();});
+ const buildTag=new URL(location.href).searchParams.get('build')||'local';
+ const manifest=fetch('generated/manifest.json?build='+encodeURIComponent(buildTag)).then(r=>{if(!r.ok)throw Error('Authoring catalogue unavailable');return r.json();});
  function clear(){for(const m of renderer.meshes.values())for(const p of m.parts)renderer.gl.deleteBuffer(p.buffer);renderer.meshes.clear();renderer.setScene([]);}
  function show(){
   if(!scene)return;
@@ -26,7 +27,7 @@
   const request=++serial;scene=null;window.OBTPStudioV3=null;clear();$('status').textContent='Loading script-authored model…';$('wood-total').textContent='';$('schedule').replaceChildren();
   try{
    const s=selection(),catalogue=await manifest,entry=catalogue.entries.find(e=>e.key===key(s));if(!entry)throw Error('Configuration is not in the verified export catalogue');
-   const r=await fetch('generated/'+entry.file);if(!r.ok)throw Error('Model export unavailable');const bytes=await r.arrayBuffer();
+   const r=await fetch('generated/'+entry.file+'?sha='+entry.sha256);if(!r.ok)throw Error('Model export unavailable');const bytes=await r.arrayBuffer();
    const hash=Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',bytes)),b=>b.toString(16).padStart(2,'0')).join('');
    if(hash!==entry.sha256)throw Error('Model export checksum mismatch');
    const next=JSON.parse(new TextDecoder().decode(bytes));if(request!==serial)return;
