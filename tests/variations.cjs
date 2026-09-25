@@ -111,6 +111,8 @@ assert.equal(await v3.locator('canvas').evaluate(()=>OBTPStudioV3.plan.blocks.fi
 assert.equal(await v3.locator('canvas').evaluate(()=>OBTPStudioV3.plan.blocks.find(b=>b.id==='storage').y),0);
 assert.equal(await v3.locator('canvas').evaluate(()=>OBTPStudioV3.plan.subblocks.outside.some(d=>d.id==='storage-entry-side')),true);
 assert.equal(await v3.locator('canvas').evaluate(()=>OBTPStudioV3.plan.subblocks.components.some(c=>c.kind==='storage')),true);
+assert.equal(await v3.locator('canvas').evaluate(()=>OBTPStudioV3.plan.subblocks.components.some(c=>c.kind==='outdoor-seat')),true);
+assert.equal(await v3.locator('#floor-plan [data-cad-block="outside-seat"]').count(),1);
 assert.equal(await v3.locator('canvas').evaluate(()=>OBTPStudioCAD.exportDXF(OBTPStudioV3.plan.subblocks,OBTPStudioV3.plan,OBTPStudioV3.scene).includes('OBTP_OUTDOOR_SHOWER_STUDY')),true);
 await page.screenshot({path:'studio-sauna-l-storage-plan.png',fullPage:true});
 for(const [size,bays,area] of [['s',4,'11.14'],['m',5,'13.90'],['l',6,'16.66']]){
