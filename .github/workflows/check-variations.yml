@@ -1,7 +1,7 @@
 name: Check Studio development variations (no deployment)
 on:
   push:
-    branches: ['dev/obtp-independent-v1-20260923', 'dev/cassette-connections-studio-controls-20260924', 'dev/studio-presets-envelope-20260925', 'dev/matrix-study-20260925', 'dev/sauna-program-blocks-20260925', 'dev/sauna-r01-default-20260925', 'dev/sauna-heater-screen-20260925', 'dev/sauna-circulation-r03-20260925']
+    branches: ['dev/obtp-independent-v1-20260923', 'dev/cassette-connections-studio-controls-20260924', 'dev/studio-presets-envelope-20260925', 'dev/matrix-study-20260925', 'dev/sauna-program-blocks-20260925', 'dev/sauna-r01-default-20260925', 'dev/sauna-heater-screen-20260925', 'dev/sauna-circulation-r03-20260925', 'dev/sauna-route-r04-20260925']
 permissions:
   contents: read
 jobs:
