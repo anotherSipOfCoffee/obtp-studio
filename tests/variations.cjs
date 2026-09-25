@@ -15,7 +15,7 @@ assert(await v3.locator('#solved-plan').isVisible());
 assert(await v3.locator('#solved-scroll').evaluate(x=>x.scrollWidth>x.clientWidth),'Solved plan keeps natural scale and scrolls');
 assert(!(await v3.locator('#component-details').evaluate(x=>x.open)));
 assert(!(await v3.locator('#technical-notes').evaluate(x=>x.open)));
-assert.match(await v3.locator('#wood-total').textContent(),/Modelled wood: \d+[.]\d{3} m³/);
+assert.match(await v3.locator('#wood-total').textContent(),/Modelled wood in generated cassette shell: \d+[.]\d{3} m³/);
 assert(await v3.locator('canvas').evaluate(()=>OBTPStudioV3.scene.foundation.spacing===4572));
 for(const [size,bays] of [['s',4],['m',5],['l',6]]){
  await v3.locator('#sauna-size').selectOption(size);
