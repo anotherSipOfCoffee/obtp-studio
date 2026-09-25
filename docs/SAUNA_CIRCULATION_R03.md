@@ -2,6 +2,8 @@
 
 Status: **manual spatial research**. All three studies keep the same Cassette 01 exterior, 10 module count, 600 mm coordination grid, roof bearing and regulatory dimensional screen. Colored blocks and door marks are reservations only. **No corridor partition or exterior/interior opening is generated.** Neither a second outside door nor a drawn corridor establishes a compliant escape route.
 
+Follow-up: [R04 nominal whole-plan route study](SAUNA_ROUTE_R04.md) locates candidate side doors, a crossing band, changing seat, wet-room doors and a shower in study A. It also records the wet/dry traffic conflict that the block diagram alone cannot resolve.
+
 ![Three whole-plan Sauna circulation studies](SAUNA_CIRCULATION_R03.svg)
 
 ## Fixed geometry for this comparison
