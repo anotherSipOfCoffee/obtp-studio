@@ -1,6 +1,6 @@
 'use strict';
 (()=>{
- const $=id=>document.getElementById(id),api=window.OBTPCassette,presets=window.OBTPStudioPresets,linked=window.OBTPStudioLinkedView;
+ const $=id=>document.getElementById(id),api=window.OBTPCassette,presets=window.OBTPStudioPresets,linked=window.OBTPStudioLinkedView,functionScreen=window.OBTPStudioFunctionScreen;
  let renderer;
  try {renderer=new SourceMeshView($('diagram'));}
  catch(e){$('status').textContent=e.message;return;}
@@ -97,6 +97,11 @@
     const caveat=document.createElement('small');caveat.textContent='Program plan only. Brown marks are proposed outside access edges; no partitions or openings are generated. Heater, bench, wet-room and passage details remain under review.';
     const reference=document.createElement('p'),link=document.createElement('a');link.href='https://github.com/anotherSipOfCoffee/obtp-studio/blob/main/docs/'+({shared:'SAUNA_MANUAL_PLAN_R01.md',sharedTwoAccess:'SAUNA_ROUTE_R04.md',wetLobby:'SAUNA_WET_LOBBY_R05.md',deadEnd:'SAUNA_CIRCULATION_R03.md',through:'SAUNA_CIRCULATION_R03.md'})[plan.circulation];link.target='_blank';link.rel='noopener';link.textContent=plan.circulation==='shared'?'Review the 10-module manual plan R01 ↗':plan.circulation==='sharedTwoAccess'?'Review the two-access whole-plan study R04 ↗':plan.circulation==='wetLobby'?'Review the wet-lobby whole-plan study R05 ↗':'Compare complete circulation layouts R03 ↗';reference.append(link);$('program').append(diagram,facts,caveat,reference);
    }else{const diagram=document.createElement('div');diagram.className='zone-plan';diagram.setAttribute('aria-label',program.name+' conceptual program allocation');for(let i=0;i<program.zones.length;i++){const zone=document.createElement('span');zone.style.width=(program.shares[i]*100)+'%';zone.textContent=program.zones[i];diagram.append(zone);}const caveat=document.createElement('small');caveat.textContent='Concept allocation across the interior length, without partitions, access openings, services or wet-room assembly in the generated model.';$('program').append(diagram,caveat);}
+   const functionResult=functionScreen.screen(preset,scene,metrics,plan);
+   $('function-screen').replaceChildren();$('function-screen').hidden=!functionResult;
+   if(functionResult){const title=document.createElement('strong');title.textContent='Function screen · '+(functionResult.spatialCandidate?'spatial candidate, unverified':'needs a task-specific revision');const summary=document.createElement('p');summary.textContent=functionResult.brief+'. '+functionResult.benchmark+'.';$('function-screen').append(title,summary);
+    for(const reason of [...functionResult.reasons,...functionResult.holds.slice(0,2)]){const line=document.createElement('p');line.textContent='• '+reason;$('function-screen').append(line);}
+    const detail=document.createElement('a');detail.href='https://github.com/anotherSipOfCoffee/obtp-studio/blob/main/docs/FUNCTIONAL_VARIANTS_R01.md';detail.target='_blank';detail.rel='noopener';detail.textContent='Read variant comparison and remaining checks ↗';$('function-screen').append(detail);}
    $('schedule').replaceChildren();
    for(const row of api.schedule(scene)){
     const tr=document.createElement('tr');
@@ -104,9 +109,9 @@
     for(const value of [row.id,role,row.count]){const td=document.createElement('td');td.textContent=value;tr.append(td);}
     $('schedule').append(tr);
    }
-   window.OBTPStudioV3={scene,items:scene.items,renderer,bays,columns,rows,preset,metrics,program,plan,researchHold};
+   window.OBTPStudioV3={scene,items:scene.items,renderer,bays,columns,rows,preset,metrics,program,plan,researchHold,functionResult};
    showView();
-  } catch(e){$('status').textContent=e.message;$('envelope').textContent='Outside I-group envelope · '+e.message;window.OBTPStudioV3=null;currentScene=null;cut=null;renderer.setScene([]);$('floor-plan').replaceChildren();$('schedule').replaceChildren();}
+  } catch(e){$('status').textContent=e.message;$('envelope').textContent='Outside I-group envelope · '+e.message;window.OBTPStudioV3=null;currentScene=null;cut=null;renderer.setScene([]);$('floor-plan').replaceChildren();$('function-screen').replaceChildren();$('schedule').replaceChildren();}
  }
  $('preset').addEventListener('change',()=>{const matrix=$('preset').value==='matrix',sauna=$('preset').value==='sauna';$('matrix-fields').hidden=!matrix;$('bays-field').hidden=matrix;$('sauna-fields').hidden=!sauna;
   if(matrix){$('rows').value=$('bays').value;limitMatrix('rows');}
