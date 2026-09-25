@@ -132,7 +132,9 @@
   if(compact?.storage){
    // Enclose the proposed side room in a conservative full-length bounding
    // rectangle; shell walls/roof are still the only generated construction.
-   metrics.proposedArea=(metrics.planWidth+1500)*metrics.planLength/1e6;
+   // A full-length rectangle includes the 1.2 m store, 0.9 m shower and
+   // adjacent 0.9 m outdoor seat; open elements are screened conservatively.
+   metrics.proposedArea=(metrics.planWidth+2400)*metrics.planLength/1e6;
    metrics.checks.area=metrics.proposedArea>0&&metrics.proposedArea<=LIMITS.outsidePlanAreaM2;
    metrics.valid=Object.values(metrics.checks).every(Boolean);
   }
