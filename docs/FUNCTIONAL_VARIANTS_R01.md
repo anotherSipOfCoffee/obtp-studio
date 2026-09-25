@@ -31,6 +31,8 @@ None earns a technical pass. All have washing equal in area to the 4.32 m² hot 
 
 An exhaustive pass through 8–18 modules, five circulation choices, allowed widths and 2–15-row wet-room lengths finds **9,024 geometrically allocated parameter states**. The current heater-volume, minimum study-block and changing-area screens retain **664 spatial candidates**. These counts are *parameter combinations*, with many nearly identical plans; they do not mean 664 validated sauna designs. The remaining candidates still fail the unbuilt technical gate. The automated test records this coverage so changing the controls cannot silently turn obviously undersized room allocations into a functional pass.
 
+The subsequent [R06 generative sub-block solver](SAUNA_SUBBLOCKS_R06.md) places the heater, bench, shower, seat and adjacent door candidates and rejects a further **11** of those 664 nominal candidates, leaving **653 geometric placement candidates**. That additional screen still cannot verify real openings, finished circulation or technical assemblies.
+
 **Next Sauna test:** draw a single-entry heat ↔ washing ↔ changing/rest route using the ten-module shared shell; place a *candidate* direct sauna–washing door without colliding with the R02 heater, bench, shower and exhaust route. Compare its finished circulation against the 12-module wet-lobby proposal. Retain a second outside access or full-pass corridor only for a site brief that actually needs it. No exterior wall is cut until the structural-opening hold is resolved.
 
 ## Studio start
