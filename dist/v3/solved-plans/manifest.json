@@ -1,0 +1,44 @@
+[
+  {
+    "size": "s",
+    "storage": false,
+    "file": "sauna-s-open.svg",
+    "insertCount": 7,
+    "heaterOutlineCount": 1
+  },
+  {
+    "size": "s",
+    "storage": true,
+    "file": "sauna-s-storage.svg",
+    "insertCount": 12,
+    "heaterOutlineCount": 1
+  },
+  {
+    "size": "m",
+    "storage": false,
+    "file": "sauna-m-open.svg",
+    "insertCount": 7,
+    "heaterOutlineCount": 1
+  },
+  {
+    "size": "m",
+    "storage": true,
+    "file": "sauna-m-storage.svg",
+    "insertCount": 12,
+    "heaterOutlineCount": 1
+  },
+  {
+    "size": "l",
+    "storage": false,
+    "file": "sauna-l-open.svg",
+    "insertCount": 7,
+    "heaterOutlineCount": 1
+  },
+  {
+    "size": "l",
+    "storage": true,
+    "file": "sauna-l-storage.svg",
+    "insertCount": 12,
+    "heaterOutlineCount": 1
+  }
+]

@@ -5,17 +5,27 @@
  try {renderer=new SourceMeshView($('diagram'));}
  catch(e){$('status').textContent=e.message;return;}
  // Architecture's fixed view: 45° in plan, with wheel zoom still available.
- // The cut and plan buttons change only the display of the generated scene.
+ // The cut and plan buttons show generated geometry; solved is the owner's
+ // source drawing and remains independent of the generated cassette shell.
  const fixedCamera=()=>{renderer.angle=-Math.PI/4;renderer.elev=.55;};
  $('diagram').onpointerdown=$('diagram').onpointermove=$('diagram').onpointerup=$('diagram').onpointercancel=null;
  renderer.reset=()=>{fixedCamera();renderer.zoom=1;renderer.draw();};fixedCamera();
  let view='3d',currentScene=null,currentPlan=null,currentStudy=null,cut=null;
  function showView(){
-  const isPlan=view==='plan';$('diagram').hidden=isPlan;$('floor-plan').toggleAttribute('hidden',!isPlan);
+  const isPlan=view==='plan',isSolved=view==='solved'&&currentPlan?.selection;
+  $('diagram').hidden=Boolean(isPlan||isSolved);$('floor-plan').toggleAttribute('hidden',!isPlan);$('solved-plan').hidden=!isSolved;
+  $('solved-view').hidden=!currentPlan?.selection;
   for(const button of document.querySelectorAll('[data-view]'))button.setAttribute('aria-pressed',String(button.dataset.view===view));
-  $('view-description').textContent=isPlan?'Model wall section at 1.10 m above floor · dashed Sauna blocks are unbuilt allowances':view==='cut'?'Frame clipped at 1.10 m above floor · roof hidden · fixed camera':'Fixed 45° camera · scroll to zoom';
+  if(currentPlan?.selection){const {size}=currentPlan.selection;
+   $('assembly-title').textContent=isSolved?`Sauna ${size.toUpperCase()} · owner-solved floor plan`:`Sauna ${size.toUpperCase()} · ${window.OBTPStudioV3?.bays||currentScene?.bays} cassette modules · earlier model`;
+   $('dimensions').textContent=isSolved?`${({s:3800,m:4400,l:5000})[size].toLocaleString('en')} × 2,000 mm outer boundary sketch · walls orientational`:`${currentScene.length.toLocaleString('en')} × ${currentScene.width.toLocaleString('en')} mm generated shell · 2,100 mm wall height`;
+  }
+  $('view-description').textContent=isSolved?'Owner-provided monochrome plan · source line weights preserved · geometry is not yet fitted to the generated cassette':isPlan?'Model wall section at 1.10 m above floor · dashed Sauna blocks are unbuilt allowances':view==='cut'?'Frame clipped at 1.10 m above floor · roof hidden · fixed camera':'Fixed 45° camera · scroll to zoom';
   if(!currentScene)return;
-  if(isPlan){
+  if(isSolved){const selection=currentPlan.selection;
+   $('solved-plan').src=`solved-plans/sauna-${selection.size}-${selection.storage?'storage':'open'}.svg`;
+   $('solved-plan').alt=`Owner-solved monochrome Sauna ${selection.size.toUpperCase()} plan, ${selection.storage?'with':'without'} side storage`;
+  }else if(isPlan){
    const {preset,bays,columns,rows}=window.OBTPStudioV3;
    const source=preset==='matrix'?window.OBTPMatrix.generate({columns,rows,layer:'all',skin:true}):api.generate({bays,height,layer:'all',skin:true,connectionRevision:'revised'});
    linked.renderPlan($('floor-plan'),api,source,currentPlan,currentPlan?.subblocks);
@@ -34,7 +44,7 @@
  }
  function limitSauna(){
   const chosen=presets.compactSaunaPlan($('sauna-size').value,$('sauna-storage').checked);
-  $('sauna-circulation-note').textContent=chosen.bays+' cassette modules · hot room, little front hall and required outdoor shower'+(chosen.storage?'; separate 1.2 × 1.2 m side storage and open-air seat beside the shower':'')+'. Exterior services, annex structure and openings remain proposals.';
+  $('sauna-circulation-note').textContent='Solved drawing: fixed 2.4 m hot room, '+({s:'1.2',m:'1.8',l:'2.4'})[chosen.size]+' m entrance length, outdoor shower'+(chosen.storage?'; separate 1.2 m side bay with exterior access and outdoor seat':'')+'. The earlier '+chosen.bays+'-module cassette model has not been fitted to these plans.';
  }
  const area=(c,r)=>((600*c+414)*(600*r+414))/1e6;
  function limitMatrix(changed){
@@ -59,17 +69,17 @@
    currentScene=scene;currentPlan=plan;cut=null;
    $('assembly-title').textContent=isMatrix?columns+' × '+rows+' Matrix cells · research prototype':sauna?'Sauna '+selection.size.toUpperCase()+' · '+bays+' cassette modules':bays+' module cassette · '+program.name;
    $('dimensions').textContent=isMatrix?scene.clear[0].toLocaleString('en')+' × '+scene.clear[1].toLocaleString('en')+' mm inner-face grid · '+height.toLocaleString('en')+' mm wall height':scene.length.toLocaleString('en')+' × '+scene.width.toLocaleString('en')+' mm setting-out · '+height.toLocaleString('en')+' mm wall height';
-   $('status').textContent=isMatrix?scene.items.length+' study components · geometry preview only':scene.items.length+' cassette instances · geometry ready'+(plan?' · Sauna plan under review':'')+(currentStudy?.items.length?' · exterior shower study':'');
+   $('status').textContent=isMatrix?scene.items.length+' study components · geometry preview only':scene.items.length+' cassette instances · geometry ready'+(plan?' · earlier Sauna model; solved drawing is a separate source view':'')+(currentStudy?.items.length?' · exterior shower study':'');
    const fmt=n=>n.toFixed(2),mm=n=>(n/1000).toFixed(3);
    $('envelope').replaceChildren();
-   const title=document.createElement('strong');title.textContent=isMatrix?'LT I-group dimensional screen · Matrix prototype on hold':plan?.storage?'LT I-group dimensional screen · side storage annex on hold':'LT I-group dimensional envelope · within limits';$('envelope').append(title);
+   const title=document.createElement('strong');title.textContent=isMatrix?'LT I-group dimensional screen · Matrix prototype on hold':plan?'LT I-group dimensional screen · generated shell only':'LT I-group dimensional envelope · within limits';$('envelope').append(title);
    for(const line of [
     `Outside-wall plan area: ${fmt(metrics.area)} / 50.00 m² ✓`,
     ...(metrics.proposedArea?[`Conservative shell + proposed annex bound: ${fmt(metrics.proposedArea)} / 50.00 m² ✓ · annex unbuilt`]:[]),
     `Internal clear floor estimate: ${fmt(metrics.internalArea)} m²`,
     `Modelled height: ${mm(metrics.height)} / 5.000 m ✓`,
     `${isMatrix?'Conservative clear-width bearing screen':'Modelled roof span'}: ${mm(metrics.supportSpacing)} / 6.000 m ✓`]){const p=document.createElement('p');p.textContent=line;$('envelope').append(p);}
-   const note=document.createElement('small');note.textContent=isMatrix?'Geometric research only; NOT a valid structural preset/output. The continuous roof load path across tiled joints, 195 mm corners, floor perimeter, foundation supports, roof finishes and site conditions are unresolved. Dimensional screening cannot establish permit exemption.':plan?.storage?'The side storage and open-air seat are studies outside the generated shell; no annex structure, connections or actual doors exist. This is a dimensional study, NOT a valid building output. Site conditions must be checked separately.':'Designed for the LT I-group permit-free dimensional envelope. This is an outside-wall area cap, not a certified legal total floor area. Roof finish, terrain datum, foundation supports, openings and site / land-use conditions must be verified separately.';$('envelope').append(note);
+   const note=document.createElement('small');note.textContent=isMatrix?'Geometric research only; NOT a valid structural preset/output. The continuous roof load path across tiled joints, 195 mm corners, floor perimeter, foundation supports, roof finishes and site conditions are unresolved. Dimensional screening cannot establish permit exemption.':plan?'These calculations refer to the earlier generated cassette shell, NOT the owner-solved drawing shown in Solved plan. The fixed shell width and room lengths differ. The side storage structure and connections are unbuilt; the source plan is not validated as a structural output. Site conditions must be checked separately.':'Designed for the LT I-group permit-free dimensional envelope. This is an outside-wall area cap, not a certified legal total floor area. Roof finish, terrain datum, foundation supports, openings and site / land-use conditions must be verified separately.';$('envelope').append(note);
    $('program').replaceChildren();const heading=document.createElement('strong');heading.textContent=isMatrix?'Matrix · 600 mm coordination':program.name+' · program allowances';const use=document.createElement('p');use.textContent=program.use;$('program').append(heading,use);
    if(isMatrix){const detail=document.createElement('p');detail.textContent=(columns*rows)+' planning cells · '+columns+' columns × '+rows+' rows. Straight wall bays use the shared 600 mm cassette; floors and roofs are grouped up to 2,400 × 1,200 mm with separate perimeter pieces.';const caveat=document.createElement('small');caveat.textContent='Walls follow only the outside boundary. The corner posts and bearing details are placeholders; no room partitions, openings, supports or verified connections are generated.';$('program').append(detail,caveat);}
    else if(plan){
@@ -83,16 +93,19 @@
     const flow=document.createElement('p');flow.textContent=`${plan.access}. ${plan.exteriorAccessCandidates} candidate outside ${plan.exteriorAccessCandidates===1?'access':'accesses'}; ${plan.corridorAreaM2.toFixed(2)} m² allocated to a separate corridor${plan.lobbyAreaM2?`; ${plan.lobbyAreaM2.toFixed(2)} m² to the wet lobby`:''}.`;facts.append(flow);
     const heater=document.createElement('p');heater.textContent=`Reference ${plan.referenceHeater.model}: nominal Sauna volume ${plan.nominalVolumeM3.toFixed(2)} m³ / ${plan.referenceHeater.minVolumeM3}–${plan.referenceHeater.maxVolumeM3} m³ published room range · ${plan.referenceHeaterVolumeInRange?'within preliminary range':'outside preliminary range; another heater or block size is needed'}. Finished volume and installation remain unverified.`;facts.append(heater);
     const caveat=document.createElement('small');caveat.textContent='Program plan only. Brown marks are proposed outside access edges; no partitions or openings are generated. Heater, bench, wet-room and passage details remain under review.';
-    const placement=document.createElement('p');placement.textContent='Generated sub-block fit: '+(plan.subblocks.status==='spatial-candidate'?'candidate · heater, benches, exterior shower'+(plan.storage?', outdoor seat and unbuilt side storage study':'')+' and access edges placed':'no fit · '+plan.subblocks.failures.join('; '))+'. The plan view shows these reservations.';
+    const sourcePlan=document.createElement('p');sourcePlan.textContent=`Solved source plan: ${({s:3.6,m:4.2,l:4.8})[selection.size].toFixed(1)} m nominal length × 1.8 m nominal depth, with a fixed 2.4 m sauna room and an entrance hall that grows in 600 mm steps${plan.storage?'; the optional side room adds a 1.2 m bay':''}. The existing generator has a fixed 4.572 m outer width and currently assigns different room lengths. The source plan has not been fitted to its structural grid or connections.`;
+    const placement=document.createElement('p');placement.textContent='Generated sub-block fit (separate earlier cassette study): '+(plan.subblocks.status==='spatial-candidate'?'candidate · heater, benches, exterior shower'+(plan.storage?', outdoor seat and unbuilt side storage study':'')+' and access edges placed':'no fit · '+plan.subblocks.failures.join('; '))+'. The generated Plan view shows these reservations; Solved plan shows the submitted drawing.';
     const download=document.createElement('button');download.type='button';download.id='download-cad';download.textContent='Download CAD blocks · DXF';download.disabled=plan.subblocks.status!=='spatial-candidate';
     download.addEventListener('click',()=>{const a=document.createElement('a');a.href=`cad/r14/OBTP_Sauna_${selection.size.toUpperCase()}_${selection.storage?'Side_Storage':'No_Storage'}_Archicad_R14.dxf`;a.download=a.href.split('/').pop();a.click();});
     const allPlans=document.createElement('p'),allPlansLink=document.createElement('a');allPlansLink.href='cad/r14/OBTP_Sauna_All_Six_Plans_Archicad_R14.dxf';allPlansLink.download='OBTP_Sauna_All_Six_Plans_Archicad_R14.dxf';allPlansLink.textContent='Download all six plans in one DXF ↗';allPlans.append(allPlansLink);
     const cadNote=document.createElement('small');cadNote.textContent='Complete AutoCAD 2010 DXF, millimetres, audited without repairs and arranged in CAD BLOCKs. Archicad import must still be confirmed on your installation; no native DWG file or built opening is generated.'+(currentStudy?.items.length?' The unroofed exterior pad, shower and seat are planning geometry; frost-safe services, drainage, privacy and site area treatment are unresolved.':'');
-    const reference=document.createElement('p'),link=document.createElement('a');link.href='https://github.com/anotherSipOfCoffee/obtp-studio/blob/main/docs/SAUNA_SIDE_AMENITIES_R13.md';link.target='_blank';link.rel='noopener';link.textContent='Review compact Sauna and unresolved details ↗';reference.append(link);$('program').append(diagram,facts,placement,download,allPlans,cadNote,caveat,reference);
+    const old=document.createElement('details'),oldLabel=document.createElement('summary');oldLabel.textContent='Earlier generated cassette study · does not match the solved plan';
+    old.append(oldLabel,diagram,facts,placement,download,allPlans,cadNote,caveat);
+    const reference=document.createElement('p'),link=document.createElement('a');link.href='https://github.com/anotherSipOfCoffee/obtp-studio/blob/main/docs/SAUNA_SOURCE_PLANS_R15.md';link.target='_blank';link.rel='noopener';link.textContent='Review the six solved plans and grid comparison ↗';reference.append(link);$('program').append(sourcePlan,old,reference);
    }else{const diagram=document.createElement('div');diagram.className='zone-plan';diagram.setAttribute('aria-label',program.name+' conceptual program allocation');for(let i=0;i<program.zones.length;i++){const zone=document.createElement('span');zone.style.width=(program.shares[i]*100)+'%';zone.textContent=program.zones[i];diagram.append(zone);}const caveat=document.createElement('small');caveat.textContent='Concept allocation across the interior length, without partitions, access openings, services or wet-room assembly in the generated model.';$('program').append(diagram,caveat);}
    const functionResult=functionScreen.screen(preset,scene,metrics,plan);
    $('function-screen').replaceChildren();$('function-screen').hidden=!functionResult;
-   if(functionResult){const title=document.createElement('strong');title.textContent='Function screen · '+(functionResult.spatialCandidate?'spatial candidate, unverified':'needs a task-specific revision');const summary=document.createElement('p');summary.textContent=functionResult.brief+'. '+functionResult.benchmark+'.';$('function-screen').append(title,summary);
+   if(functionResult){const title=document.createElement('strong');title.textContent=plan?'Function screen · earlier generated study only':'Function screen · '+(functionResult.spatialCandidate?'spatial candidate, unverified':'needs a task-specific revision');const summary=document.createElement('p');summary.textContent=functionResult.brief+'. '+functionResult.benchmark+'.';$('function-screen').append(title,summary);
     for(const reason of [...functionResult.reasons,...functionResult.holds.slice(0,2)]){const line=document.createElement('p');line.textContent='• '+reason;$('function-screen').append(line);}
     const detail=document.createElement('a');detail.href='https://github.com/anotherSipOfCoffee/obtp-studio/blob/main/docs/FUNCTIONAL_VARIANTS_R01.md';detail.target='_blank';detail.rel='noopener';detail.textContent='Read variant comparison and remaining checks ↗';$('function-screen').append(detail);}
    $('schedule').replaceChildren();
@@ -106,7 +119,7 @@
    showView();
   } catch(e){$('status').textContent=e.message;$('envelope').textContent='Outside I-group envelope · '+e.message;window.OBTPStudioV3=null;currentScene=null;cut=null;renderer.setScene([]);$('floor-plan').replaceChildren();$('function-screen').replaceChildren();$('schedule').replaceChildren();}
  }
- $('preset').addEventListener('change',()=>{const matrix=$('preset').value==='matrix',sauna=$('preset').value==='sauna';$('matrix-fields').hidden=!matrix;$('bays-field').hidden=matrix||sauna;$('sauna-fields').hidden=!sauna;
+ $('preset').addEventListener('change',()=>{const matrix=$('preset').value==='matrix',sauna=$('preset').value==='sauna';$('matrix-fields').hidden=!matrix;$('bays-field').hidden=matrix||sauna;$('sauna-fields').hidden=!sauna;view=sauna?'solved':view==='solved'?'3d':view;
   if(matrix){$('rows').value=$('bays').value;limitMatrix('rows');}
   else if(!sauna){const min=presets.PROGRAMS[$('preset').value].minBays;if(Number($('bays').value)<min)$('bays').value=String(min);for(const o of $('bays').options)o.disabled=Number(o.value)<min;}
   if(sauna)limitSauna();render();});
