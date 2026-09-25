@@ -11,7 +11,7 @@ const esc=value=>String(value).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>'
 for(const size of ['s','m','l'])for(const storage of [false,true]){
  const result=presets.create(api,{preset:'sauna',saunaSelection:{size,storage}});
  if(result.plan.subblocks.status!=='spatial-candidate')throw Error(`${size}/${storage} failed fit`);
- const filename=`OBTP_Sauna_${size.toUpperCase()}_${storage?'Side_Storage':'No_Storage'}_R12.dxf`;
+ const filename=`OBTP_Sauna_${size.toUpperCase()}_${storage?'Side_Storage':'No_Storage'}_R13.dxf`;
  fs.writeFileSync(path.join(out,filename),cad.exportDXF(result.plan.subblocks,result.plan,result.scene));
  rows.push({size,storage,filename,bays:result.bays,shellArea:result.metrics.area,proposedBound:result.metrics.proposedArea||null,
   generatedValid:result.valid,plan:result.plan,components:result.plan.subblocks.components,doors:[...result.plan.subblocks.doors,...result.plan.subblocks.outside]});
@@ -30,5 +30,5 @@ const panels=rows.map((r,i)=>{
  p.push(`<text x="${x}" y="${y+shellL+25}" font-size="13">Shell ${r.shellArea.toFixed(2)} m² · ${r.bays} bays${r.storage?` · bound ${r.proposedBound.toFixed(2)} m²`:''}</text></g>`);
  return p.join('');
 }).join('');
-fs.writeFileSync(path.join(out,'OBTP_Sauna_Six_Variants_R12.svg'),`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 950 1110" width="950" height="1110"><style>text{font-family:system-ui,sans-serif;fill:#29392f}.title{font-size:21px;font-weight:bold}</style><rect width="100%" height="100%" fill="#fbfaf5"/><text x="30" y="29" font-size="22" font-weight="bold">OBTP Sauna · six correction plans</text>${panels}<text x="30" y="1080" font-size="13">Study only. Storage sits right of the hall, above the outside shower; its structure is not generated. Dimensions in CAD are mm.</text></svg>`);
+fs.writeFileSync(path.join(out,'OBTP_Sauna_Six_Variants_R13.svg'),`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 950 1110" width="950" height="1110"><style>text{font-family:system-ui,sans-serif;fill:#29392f}.title{font-size:21px;font-weight:bold}</style><rect width="100%" height="100%" fill="#fbfaf5"/><text x="30" y="29" font-size="22" font-weight="bold">OBTP Sauna · six correction plans</text>${panels}<text x="30" y="1080" font-size="13">Study only. Storage sits right of the hall, above the outside shower; its structure is not generated. Dimensions in CAD are mm.</text></svg>`);
 console.log('Exported '+rows.length+' CAD variants and a six-panel preview to '+out);
