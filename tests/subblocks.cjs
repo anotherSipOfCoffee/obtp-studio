@@ -4,6 +4,7 @@ const api=require('../_system/dist/cassette/system.js');
 const presets=require('../dist/v3/presets.js');
 const sub=require('../dist/v3/subblocks.js');
 const cad=require('../dist/v3/cad.js');
+const linked=require('../dist/v3/linked-view.js');
 const layout=(bays,circulation,saunaBlocks={})=>presets.create(api,{preset:'sauna',bays,saunaBlocks:{circulation,...saunaBlocks}});
 const shared=layout(10,'shared');
 assert.equal(shared.plan.subblocks.status,'spatial-candidate');
@@ -26,6 +27,15 @@ const drawing=cad.exportDXF(wet.plan.subblocks,wet.plan,wet.scene);
 for(const tag of ['OBTP_HEATER_SW80','OBTP_UPPER_BENCH','OBTP_FOOT_BENCH','OBTP_SHOWER','OBTP_CHANGING_SEAT','OBTP_DOOR_CANDIDATE','SHELL_REFERENCE','PROGRAM_UNBUILT'])assert(drawing.includes(tag),tag);
 assert(drawing.includes('AC1015')&&drawing.includes('INSUNITS'));
 assert.throws(()=>cad.exportDXF({status:'no-fit'},wet.plan,wet.scene),/No spatial candidate/);
+const outdoor=presets.create(api,{preset:'sauna',saunaSelection:{size:'l',circulation:'wetLobby',shower:'outdoor'}});
+const pad=outdoor.plan.subblocks.components.find(c=>c.id==='outside-shower');
+const offset=(outdoor.scene.width-outdoor.plan.gridWidthMm)/2;
+assert.equal(offset+pad.rect.x,outdoor.scene.width+100,'The shower study pad must sit entirely outside the current exterior wall');
+assert.equal(linked.outdoorView(api,outdoor.scene,outdoor.plan).items[0].stage,'study-outdoor-shower');
+const outdoorDXF=cad.exportDXF(outdoor.plan.subblocks,outdoor.plan,outdoor.scene);
+assert(outdoorDXF.includes('OBTP_OUTDOOR_SHOWER_STUDY'));
+assert(outdoorDXF.includes('EXTERIOR_STUDY'));
+assert(!outdoor.plan.subblocks.components.some(c=>c.kind==='shower'),'Outdoor-only must remove the indoor shower fixture');
 let eligible=0,withPlacement=0;
 for(const circulation of ['shared','sharedTwoAccess','wetLobby','deadEnd','through'])for(let bays=8;bays<=18;bays++)
  for(let saunaWidth=2;saunaWidth<=4;saunaWidth++)for(let saunaLength=2;saunaLength<=15;saunaLength++)for(let washLength=2;washLength<=15;washLength++){

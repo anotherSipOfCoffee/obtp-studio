@@ -24,6 +24,13 @@ assert.equal(sauna(10,'shared',{saunaWidth:4})[1].spatialCandidate,false,'1.2 m 
 assert.equal(sauna(10,'shared',{saunaLength:2,washLength:4})[1].spatialCandidate,false,'Nominal area compliance must not override heater/bench fit');
 assert.throws(()=>sauna(10,'wetLobby'),/at least 12/);
 assert(sauna(12,'wetLobby')[1].holds.some(x=>x.includes('unbuilt')));
+const exterior=presets.create(api,{preset:'sauna',saunaSelection:{size:'m',shower:'outdoor'}});
+const exteriorScreen=filter.screenSauna(exterior.plan);
+assert.equal(exteriorScreen.spatialCandidate,false,'A year-round exterior-only shower cannot earn a functional pass from nominal fit');
+assert.match(exteriorScreen.reasons.join(' '),/frost-safe services/);
+const combined=presets.create(api,{preset:'sauna',saunaSelection:{size:'m',shower:'both'}});
+assert.equal(filter.screenSauna(combined.plan).spatialCandidate,true);
+assert.match(filter.screenSauna(combined.plan).holds.join(' '),/winter-safe route/);
 let gridStates=0,spatialCandidates=0;
 for(const circulation of ['shared','sharedTwoAccess','wetLobby','deadEnd','through'])for(let bays=8;bays<=18;bays++)
  for(let saunaWidth=2;saunaWidth<=4;saunaWidth++)for(let saunaLength=2;saunaLength<=15;saunaLength++)for(let washLength=2;washLength<=15;washLength++){

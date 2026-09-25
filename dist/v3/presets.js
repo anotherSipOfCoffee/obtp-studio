@@ -8,14 +8,19 @@
  const SAUNA_CATALOGUE=Object.freeze({
   s:Object.freeze({shared:Object.freeze({bays:9,saunaWidth:3,saunaLength:4,washLength:4})}),
   m:Object.freeze({shared:Object.freeze({bays:11,saunaWidth:3,saunaLength:4,washLength:6})}),
-  l:Object.freeze({wetLobby:Object.freeze({bays:14,saunaWidth:3,saunaLength:4,washLength:6}),through:Object.freeze({bays:14,saunaWidth:3,saunaLength:3,washLength:5})})
+  l:Object.freeze({wetLobby:Object.freeze({bays:14,saunaWidth:3,saunaLength:4,washLength:6}),shared:Object.freeze({bays:14,saunaWidth:3,saunaLength:5,washLength:7}),through:Object.freeze({bays:14,saunaWidth:3,saunaLength:3,washLength:5})})
+ });
+ const SAUNA_OUTDOOR=Object.freeze({
+  s:Object.freeze({shared:Object.freeze({bays:8,saunaWidth:3,saunaLength:4,washLength:3})}),
+  m:Object.freeze({shared:Object.freeze({bays:9,saunaWidth:3,saunaLength:4,washLength:3})}),
+  l:Object.freeze({wetLobby:Object.freeze({bays:12,saunaWidth:3,saunaLength:4,washLength:3}),shared:Object.freeze({bays:10,saunaWidth:3,saunaLength:4,washLength:3})})
  });
  function curatedSauna(size='m',circulation,shower='indoor'){
-  const variants=SAUNA_CATALOGUE[size];
+  if(!['indoor','outdoor','both'].includes(shower))throw Error('At least one shower must be selected');
+  const variants=(shower==='outdoor'?SAUNA_OUTDOOR:SAUNA_CATALOGUE)[size];
   if(!variants)throw Error('Unknown Sauna size');
   circulation??=Object.keys(variants)[0];
   if(!Object.hasOwn(variants,circulation))throw Error('This Sauna circulation has no tested layout at size '+size.toUpperCase());
-  if(shower!=='indoor')throw Error('Year-round exterior shower is a research hold: water, wastewater, frost protection and an exterior route have no generated solution');
   return {bays:variants[circulation].bays,blocks:{...variants[circulation],circulation},size,circulation,shower};
  }
  const PROGRAMS=Object.freeze({
@@ -111,25 +116,34 @@
   const plan=preset==='sauna'?saunaPlan({bays,...saunaBlocks}):null;
   if(curated){
    plan.selection={size:curated.size,circulation:curated.circulation,shower:curated.shower};
+   plan.showerMode=curated.shower;
+   if(curated.shower==='outdoor'){
+    const transition=plan.blocks.find(b=>b.id==='washing');
+    transition.label='Wet transition / exterior access';
+   }
    if(curated.circulation==='wetLobby'){
     plan.singleEntry=true;
     plan.exteriorAccessCandidates=1;
     plan.access='One proposed outside entry into changing/rest; a wet lobby separates both wet-room approaches';
    }
+   if(curated.shower==='outdoor')plan.access+='; exterior shower reached from the wet transition';
+   if(curated.shower==='both')plan.access+='; exterior shower is an additional candidate outside washing';
   }
   if(plan&&(scene.clear[0]<plan.gridWidthMm||scene.clear[1]<plan.gridLengthMm))throw Error('Sauna planning grid exceeds the generated clear interior');
   if(plan){
+   plan.shellWidthMm=scene.width||scene.spec.width;
+   plan.shellLengthMm=scene.length||scene.spec.pitch*bays;
    const block=plan.blocks.find(b=>b.id==='sauna');
    plan.nominalVolumeM3=block.width*plan.stepMm*block.length*plan.stepMm*scene.clear[2]/1e9;
    plan.referenceHeater={model:'Harvia The Wall SW80',minVolumeM3:7,maxVolumeM3:12};
    plan.referenceHeaterVolumeInRange=plan.nominalVolumeM3>=7&&plan.nominalVolumeM3<=12;
    plan.subblocks=subblocks.solve(plan);
-   plan.functionallyValid=plan.subblocks.status==='spatial-candidate'; // Room allocation only; never a construction release.
+   plan.functionallyValid=plan.subblocks.status==='spatial-candidate'&&curated?.shower!=='outdoor'; // Exterior-only winter washing remains a research hold.
    plan.technicalValid=false; // Nominal heater volume never proves finished fit or installation.
   }
-  return {scene,metrics,program:PROGRAMS[preset],preset,plan,bays,valid:true,classificationVerified:false,openingsEnabled:false};
+  return {scene,metrics,program:PROGRAMS[preset],preset,plan,bays,valid:true,researchHold:curated?.shower==='outdoor',classificationVerified:false,openingsEnabled:false};
  }
- const exported={LIMITS,PROGRAMS,SAUNA_CATALOGUE,curatedSauna,bounds,measure,saunaPlan,create};
+ const exported={LIMITS,PROGRAMS,SAUNA_CATALOGUE,SAUNA_OUTDOOR,curatedSauna,bounds,measure,saunaPlan,create};
  if(typeof module!=='undefined')module.exports=exported;
  root.OBTPStudioPresets=exported;
 })(typeof window==='undefined'?globalThis:window);

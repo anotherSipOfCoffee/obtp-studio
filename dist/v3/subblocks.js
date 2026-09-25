@@ -28,7 +28,7 @@
   if(span<(axis==='y'?r.x:r.y)+150||span+width>(axis==='y'?r.x+r.w:r.y+r.h)-150)return null;
   return {id,kind:'outside-door',room,wall:edge,axis,at,start:span,width,status:'candidate-only'};
  }
- function equip(sauna,washing,changing,doorWall){
+ function equip(sauna,washing,changing,doorWall,indoor=true){
   const t=60,side=doorWall==='west'?'east':'west';
   const upper={x:sauna.x+t,y:sauna.y+sauna.h-t-600,w:sauna.w-2*t,h:600};
   const foot={x:doorWall==='west'?sauna.x+t+450:sauna.x+t,y:upper.y-450,w:sauna.w-2*t-450,h:450};
@@ -38,7 +38,7 @@
   const heater={x:side==='west'?sauna.x+t:sauna.x+sauna.w-t-260,y:sauna.y+heaterOffset,w:260,h:430};
   const shower={x:washing.x+washing.w-t-900,y:washing.y+washing.h-t-900,w:900,h:900};
   const seat={x:changing.x+t,y:changing.y+changing.h-t-550,w:1200,h:550};
-  return [component('heater','heater','sauna',heater,side),component('upper-bench','bench','sauna',upper,'rear'),component('foot-bench','foot-bench','sauna',foot,'rear'),component('shower','shower','washing',shower,'rear/east'),component('changing-seat','seat','changing',seat,'west')];
+  return [component('heater','heater','sauna',heater,side),component('upper-bench','bench','sauna',upper,'rear'),component('foot-bench','foot-bench','sauna',foot,'rear'),...(indoor?[component('shower','shower','washing',shower,'rear/east')]:[]),component('changing-seat','seat','changing',seat,'west')];
  }
  function solve(plan,options={}){
   const rooms=Object.fromEntries(plan.blocks.map(b=>[b.id,box(b)]));
@@ -49,7 +49,17 @@
    plan.circulation==='deadEnd'||plan.circulation==='through'?[['sauna','corridor'],['washing','corridor'],['changing','corridor']]:
    [['sauna','washing'],['washing','changing']];
   const saunaAccess=sharedEdge(sauna,rooms[routes[0][1]]);
-  const components=equip(sauna,washing,changing,saunaAccess?.sideA||'front');
+  const components=equip(sauna,washing,changing,saunaAccess?.sideA||'front',plan.showerMode!=='outdoor');
+  if(plan.showerMode==='outdoor'||plan.showerMode==='both'){
+   const wallOffset=(plan.shellWidthMm-plan.gridWidthMm)/2;
+   const start=washing.y+(plan.showerMode==='outdoor'?750:250);
+   if(!Number.isFinite(plan.shellWidthMm)||!Number.isFinite(plan.shellLengthMm))failures.push('Exterior wall geometry is required for the wall shower');
+   else {
+    const rect={x:plan.shellWidthMm-wallOffset+100,y:start,w:900,h:900};
+    components.push(component('outside-shower','outdoor-shower','exterior',rect,'east'));
+    if(rect.y<0||rect.y+rect.h>plan.gridLengthMm)failures.push('Exterior shower reservation exceeds the generated shell length');
+   }
+  }
   // Search the adjacent door boundary in 100 mm steps, preferring the side
   // nearest the approach. An entire swing square must fit the next room.
   for(const [from,to] of routes){let chosen=null;
@@ -63,9 +73,9 @@
    if(!chosen)failures.push('No 800 mm candidate door and swing fits '+from+' → '+to);
    else candidates.push(chosen);
   }
-  for(const item of components)if(item.rect.w<=0||item.rect.h<=0||!inside(item.rect,rooms[item.room]))failures.push(item.id+' exceeds its nominal room');
-  const [heater,upper,foot,shower,seat]=components;
-  for(const [a,b] of [[heater,upper],[heater,foot],[upper,shower]])if(a.room===b.room&&overlap(a.rect,b.rect))failures.push(a.id+' intersects '+b.id);
+  for(const item of components)if(item.rect.w<=0||item.rect.h<=0||(item.room!=='exterior'&&!inside(item.rect,rooms[item.room])))failures.push(item.id+' exceeds its nominal room');
+  const heater=components.find(c=>c.id==='heater'),upper=components.find(c=>c.id==='upper-bench'),foot=components.find(c=>c.id==='foot-bench');
+  for(const [a,b] of [[heater,upper],[heater,foot]])if(a.room===b.room&&overlap(a.rect,b.rect))failures.push(a.id+' intersects '+b.id);
   // Swing checks include the destination room only; construction thickness,
   // door leaf thickness and actual people movement require separate review.
   for(const d of candidates)for(const item of components.filter(i=>i.room===d.to))if(overlap(d.sweep,item.rect,40))failures.push(d.id+' swing intersects '+item.id);
@@ -73,9 +83,11 @@
   if(rooms.corridor){outside.push(entry('entry-front','corridor',rooms,'front',900));if(plan.circulation==='through')outside.push(entry('entry-rear','corridor',rooms,'rear',900));}
   else if(plan.circulation==='shared'||plan.singleEntry)outside.push(entry('entry-front','changing',rooms,'front',900));
   else {outside.push(entry('entry-west','changing',rooms,'west',900,changing.y+600));outside.push(entry('entry-east','changing',rooms,'east',900,changing.y+600));}
+  if(plan.showerMode==='outdoor'||plan.showerMode==='both')outside.push(entry('shower-access','washing',rooms,'east',900,washing.y+(plan.showerMode==='outdoor'?750:250)));
   if(outside.some(x=>!x))failures.push('An outside entry candidate does not fit its nominal wall');
   if(plan.circulation==='shared'||plan.circulation==='sharedTwoAccess')warnings.push('The preferred shower-linked route requires a new Sauna–washing partition door; the R02 manually placed heater must be reoriented.');
   if(plan.circulation==='wetLobby')warnings.push('The wet lobby keeps changing separate; Sauna and washing are reached through it, pending wet floor and real partitions.');
+  if(plan.showerMode==='outdoor'||plan.showerMode==='both')warnings.push('Exterior pad and shower head are study geometry beside an uncut wall. Frost-safe water supply, winter footing, privacy and compliant wastewater disposal are not designed.');
   warnings.push('60 mm face offsets, 800/900 mm candidate doors, 900 mm shower, 300 mm heater approach and 40 mm swing buffer are study assumptions, not code approvals or manufacturer installation clearances.');
   warnings.push('No opening, partition, bench anchorage, drainage, ventilation or heater safety guard is generated in Cassette 01.');
   if(!plan.referenceHeaterVolumeInRange)failures.push('The reference SW80 heater nominal volume is outside its 7–12 m³ published range');

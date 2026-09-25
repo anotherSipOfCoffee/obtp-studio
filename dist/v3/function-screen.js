@@ -14,13 +14,18 @@
  function screenSauna(plan){
   const reasons=[],holds=[],blocks=Object.fromEntries(plan.blocks.map(b=>[b.id,b]));
   if(plan.subblocks?.status==='no-fit')reasons.push(...plan.subblocks.failures.map(x=>'Sub-block fit: '+x));
-  if(!['sauna','washing','changing'].every(id=>blocks[id]&&area(blocks[id])>0))reasons.push('The hot room, shower/washing and changing/rest functions must each have an allocated block.');
+  if(!['sauna','washing','changing'].every(id=>blocks[id]&&area(blocks[id])>0))reasons.push('The hot room, wet approach and changing/rest functions must each have an allocated block.');
   if(blocks.sauna&&blocks.washing){
    const s=blocks.sauna,w=blocks.washing;
    if(s.width<3||s.length<3)reasons.push('The sauna block is below the 1.8 m width × 1.8 m length planning floor for this heater/bench study.');
-   if(w.width<3||w.length<3)reasons.push('The washing block is below the 1.8 × 1.8 m allocation used to study a shower and its approach.');
+   if(w.width<3||w.length<3)reasons.push('The wet approach is below the 1.8 × 1.8 m study allocation.');
    if(!plan.referenceHeaterVolumeInRange)reasons.push('The current reference heater is outside its nominal room-volume range; change equipment or block dimensions.');
-   if(area(w)<1.5*area(s))holds.push('Washing is below the 1.5× hot-room size rule of thumb; verify shower approach and expected number of users.');
+   if(plan.showerMode!=='outdoor'&&area(w)<1.5*area(s))holds.push('Washing is below the 1.5× hot-room size rule of thumb; verify shower approach and expected number of users.');
+  }
+  if(plan.showerMode==='outdoor'||plan.showerMode==='both'){
+   if(!plan.subblocks?.components.some(c=>c.kind==='outdoor-shower')||!plan.subblocks?.outside.some(d=>d.id==='shower-access'))reasons.push('No aligned exterior shower and access candidate fits the shell.');
+   holds.push('Exterior shower is an unroofed 900 × 900 mm candidate beside an uncut wall; provide a winter-safe route, supply, drainage, wastewater and privacy design. Exterior site area classification is unresolved.');
+   if(plan.showerMode==='outdoor')reasons.push('Year-round outdoor-only washing remains functionally unverified until frost-safe services, finished wet transition and winter access are designed.');
   }
   if(blocks.changing&&blocks.sauna){
    if(area(blocks.changing)<area(blocks.sauna))reasons.push('Changing/rest is smaller than the hot room in this shared-use brief.');
@@ -31,7 +36,7 @@
   if(plan.circulation==='wetLobby')holds.push('The wet lobby separates changing from wet-room approaches in plan; floor falls, enclosure and drying remain unbuilt.');
   if(plan.exteriorAccessCandidates===2)holds.push('Two exterior entrances are only candidates; verify privacy and whether both are useful for the site.');
   holds.push('Candidate door and equipment rectangles are geometric studies; finished clearances, actual openings, benches, ventilation and waterproof construction remain unbuilt/unverified.');
-  return {brief:'Small non-residential Finnish-style sauna with heat, shower and changing/rest',spatialCandidate:reasons.length===0,reasons,holds,benchmark:'1.8 m study blocks; 1.5× washing and 2× changing are advisory comparisons, not legal rules'};
+  return {brief:'Small non-residential Finnish-style sauna with heat, shower and changing/rest',spatialCandidate:reasons.length===0,reasons,holds,benchmark:'1.8 m study blocks; 1.5× indoor washing and 2× changing are advisory comparisons, not legal rules'};
  }
  function screen(preset,scene,metrics,plan){return preset==='studio'?screenStudio(scene,metrics):preset==='sauna'?screenSauna(plan):null;}
  const exported={screen,screenStudio,screenSauna};if(typeof module!=='undefined')module.exports=exported;root.OBTPStudioFunctionScreen=exported;
