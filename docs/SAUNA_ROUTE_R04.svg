@@ -1,0 +1,65 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1030 750" role="img" aria-labelledby="title description">
+ <title id="title">R04 whole Sauna plan with two side-access reservations</title>
+ <desc id="description">Ten-module Sauna planning grid. Two opposing side entrance candidates pass through a band inside changing/rest. Rear room doors open toward changing/rest. A central changing seat does not overlap their nominal swings. Sauna bench/heater and washing shower are shown as equipment reservations only.</desc>
+ <style>
+  text{font-family:system-ui,sans-serif;fill:#24332e}.heading{font-size:24px;font-weight:700}.label{font-size:15px;font-weight:650}.small{font-size:12px}.outline{fill:none;stroke:#244f40;stroke-width:3;stroke-dasharray:8 5}.door{stroke:#b06a34;stroke-width:7;stroke-linecap:round}.swing{fill:none;stroke:#b06a34;stroke-width:2;stroke-dasharray:5 4}.route{fill:none;stroke:#244f40;stroke-width:3;marker-end:url(#arrow)}
+ </style>
+ <defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0L10 5L0 10Z" fill="#244f40"/></marker></defs>
+ <rect width="1030" height="750" fill="#f5f4ed"/>
+ <text x="94" y="42" class="heading">R04 · two outside accesses through changing/rest</text>
+ <text x="94" y="64" class="small">All marks are nominal reservations in a 3,600 × 5,400 mm grid. No wall, door, drain or heater is generated.</text>
+ <!-- Grid scale: 0.1 px/mm, x = 160 + 0.1X, y = 100 + 0.1Y -->
+ <rect x="160" y="100" width="360" height="300" fill="#e6e5d6"/>
+ <rect x="160" y="145" width="360" height="120" fill="#d4ddcd"/>
+ <text x="340" y="132" text-anchor="middle" class="label">Changing/rest</text>
+ <text x="340" y="183" text-anchor="middle" class="label">1,200 mm shared crossing band</text>
+ <text x="340" y="202" text-anchor="middle" class="small">Two side access edges, 900 mm each</text>
+ <rect x="280" y="330" width="120" height="55" fill="#f0eadc" stroke="#52665c" stroke-width="1.5"/>
+ <text x="340" y="353" text-anchor="middle" class="small">Changing seat</text>
+ <text x="340" y="371" text-anchor="middle" class="small">1,200 × 550</text>
+ <rect x="160" y="400" width="180" height="240" fill="#dfeaab"/>
+ <rect x="340" y="400" width="180" height="240" fill="#d3e4e4"/>
+ <text x="235" y="506" text-anchor="middle" class="label">Sauna</text>
+ <text x="428" y="506" text-anchor="middle" class="label">Washing</text>
+ <rect x="170" y="580" width="160" height="60" fill="#abc678" stroke="#52665c"/>
+ <text x="248" y="616" text-anchor="middle" class="small">Upper bench</text>
+ <rect x="170" y="535" width="125" height="45" fill="#cbd5aa" stroke="#52665c"/>
+ <text x="232" y="562" text-anchor="middle" class="small">Footstep</text>
+ <rect x="314" y="430" width="26" height="43" fill="#b3975b" stroke="#24332e"/>
+ <text x="302" y="456" text-anchor="end" class="small">Heater</text>
+ <rect x="350" y="550" width="90" height="90" fill="#a8d1d6" stroke="#52665c"/>
+ <text x="394" y="585" text-anchor="middle" class="small">Shower</text>
+ <text x="394" y="601" text-anchor="middle" class="small">900 × 900</text>
+ <rect x="160" y="100" width="360" height="540" class="outline"/>
+ <!-- Exterior edge candidates x=0 and x=3600, y=600..1500. -->
+ <line x1="160" y1="160" x2="160" y2="250" class="door"/>
+ <line x1="520" y1="160" x2="520" y2="250" class="door"/>
+ <!-- Wet door candidates at y=3000. Swing arcs are study reservations only. -->
+ <line x1="170" y1="400" x2="250" y2="400" class="door"/>
+ <path d="M250 400A80 80 0 0 0 170 320" class="swing"/>
+ <line x1="420" y1="400" x2="500" y2="400" class="door"/>
+ <path d="M420 400A80 80 0 0 1 500 320" class="swing"/>
+ <!-- Through movement and branches to wet rooms. -->
+ <path d="M176 225H492" class="route"/>
+ <path d="M219 258V307" class="route"/>
+ <path d="M459 258V307" class="route"/>
+ <text x="562" y="132" class="label">What this tests</text>
+ <text x="562" y="159" class="small">1. Cross-building route in changing/rest.</text>
+ <text x="562" y="184" class="small">2. Central seat outside nominal wet-door swings.</text>
+ <text x="562" y="209" class="small">3. Separate access to Sauna and washing.</text>
+ <text x="562" y="234" class="small">4. R02 nominal bench and heater still fit.</text>
+ <text x="562" y="282" class="label">Still unresolved</text>
+ <text x="562" y="309" class="small">Side-wall structural openings and weather seals.</text>
+ <text x="562" y="334" class="small">Door jambs, threshold and actual swings.</text>
+ <text x="562" y="359" class="small">Wet traffic across the changing floor.</text>
+ <text x="562" y="384" class="small">Finished corridor width and privacy.</text>
+ <text x="562" y="409" class="small">Shower drain/falls and partition build-ups.</text>
+ <text x="562" y="470" class="label">Comparison</text>
+ <text x="562" y="498" class="small">A dedicated full-pass corridor uses 6.48 m²</text>
+ <text x="562" y="520" class="small">of the same 19.44 m² grid and needs a</text>
+ <text x="562" y="542" class="small">new Sauna equipment arrangement.</text>
+ <line x1="160" y1="671" x2="520" y2="671" stroke="#52665c"/>
+ <text x="340" y="690" text-anchor="middle" class="small">3,600 mm allocated width</text>
+ <text x="95" y="371" transform="rotate(-90 95 371)" text-anchor="middle" class="small">5,400 mm allocated length</text>
+ <text x="160" y="722" class="small">Front at top · orange marks denote proposed door edges, not physical cuts. See SAUNA_ROUTE_R04.md.</text>
+</svg>
