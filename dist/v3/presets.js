@@ -123,7 +123,7 @@
    metrics.checks.supportSpacing=metrics.supportSpacing>0&&metrics.supportSpacing<=LIMITS.supportSpacingMm;
    metrics.valid=Object.values(metrics.checks).every(Boolean);
    if(!metrics.valid)throw Error('Outside LT I-group dimensional envelope: '+Object.entries(metrics.checks).filter(([,ok])=>!ok).map(([key])=>key).join(', '));
-   const scene=root.OBTPMatrix.generate({columns,rows,layer,skin:false});
+   const scene=root.OBTPMatrix.generate({columns,rows,layer,skin:true});
    return {scene,metrics,program:PROGRAMS.matrix,preset,valid:false,geometryValid:true,researchHold:true,classificationVerified:false,openingsEnabled:false};
   }
   if(!Number.isInteger(bays)||bays<(compact?4:PROGRAMS[preset].minBays)||bays>18)throw Error('Module count outside supported preset range');
@@ -140,7 +140,7 @@
    metrics.valid=Object.values(metrics.checks).every(Boolean);
   }
   if(!metrics.valid)throw Error('Outside LT I-group dimensional envelope: '+Object.entries(metrics.checks).filter(([,ok])=>!ok).map(([key])=>key).join(', '));
-  const scene=api.generate({bays,height,layer,skin:false,connectionRevision:'revised',includeFoundation:true});
+  const scene=api.generate({bays,height,layer,skin:true,connectionRevision:'revised',includeFoundation:true});
   const plan=preset==='sauna'?(compact||saunaPlan({bays,...saunaBlocks})):null;
   if(compact)plan.selection={size:compact.size,storage:compact.storage,shower:'outdoor',circulation:'compact'};
   if(curated){

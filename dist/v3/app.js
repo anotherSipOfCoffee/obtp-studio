@@ -7,28 +7,25 @@
  // Architecture's fixed view: 45° in plan, with wheel zoom still available.
  // The cut and plan buttons show generated geometry; solved is the owner's
  // source drawing and remains independent of the generated cassette shell.
- const fixedCamera=()=>{renderer.angle=-Math.PI/4;renderer.elev=.55;};
+ let quarterTurns=0;
+ const fixedCamera=()=>{renderer.angle=-Math.PI/4+quarterTurns*Math.PI/2;renderer.elev=.55;};
  $('diagram').onpointerdown=$('diagram').onpointermove=$('diagram').onpointerup=$('diagram').onpointercancel=null;
- renderer.reset=()=>{fixedCamera();renderer.zoom=1;renderer.draw();};fixedCamera();
+ renderer.reset=()=>{quarterTurns=0;fixedCamera();renderer.zoom=1;renderer.draw();};fixedCamera();
  let view='3d',currentScene=null,currentPlan=null,currentStudy=null,cut=null;
  function showView(){
-  const isPlan=view==='plan',isSolved=view==='solved'&&currentPlan?.selection;
-  $('diagram').hidden=Boolean(isPlan||isSolved);$('floor-plan').toggleAttribute('hidden',!isPlan);$('solved-scroll').hidden=!isSolved;
+  const isSolved=view==='solved'&&currentPlan?.selection;
+  $('diagram').hidden=Boolean(isSolved);$('rotate').disabled=Boolean(isSolved);$('solved-scroll').hidden=!isSolved;
   $('solved-view').hidden=!currentPlan?.selection;
   for(const button of document.querySelectorAll('[data-view]'))button.setAttribute('aria-pressed',String(button.dataset.view===view));
   if(currentPlan?.selection){const {size}=currentPlan.selection;
    $('assembly-title').textContent=isSolved?`Sauna ${size.toUpperCase()} · owner-solved floor plan`:`Sauna ${size.toUpperCase()} · ${window.OBTPStudioV3?.bays||currentScene?.bays} cassette modules · earlier model`;
    $('dimensions').textContent=isSolved?`${({s:3800,m:4400,l:5000})[size].toLocaleString('en')} × 2,000 mm outer boundary sketch · walls orientational`:`${currentScene.length.toLocaleString('en')} × ${currentScene.width.toLocaleString('en')} mm generated shell · 2,100 mm wall height`;
   }
-  $('view-description').textContent=isSolved?'Owner-provided monochrome plan · source line weights preserved · geometry is not yet fitted to the generated cassette':isPlan?'Model wall section at 1.10 m above floor · dashed Sauna blocks are unbuilt allowances':view==='cut'?'Frame clipped at 1.10 m above floor · roof hidden · fixed camera':'Fixed 45° camera · scroll to zoom';
+  $('view-description').textContent=isSolved?'Owner-provided monochrome plan · source line weights preserved · geometry is not yet fitted to the generated cassette':view==='cut'?'Frame clipped at 1.10 m above floor · roof hidden · fixed camera':'Fixed 45° camera · scroll to zoom';
   if(!currentScene)return;
   if(isSolved){const selection=currentPlan.selection;
    $('solved-plan').src=`solved-plans/sauna-${selection.size}-${selection.storage?'storage':'open'}.svg`;
    $('solved-plan').alt=`Owner-solved monochrome Sauna ${selection.size.toUpperCase()} plan, ${selection.storage?'with':'without'} side storage`;
-  }else if(isPlan){
-   const {preset,bays,columns,rows}=window.OBTPStudioV3;
-   const source=preset==='matrix'?window.OBTPMatrix.generate({columns,rows,layer:'all',skin:true}):api.generate({bays,height,layer:'all',skin:true,connectionRevision:'revised'});
-   linked.renderPlan($('floor-plan'),api,source,currentPlan,currentPlan?.subblocks);
   }else{if(view==='cut'&&!cut){cut=linked.cutScene(api,currentScene);cut.models.forEach(m=>renderer.register(m));}
    renderer.setScene(view==='cut'?[...cut.items,...(currentStudy?.items||[]).filter(i=>i.stage==='study-furniture')]:[...currentScene.items,...(currentStudy?.items||[])],{explode:Number($('explode').value)/100});fixedCamera();renderer.draw();}
  }
@@ -94,7 +91,7 @@
     const heater=document.createElement('p');heater.textContent=`Reference ${plan.referenceHeater.model}: nominal Sauna volume ${plan.nominalVolumeM3.toFixed(2)} m³ / ${plan.referenceHeater.minVolumeM3}–${plan.referenceHeater.maxVolumeM3} m³ published room range · ${plan.referenceHeaterVolumeInRange?'within preliminary range':'outside preliminary range; another heater or block size is needed'}. Finished volume and installation remain unverified.`;facts.append(heater);
     const caveat=document.createElement('small');caveat.textContent='Program plan only. Brown marks are proposed outside access edges; no partitions or openings are generated. Heater, bench, wet-room and passage details remain under review.';
     const sourcePlan=document.createElement('p');sourcePlan.textContent=`Solved source plan: ${({s:3.6,m:4.2,l:4.8})[selection.size].toFixed(1)} m nominal length × 1.8 m nominal depth, with a fixed 2.4 m sauna room and an entrance hall that grows in 600 mm steps${plan.storage?'; the optional side room adds a 1.2 m bay':''}. The existing generator has a fixed 4.572 m outer width and currently assigns different room lengths. The source plan has not been fitted to its structural grid or connections.`;
-    const placement=document.createElement('p');placement.textContent='Generated sub-block fit (separate earlier cassette study): '+(plan.subblocks.status==='spatial-candidate'?'candidate · heater, benches, exterior shower'+(plan.storage?', outdoor seat and unbuilt side storage study':'')+' and access edges placed':'no fit · '+plan.subblocks.failures.join('; '))+'. The generated Plan view shows these reservations; Solved plan shows the submitted drawing.';
+    const placement=document.createElement('p');placement.textContent='Generated sub-block fit (separate earlier cassette study): '+(plan.subblocks.status==='spatial-candidate'?'candidate · heater, benches, exterior shower'+(plan.storage?', outdoor seat and unbuilt side storage study':'')+' and access edges placed':'no fit · '+plan.subblocks.failures.join('; '))+'. The submitted drawing remains the plan reference.';
     const download=document.createElement('button');download.type='button';download.id='download-cad';download.textContent='Download CAD blocks · DXF';download.disabled=plan.subblocks.status!=='spatial-candidate';
     download.addEventListener('click',()=>{const a=document.createElement('a');a.href=`cad/r14/OBTP_Sauna_${selection.size.toUpperCase()}_${selection.storage?'Side_Storage':'No_Storage'}_Archicad_R14.dxf`;a.download=a.href.split('/').pop();a.click();});
     const allPlans=document.createElement('p'),allPlansLink=document.createElement('a');allPlansLink.href='cad/r14/OBTP_Sauna_All_Six_Plans_Archicad_R14.dxf';allPlansLink.download='OBTP_Sauna_All_Six_Plans_Archicad_R14.dxf';allPlansLink.textContent='Download all six plans in one DXF ↗';allPlans.append(allPlansLink);
@@ -119,7 +116,7 @@
    }
    window.OBTPStudioV3={scene,items:scene.items,renderer,bays,columns,rows,preset,metrics,program,plan,researchHold,functionResult};
    showView();
-  } catch(e){$('status').textContent=e.message;$('envelope').textContent='Outside I-group envelope · '+e.message;window.OBTPStudioV3=null;currentScene=null;cut=null;renderer.setScene([]);$('floor-plan').replaceChildren();$('function-screen').replaceChildren();$('schedule').replaceChildren();}
+  } catch(e){$('status').textContent=e.message;$('envelope').textContent='Outside I-group envelope · '+e.message;window.OBTPStudioV3=null;currentScene=null;cut=null;renderer.setScene([]);$('function-screen').replaceChildren();$('schedule').replaceChildren();}
  }
  $('preset').addEventListener('change',()=>{const matrix=$('preset').value==='matrix',sauna=$('preset').value==='sauna';$('matrix-fields').hidden=!matrix;$('bays-field').hidden=matrix||sauna;$('sauna-fields').hidden=!sauna;view=sauna?'solved':view==='solved'?'3d':view;
   if(matrix){$('rows').value=$('bays').value;limitMatrix('rows');}
@@ -131,6 +128,7 @@
  $('layer').addEventListener('change',render);
  for(const button of document.querySelectorAll('[data-view]'))button.addEventListener('click',()=>{view=button.dataset.view;showView();});
  $('explode').addEventListener('input',()=>{$('amount').textContent=$('explode').value+'%';renderer.explode=Number($('explode').value)/100;renderer.draw();});
+ $('rotate').addEventListener('click',()=>{quarterTurns=(quarterTurns+1)%4;fixedCamera();renderer.draw();});
  $('reset').addEventListener('click',()=>{$('explode').value='0';$('amount').textContent='0%';renderer.explode=0;renderer.reset();});
  limitMatrix('rows');$('preset').dispatchEvent(new Event('change'));
 })();
