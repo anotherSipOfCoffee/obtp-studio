@@ -32,13 +32,22 @@
    api.box('shower-head-study',[x+425,y+385,z+1925],[70,140,90],'study')
   ];
   const model=api.model('OBTP-OUTDOOR-SHOWER-STUDY',assets);
-  return {models:[model],items:[{id:'outside-shower-study',block:model.id,stage:'study-outdoor-shower',translation:[0,0,0],highlight:true}]};
+  const models=[model],items=[{id:'outside-shower-study',block:model.id,stage:'study-outdoor-shower',translation:[0,0,0],highlight:true}];
+  const seat=plan.subblocks.components.find(c=>c.kind==='outdoor-seat');
+  if(seat){const sx=ox+seat.rect.x,sy=oy+seat.rect.y;
+   const sitting=api.model('OBTP-OUTDOOR-SEAT-STUDY',[
+    api.box('seat-top-study',[sx,sy,z+410],[900,450,35],'study'),
+    api.box('seat-leg-left-study',[sx+75,sy+75,z],[45,45,410],'study'),
+    api.box('seat-leg-right-study',[sx+780,sy+75,z],[45,45,410],'study')]);
+   models.push(sitting);items.push({id:'outside-seat-study',block:sitting.id,stage:'study-outdoor-seat',translation:[0,0,0],highlight:true});
+  }
+  return {models,items};
  }
  function renderPlan(svg,api,scene,plan,subblocks){
   const w=scene.width||scene.spec?.width||4572,l=scene.length||scene.spec?.pitch*scene.bays;
   if(!Number.isFinite(w)||!Number.isFinite(l))throw Error('Plan dimensions missing from System geometry');
   const p=240,exterior=plan?.showerMode==='outdoor'||plan?.showerMode==='both',z=floorTop(scene)+CUT_ABOVE_FLOOR_MM;
-  svg.setAttribute('viewBox',`${-p} ${-p} ${w+2*p+(exterior?1000:0)} ${l+2*p}`);
+  svg.setAttribute('viewBox',`${-p} ${-p} ${w+2*p+(exterior?(plan?.storage?2400:1000):0)} ${l+2*p}`);
   svg.setAttribute('aria-label',`Generated cassette wall section at 1.10 m above floor, ${w} by ${l} mm${plan?'; dashed Sauna program allowances are unbuilt':''}`);
   svg.replaceChildren();
   svg.append(element('rect',{x:0,y:0,width:w,height:l,fill:'#fffef9',stroke:'#24332e','stroke-width':24}));
@@ -57,7 +66,7 @@
     const label=element('text',{x:x+bw/2,y:y+bh/2,'text-anchor':'middle','dominant-baseline':'middle','font-size':Math.min(160,Math.max(110,bw/12)),fill:'#24332e'});label.textContent=block.id==='washing'&&plan.showerMode==='outdoor'?'Wet transition':({sauna:'Sauna',washing:'Washing',changing:'Changing / rest',hall:'Little hall',storage:'Storage',lobby:'Wet lobby',corridor:'Corridor',service:'Service study'})[block.id];g.append(label);svg.append(g);
    }
    if(subblocks){
-    const fill={heater:'#b36a40',bench:'#b49763','foot-bench':'#cab88d',shower:'#80afbb','outdoor-shower':'#80afbb',seat:'#a8ae8a',storage:'#b6ac83'};
+    const fill={heater:'#b36a40',bench:'#b49763','foot-bench':'#cab88d',shower:'#80afbb','outdoor-shower':'#80afbb','outdoor-seat':'#a8ae8a',seat:'#a8ae8a',storage:'#b6ac83'};
     for(const item of subblocks.components){const b=item.rect,g=element('g',{'data-cad-block':item.id,'aria-label':item.kind+' candidate'});
      g.append(element('rect',{x:ox+b.x,y:oy+b.y,width:b.w,height:b.h,fill:fill[item.kind],stroke:'#24332e','stroke-width':12,...(item.kind==='outdoor-shower'?{'stroke-dasharray':'70 40'}:{})}));
      const name=element('text',{x:ox+b.x+b.w/2,y:oy+b.y+b.h/2,'text-anchor':'middle','dominant-baseline':'middle','font-size':Math.min(125,Math.max(85,b.w/11)),fill:'#24332e'});name.textContent=item.kind==='outdoor-shower'?'OUTDOOR':item.kind;g.append(name);svg.append(g);

@@ -66,11 +66,13 @@
   if(!Number.isFinite(plan.shellWidthMm))failures.push('Exterior wall geometry is required for outside shower');
   else{
    const wallOffset=(plan.shellWidthMm-plan.gridWidthMm)/2;
-   components.push(component('outside-shower','outdoor-shower','exterior',
-    {x:plan.shellWidthMm-wallOffset+100,y:Math.max(1200,hall.y+hall.h-900),w:900,h:900},'east'));
+   const shower={x:plan.shellWidthMm-wallOffset+100,y:Math.max(1200,hall.y+hall.h-900),w:900,h:900};
+   components.push(component('outside-shower','outdoor-shower','exterior',shower,'east'));
+   if(plan.storage)components.push(component('outside-seat','outdoor-seat','exterior',
+    {x:shower.x+1000,y:shower.y+100,w:900,h:450},'east-of-shower'));
   }
   warnings.push('The outside shower is unroofed study geometry beside an uncut wall; frost-safe supply, wastewater, ice-safe access and privacy need design.');
-  warnings.push('The proposed right-side storage annex is outside the generated fixed-width shell; no floor, roof, exterior walls or engineered connection is built for it.');
+  warnings.push('The right-side storage, open shower and outdoor seat form a three-part exterior study. No annex floor, roof, walls, foundation or engineered connection is generated.');
   warnings.push('Candidate hall, sauna and optional side storage doors are not built; finished linings, door hardware, heater guard and bench anchorage are unresolved.');
   if(!plan.referenceHeaterVolumeInRange)failures.push('Reference heater nominal volume outside its published range');
   return {status:failures.length?'no-fit':'spatial-candidate',rooms,components,doors:doorCandidate?[doorCandidate]:[],outside:outside.filter(Boolean),

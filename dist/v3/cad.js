@@ -13,7 +13,7 @@
   add(0,'SECTION',2,'TABLES',0,'TABLE',2,'LAYER',70,7);
   for(const [name,color] of [['SHELL_REFERENCE',8],['PROGRAM_UNBUILT',4],['ANNEX_UNBUILT',6],['EQUIPMENT',3],['EXTERIOR_STUDY',4],['DOOR_CANDIDATE',1],['ANNOTATION',7]])add(0,'LAYER',2,name,70,0,62,color,6,'CONTINUOUS');
   add(0,'ENDTAB',0,'ENDSEC',0,'SECTION',2,'BLOCKS');
-  for(const name of ['OBTP_UPPER_BENCH','OBTP_FOOT_BENCH','OBTP_SHOWER','OBTP_OUTDOOR_SHOWER_STUDY','OBTP_CHANGING_SEAT','OBTP_STORAGE_SHELF','OBTP_HEATER_SW80','OBTP_HEATER_SW90','OBTP_HEATER_CLUB_STUDY'])block(name,()=>{
+  for(const name of ['OBTP_UPPER_BENCH','OBTP_FOOT_BENCH','OBTP_SHOWER','OBTP_OUTDOOR_SHOWER_STUDY','OBTP_OUTDOOR_SEAT_STUDY','OBTP_CHANGING_SEAT','OBTP_STORAGE_SHELF','OBTP_HEATER_SW80','OBTP_HEATER_SW90','OBTP_HEATER_CLUB_STUDY'])block(name,()=>{
    rect(0,0,1,1,'EQUIPMENT');
    if(name.includes('BENCH'))for(const y of [.2,.4,.6,.8])line(0,y,1,y);
    else if(name==='OBTP_SHOWER'||name==='OBTP_OUTDOOR_SHOWER_STUDY'){line(.1,.1,.9,.9);add(0,'CIRCLE',8,'EQUIPMENT',10,.5,20,.5,30,0,40,.08);}
@@ -27,8 +27,8 @@
   const ox=(width-plan.gridWidthMm)/2,oy=(length-plan.gridLengthMm)/2;
   rect(0,0,width,length,'SHELL_REFERENCE');
   for(const [name,b] of Object.entries(solution.rooms)){rect(ox+b.x,oy+b.y,b.w,b.h,name==='storage'&&plan.storage?'ANNEX_UNBUILT':'PROGRAM_UNBUILT');text(name+(name==='storage'&&plan.storage?' - UNBUILT':''),ox+b.x+100,oy+b.y+130);}
-  const names={'heater':plan.referenceHeater?.model?.includes('Club')?'OBTP_HEATER_CLUB_STUDY':plan.referenceHeater?.model?.includes('SW90')?'OBTP_HEATER_SW90':'OBTP_HEATER_SW80','bench':'OBTP_UPPER_BENCH','foot-bench':'OBTP_FOOT_BENCH','shower':'OBTP_SHOWER','outdoor-shower':'OBTP_OUTDOOR_SHOWER_STUDY','seat':'OBTP_CHANGING_SEAT','storage':'OBTP_STORAGE_SHELF'};
-  for(const c of solution.components){const b=c.rect,layer=c.kind==='outdoor-shower'?'EXTERIOR_STUDY':'EQUIPMENT';insert(names[c.kind],ox+b.x,oy+b.y,b.w,b.h,0,layer);text(c.id,ox+b.x+20,oy+b.y+Math.min(160,b.h/2));}
+  const names={'heater':plan.referenceHeater?.model?.includes('Club')?'OBTP_HEATER_CLUB_STUDY':plan.referenceHeater?.model?.includes('SW90')?'OBTP_HEATER_SW90':'OBTP_HEATER_SW80','bench':'OBTP_UPPER_BENCH','foot-bench':'OBTP_FOOT_BENCH','shower':'OBTP_SHOWER','outdoor-shower':'OBTP_OUTDOOR_SHOWER_STUDY','outdoor-seat':'OBTP_OUTDOOR_SEAT_STUDY','seat':'OBTP_CHANGING_SEAT','storage':'OBTP_STORAGE_SHELF'};
+  for(const c of solution.components){const b=c.rect,layer=c.kind==='outdoor-shower'||c.kind==='outdoor-seat'?'EXTERIOR_STUDY':'EQUIPMENT';insert(names[c.kind],ox+b.x,oy+b.y,b.w,b.h,0,layer);text(c.id,ox+b.x+20,oy+b.y+Math.min(160,b.h/2));}
   for(const d of [...solution.doors,...solution.outside]){
    const exterior=solution.outside.includes(d);
    const baseX=d.axis==='y'?ox+d.start:exterior?(d.wall==='west'?0:d.wall==='annex-east'?ox+d.at:width):ox+d.at;
@@ -38,7 +38,7 @@
    text(d.id,baseX+45,baseY+45);
   }
   text('STUDY ONLY - NO CASSETTE OPENINGS OR FINISHED ROOM FACES',120,-180);
-  if(plan.storage)text('RIGHT SIDE ANNEX NOT GENERATED - NO STRUCTURAL SUPPORT OR ROOF',120,-550);
+  if(plan.storage)text('RIGHT SIDE STORAGE ANNEX NOT GENERATED - SHOWER AND SEAT OPEN AIR',120,-550);
   if(plan.showerMode==='outdoor'||plan.showerMode==='both')text('EXTERIOR SHOWER PAD UNROOFED - FROST/WASTEWATER/LEGAL SITE REVIEW REQUIRED',120,-430);
   text('UNITS MM - front at Y=0 - CAD blocks are candidate reservations',120,-300);
   add(0,'ENDSEC',0,'EOF');return out.join('\r\n')+'\r\n';

@@ -24,6 +24,7 @@ for(const [size,offBays,onBays,offArea,onArea,heater] of [
  assert.equal(plan.subblocks.components.some(c=>c.kind==='shower'),false);
  assert.equal(plan.subblocks.components.some(c=>c.kind==='storage'),storage);
  assert.equal(plan.subblocks.components.filter(c=>c.kind==='outdoor-shower').length,1);
+ assert.equal(plan.subblocks.components.filter(c=>c.kind==='outdoor-seat').length,storage?1:0);
  assert.equal(plan.referenceHeater.model.includes(heater==='CLUB_STUDY'?'Club':heater),true);
  assert.equal(plan.referenceHeaterVolumeInRange,true);
  const functional=screen.screen('sauna',result.scene,result.metrics,plan);
@@ -39,7 +40,11 @@ for(const [size,offBays,onBays,offArea,onArea,heater] of [
   assert.equal(store.width*store.length*plan.stepMm*plan.stepMm/1e6,1.44);
   assert.equal(plan.subblocks.outside.find(d=>d.id==='storage-entry-side').wall,'annex-east');
   const shower=plan.subblocks.components.find(c=>c.kind==='outdoor-shower').rect;
+  const seat=plan.subblocks.components.find(c=>c.kind==='outdoor-seat').rect;
   assert(shower.y>=store.length*plan.stepMm,'Shower must sit below side store');
+  assert.equal(seat.x,shower.x+1000);
+  assert(seat.y>=shower.y&&seat.y+seat.h<=shower.y+shower.h);
+  assert(result.metrics.proposedArea>result.metrics.area+(seat.w*seat.h+shower.w*shower.h)/1e6);
  }
  assert.equal(plan.technicalValid,false);
  assert.equal(plan.functionallyValid,false);
@@ -47,6 +52,7 @@ for(const [size,offBays,onBays,offArea,onArea,heater] of [
  assert.match(drawing,/OBTP_OUTDOOR_SHOWER_STUDY/);
  assert.match(drawing,new RegExp('OBTP_HEATER_'+heater));
  if(storage)assert.match(drawing,/storage-shelf/);
+ if(storage)assert.match(drawing,/OBTP_OUTDOOR_SEAT_STUDY/);
 }
 assert.throws(()=>presets.compactSaunaPlan('xl',false),/S, M or L/);
 assert.throws(()=>presets.compactSaunaPlan('m','yes'),/boolean/);

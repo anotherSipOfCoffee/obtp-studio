@@ -19,7 +19,7 @@
     'The unroofed outside shower and both access edges are proposals. Frost-safe supply, wastewater, ice-safe route and privacy remain unsolved.',
     'Finished partition thickness, actual door cuts, heater safety clearances, ventilation and bench anchorage need technical design.'
    ];
-   return {brief:'Non-residential sauna with a hot room, little indoor hall and exterior-only shower'+(plan.storage?'; a small right-side storage study has its own outside access':''),spatialCandidate:reasons.length===0,reasons,holds,
+   return {brief:'Non-residential sauna with a hot room, little indoor hall and exterior-only shower'+(plan.storage?'; a small right-side storage and outdoor seat study shares the shower side, with separate storage access':''),spatialCandidate:reasons.length===0,reasons,holds,
     benchmark:'S/M/L plans on a 600 mm nominal grid; no indoor shower or route through the hot room to storage'};
   }
   const reasons=[],holds=[],blocks=Object.fromEntries(plan.blocks.map(b=>[b.id,b]));
