@@ -14,11 +14,12 @@
  function screenSauna(plan){
   if(plan.circulation==='compact'){
    const reasons=plan.subblocks?.status==='spatial-candidate'?[]:(plan.subblocks?.failures||['No candidate room fit']);
+   if(plan.storage)reasons.push('Side storage lies outside the generated Cassette 01 shell; its floor, roof, enclosure and structural attachment are unbuilt.');
    const holds=[
     'The unroofed outside shower and both access edges are proposals. Frost-safe supply, wastewater, ice-safe route and privacy remain unsolved.',
     'Finished partition thickness, actual door cuts, heater safety clearances, ventilation and bench anchorage need technical design.'
    ];
-   return {brief:'Non-residential sauna with a hot room, little indoor hall and exterior-only shower'+(plan.storage?'; a shallow rear storage room has its own outside access':''),spatialCandidate:reasons.length===0,reasons,holds,
+   return {brief:'Non-residential sauna with a hot room, little indoor hall and exterior-only shower'+(plan.storage?'; a small right-side storage study has its own outside access':''),spatialCandidate:reasons.length===0,reasons,holds,
     benchmark:'S/M/L plans on a 600 mm nominal grid; no indoor shower or route through the hot room to storage'};
   }
   const reasons=[],holds=[],blocks=Object.fromEntries(plan.blocks.map(b=>[b.id,b]));
