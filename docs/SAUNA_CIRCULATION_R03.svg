@@ -1,0 +1,70 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1160 660" role="img" aria-labelledby="title description">
+ <title id="title">Three ten-module Sauna whole-plan circulation studies</title>
+ <desc id="description">A shared dry transverse passage with two side exterior access reservations; a longitudinal dead-end corridor with one front exterior access; and a longitudinal full-pass corridor with front and rear exterior access reservations. All room blocks are planning allocations, not partitions or doors.</desc>
+ <style>
+  text{font-family:system-ui,sans-serif;fill:#24332e}.heading{font-size:17px;font-weight:700}.small{font-size:13px}.room{font-size:15px;font-weight:650}.sub{font-size:12px}.edge{fill:none;stroke:#244f40;stroke-width:3;stroke-dasharray:8 5}.door{stroke:#b06a34;stroke-width:8;stroke-linecap:round}.line{stroke:#fffef9;stroke-width:3}
+ </style>
+ <rect width="1160" height="660" fill="#f5f4ed"/>
+ <text x="52" y="40" font-size="24" font-weight="700">Sauna R03 · complete planning grid, three circulation choices</text>
+ <text x="52" y="64" class="small">Each diagram: six 600 mm columns × nine 600 mm rows; front at top. Orange marks are candidate outside access edges only.</text>
+
+ <!-- A: shared dry passage on the R01 block topology. -->
+ <text x="64" y="112" class="heading">A · Shared dry passage</text>
+ <rect x="64" y="135" width="240" height="200" fill="#e6e5d6"/>
+ <rect x="64" y="215" width="240" height="80" fill="#d4ddcd"/>
+ <text x="184" y="178" text-anchor="middle" class="room">Changing / rest</text>
+ <text x="184" y="199" text-anchor="middle" class="sub">3,600 × 3,000 mm total</text>
+ <text x="184" y="251" text-anchor="middle" class="room">Dry passage band</text>
+ <text x="184" y="271" text-anchor="middle" class="sub">1,200 mm allocated</text>
+ <rect x="64" y="335" width="120" height="160" fill="#dfeaab"/>
+ <rect x="184" y="335" width="120" height="160" fill="#d3e4e4"/>
+ <text x="124" y="406" text-anchor="middle" class="room">Sauna</text>
+ <text x="124" y="428" text-anchor="middle" class="sub">1.8 × 2.4 m</text>
+ <text x="244" y="406" text-anchor="middle" class="room">Washing</text>
+ <text x="244" y="428" text-anchor="middle" class="sub">1.8 × 2.4 m</text>
+ <rect x="64" y="135" width="240" height="360" class="edge"/>
+ <line x1="64" y1="239" x2="64" y2="271" class="door"/>
+ <line x1="304" y1="239" x2="304" y2="271" class="door"/>
+ <text x="184" y="529" text-anchor="middle" class="small">2 side-wall access candidates</text>
+ <text x="184" y="550" text-anchor="middle" class="small">Changing includes passage</text>
+
+ <!-- B: longitudinal side corridor with one outside access. -->
+ <text x="446" y="112" class="heading">B · Dead-end corridor</text>
+ <rect x="446" y="135" width="80" height="360" fill="#d4ddcd"/>
+ <rect x="526" y="135" width="160" height="120" fill="#e6e5d6"/>
+ <rect x="526" y="255" width="160" height="120" fill="#d3e4e4"/>
+ <rect x="526" y="375" width="160" height="120" fill="#dfeaab"/>
+ <text x="486" y="312" text-anchor="middle" transform="rotate(-90 486 312)" class="room">1,200 mm corridor</text>
+ <text x="606" y="192" text-anchor="middle" class="room">Changing</text>
+ <text x="606" y="212" text-anchor="middle" class="sub">2.4 × 1.8 m</text>
+ <text x="606" y="311" text-anchor="middle" class="room">Washing</text>
+ <text x="606" y="331" text-anchor="middle" class="sub">2.4 × 1.8 m</text>
+ <text x="606" y="432" text-anchor="middle" class="room">Sauna</text>
+ <text x="606" y="452" text-anchor="middle" class="sub">2.4 × 1.8 m</text>
+ <rect x="446" y="135" width="240" height="360" class="edge"/>
+ <line x1="465" y1="135" x2="507" y2="135" class="door"/>
+ <text x="566" y="529" text-anchor="middle" class="small">1 end-wall access candidate</text>
+ <text x="566" y="550" text-anchor="middle" class="small">Corridor terminates at rear</text>
+
+ <!-- C: same rooms and corridor, second exit at the far end. -->
+ <text x="828" y="112" class="heading">C · Full-pass corridor</text>
+ <rect x="828" y="135" width="80" height="360" fill="#d4ddcd"/>
+ <rect x="908" y="135" width="160" height="120" fill="#e6e5d6"/>
+ <rect x="908" y="255" width="160" height="120" fill="#d3e4e4"/>
+ <rect x="908" y="375" width="160" height="120" fill="#dfeaab"/>
+ <text x="868" y="312" text-anchor="middle" transform="rotate(-90 868 312)" class="room">1,200 mm corridor</text>
+ <text x="988" y="192" text-anchor="middle" class="room">Changing</text>
+ <text x="988" y="212" text-anchor="middle" class="sub">2.4 × 1.8 m</text>
+ <text x="988" y="311" text-anchor="middle" class="room">Washing</text>
+ <text x="988" y="331" text-anchor="middle" class="sub">2.4 × 1.8 m</text>
+ <text x="988" y="432" text-anchor="middle" class="room">Sauna</text>
+ <text x="988" y="452" text-anchor="middle" class="sub">2.4 × 1.8 m</text>
+ <rect x="828" y="135" width="240" height="360" class="edge"/>
+ <line x1="847" y1="135" x2="889" y2="135" class="door"/>
+ <line x1="847" y1="495" x2="889" y2="495" class="door"/>
+ <text x="948" y="529" text-anchor="middle" class="small">2 opposite end-wall access candidates</text>
+ <text x="948" y="550" text-anchor="middle" class="small">Separated passage front to rear</text>
+
+ <text x="64" y="608" class="small">Room-to-corridor and room-to-changing access edges are conceptual; no cut, partition, finished corridor width, or escape route is approved.</text>
+ <text x="64" y="632" class="small">The 582 mm transverse and 210 mm longitudinal residuals are not assigned. Full analysis: SAUNA_CIRCULATION_R03.md</text>
+</svg>
