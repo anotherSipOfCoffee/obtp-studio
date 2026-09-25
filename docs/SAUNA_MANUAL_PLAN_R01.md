@@ -2,6 +2,8 @@
 
 Status: **spatial study, not a solved construction plan or approved preset**. This is the first whole-plan reference for refining the existing Sauna blocks by hand. The Architecture project's R03 process refined one selected plan and held propagation to the other variants pending clearance and interface review. Use the same example-first discipline here; Studio and Architecture remain separate applications.
 
+First block follow-up: [R02 Sauna equipment and bench fit](SAUNA_BLOCK_R02.md). It finds a non-overlapping **nominal** rear-bench and reference-heater arrangement, but finished clearances, manufacturer installation details and physical partition/door interfaces remain open. It does not approve the other blocks or any arbitrary parameter combination.
+
 ## Reference envelope and block set-out
 
 Select Cassette 01, Sauna, **10 modules**. System still generates the existing cassette. Its outside-wall plan is 4,596 × 6,024 mm = **27.686304 m²**. The unpartitioned clear interior estimate is 4,182 × 5,610 mm = **23.461020 m²**. The coordination rectangle inside it is six 600 mm columns × nine 600 mm rows = **3,600 × 5,400 mm**. The 582 mm width residual and 210 mm length residual have no assigned location or partition/finish specification. Coordinate values below are grid lines, not finished clear dimensions.
