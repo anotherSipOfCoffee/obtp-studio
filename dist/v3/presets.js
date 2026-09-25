@@ -8,6 +8,24 @@
   sauna:{name:'Sauna',use:'Non-residential sauna / pirtis',zones:['Sauna room allowance','Washing allowance','Changing / rest allowance','Technical allowance'],shares:[.35,.2,.35,.1],defaultBays:10,minBays:8},
   matrix:{name:'Matrix',use:'Non-residential open grid · research prototype',zones:['Unassigned open grid'],shares:[1],defaultBays:4,minBays:1}
  });
+ // A spatial planning layer only. Coordinates follow the 600 mm cassette
+ // setting-out; no internal walls or openings are added to System geometry.
+ function saunaPlan({bays,saunaWidth=3,saunaLength=3,washLength=3}={}){
+  if(!Number.isInteger(bays)||bays<8||bays>18)throw Error('Sauna needs 8–18 cassette modules');
+  const columns=6,rows=bays-1,washWidth=columns-saunaWidth;
+  if(![saunaWidth,saunaLength,washLength].every(Number.isInteger)||saunaWidth<2||saunaWidth>4||saunaLength<2||washLength<2)
+   throw Error('Sauna block dimensions must be whole 600 mm steps within their ranges');
+  const wetLength=Math.max(saunaLength,washLength),changingLength=rows-wetLength;
+  if(changingLength<2)throw Error('Changing/rest block needs at least two 600 mm steps');
+  const blocks=[
+   {id:'changing',label:'Changing / rest + access',x:0,y:0,width:columns,length:changingLength},
+   {id:'sauna',label:'Sauna',x:0,y:changingLength,width:saunaWidth,length:saunaLength},
+   {id:'washing',label:'Washing / bathing',x:saunaWidth,y:changingLength,width:washWidth,length:washLength}
+  ];
+  if(saunaLength<wetLength)blocks.push({id:'service',label:'Service / unassigned',x:0,y:changingLength+saunaLength,width:saunaWidth,length:wetLength-saunaLength});
+  if(washLength<wetLength)blocks.push({id:'service',label:'Service / unassigned',x:saunaWidth,y:changingLength+washLength,width:washWidth,length:wetLength-washLength});
+  return {columns,rows,blocks,stepMm:600,gridWidthMm:3600,gridLengthMm:rows*600,changingLength,access:'Entry through changing/rest; both wet blocks meet its rear boundary',valid:true};
+ }
  function bounds(api,scene,filter){
   const models=new Map(scene.models.map(m=>[m.id,m])),low=[Infinity,Infinity,Infinity],high=[-Infinity,-Infinity,-Infinity];
   for(const item of scene.allItems.filter(filter)){
@@ -38,7 +56,7 @@
   const checks={area:area>0&&area<=LIMITS.outsidePlanAreaM2+1e-9,height:height>0&&height<=LIMITS.heightMm,supportSpacing:supportSpacing>0&&supportSpacing<=LIMITS.supportSpacingMm};
   return {area,internalArea,height,supportSpacing,planWidth,planLength,checks,valid:Object.values(checks).every(Boolean)};
  }
- function create(api,{preset='studio',bays=4,columns=4,rows=4,height=2100,layer='all'}={}){
+ function create(api,{preset='studio',bays=4,columns=4,rows=4,height=2100,layer='all',saunaBlocks}={}){
   if(!Object.hasOwn(PROGRAMS,preset))throw Error('Unknown non-residential preset');
   if(preset==='matrix'){
    if(height!==2100)throw Error('Matrix prototype has fixed 2,100 mm walls');
@@ -60,9 +78,11 @@
   const metrics=measure(api,full);
   if(!metrics.valid)throw Error('Outside LT I-group dimensional envelope: '+Object.entries(metrics.checks).filter(([,ok])=>!ok).map(([key])=>key).join(', '));
   const scene=api.generate({bays,height,layer,skin:false,connectionRevision:'revised'});
-  return {scene,metrics,program:PROGRAMS[preset],preset,valid:true,classificationVerified:false,openingsEnabled:false};
+  const plan=preset==='sauna'?saunaPlan({bays,...saunaBlocks}):null;
+  if(plan&&(scene.clear[0]<plan.gridWidthMm||scene.clear[1]<plan.gridLengthMm))throw Error('Sauna planning grid exceeds the generated clear interior');
+  return {scene,metrics,program:PROGRAMS[preset],preset,plan,valid:true,classificationVerified:false,openingsEnabled:false};
  }
- const exported={LIMITS,PROGRAMS,bounds,measure,create};
+ const exported={LIMITS,PROGRAMS,bounds,measure,saunaPlan,create};
  if(typeof module!=='undefined')module.exports=exported;
  root.OBTPStudioPresets=exported;
 })(typeof window==='undefined'?globalThis:window);
