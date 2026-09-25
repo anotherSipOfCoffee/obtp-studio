@@ -26,6 +26,7 @@ await version('v1');assert.equal(await v1.locator('#model-size').textContent(),s
 await page.setViewportSize({width:390,height:844});await version('v2');await page.screenshot({path:'studio-v2-mobile.png',fullPage:true});
 await version('v3');
 const v3=page.frameLocator('#v3');await v3.locator('#status').filter({hasText:'30 cassette instances · geometry ready'}).waitFor();
+assert.equal(await v3.locator('#studio-version').inputValue(),'v3');
 assert.deepEqual(await v3.locator('aside select').evaluateAll(xs=>xs.slice(0,2).map(x=>x.id)),['studio-version','preset']);assert.equal(await v2.locator('aside select').first().getAttribute('id'),'studio-version');assert.equal(await v1.locator('aside .controls select').first().getAttribute('id'),'studio-version');
 assert.equal(await v3.locator('iframe').count(),0,'Studio must not embed the System inspector');
 assert.equal(await v3.locator('#mode').count(),0);
@@ -70,6 +71,7 @@ await v3.locator('#preset').selectOption('studio');assert.equal(await v3.locator
 await page.screenshot({path:'studio-studio.png',fullPage:true});
 await v3.locator('#preset').selectOption('sauna');await v3.locator('#bays').selectOption('8');
 await version('v2');await version('v3');assert.equal(await v3.locator('#preset').inputValue(),'sauna');
+assert.equal(await v3.locator('#studio-version').inputValue(),'v3');
 await v3.locator('#preset').selectOption('studio');await v3.locator('#bays').selectOption('4');
 await v3.locator('#preset').selectOption('matrix');
 assert(await v3.locator('#matrix-fields').isVisible());assert(!(await v3.locator('#bays-field').isVisible()));
