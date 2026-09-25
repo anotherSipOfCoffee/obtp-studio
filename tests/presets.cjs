@@ -84,7 +84,7 @@ assert.deepEqual([studio.metrics.area,workshop.metrics.area,sauna.metrics.area,a
 assert.equal(again.plan,null);
 assert.equal(p.create(api,{preset:'sauna',bays:10,saunaBlocks:{saunaWidth:3,saunaLength:4,washLength:4}}).plan.referenceHeaterVolumeInRange,true);
 assert.equal(p.create(api,{preset:'sauna',bays:10,saunaBlocks:{saunaWidth:2,saunaLength:4,washLength:4}}).plan.referenceHeaterVolumeInRange,false);
-for(const [size,circulation,bays,area] of [['s','shared',9,24.928704],['m','shared',11,30.443904],['l','wetLobby',14,38.716704],['l','through',14,38.716704]]){
+for(const [size,circulation,bays,area] of [['s','shared',9,24.928704],['m','shared',11,30.443904],['l','wetLobby',14,38.716704],['l','shared',14,38.716704],['l','through',14,38.716704]]){
  const result=p.create(api,{preset:'sauna',bays:18,saunaSelection:{size,circulation,shower:'indoor'}});
  assert.equal(result.bays,bays,'The selected whole plan determines cassette count');
  assert.equal(result.metrics.area,area);
@@ -97,6 +97,23 @@ const selectedLobby=p.create(api,{preset:'sauna',saunaSelection:{size:'l',circul
 assert.equal(selectedLobby.plan.exteriorAccessCandidates,1);
 assert.equal(selectedLobby.plan.subblocks.outside.length,1);
 assert.throws(()=>p.curatedSauna('s','through'),/no tested layout/);
-assert.throws(()=>p.curatedSauna('m','shared','outdoor'),/research hold/);
-assert.throws(()=>p.curatedSauna('l','wetLobby','both'),/research hold/);
+for(const [size,circulation,bays,area] of [['s','shared',8,22.171104],['m','shared',9,24.928704],['l','wetLobby',12,33.201504],['l','shared',10,27.686304]]){
+ const result=p.create(api,{preset:'sauna',saunaSelection:{size,circulation,shower:'outdoor'}});
+ assert.equal(result.bays,bays);assert.equal(result.metrics.area,area);
+ assert.equal(result.researchHold,true);assert.equal(result.plan.functionallyValid,false);
+ assert.equal(result.plan.subblocks.status,'spatial-candidate');
+ assert(!result.plan.subblocks.components.some(c=>c.id==='shower'));
+ assert.equal(result.plan.subblocks.components.find(c=>c.id==='outside-shower').rect.w,900);
+ assert(result.plan.subblocks.outside.some(d=>d.id==='shower-access'));
+ assert.equal(result.plan.blocks.find(b=>b.id==='washing').label,'Wet transition / exterior access');
+ assert.equal(result.metrics.valid,true);
+}
+for(const size of ['s','m','l']){
+ const result=p.create(api,{preset:'sauna',saunaSelection:{size,shower:'both'}});
+ assert(result.plan.subblocks.components.some(c=>c.id==='shower'));
+ assert(result.plan.subblocks.components.some(c=>c.id==='outside-shower'));
+ assert.equal(result.metrics.valid,true);
+}
+assert.throws(()=>p.curatedSauna('l','through','outdoor'),/no tested layout/);
+assert.throws(()=>p.curatedSauna('s','shared','none'),/At least one shower/);
 console.log('PASS: shared Studio / Workshop / Sauna module, 49.75 m² bound, internal distinction, height and support gates');
