@@ -55,7 +55,7 @@ await v3.locator('#reset').click();assert.equal(await v3.locator('#explode').inp
 assert.equal(await v3.locator('canvas').evaluate(c=>c.getContext('webgl').getError()),0);
 assert(await v3.locator('body').evaluate(()=>document.documentElement.scrollWidth<=innerWidth),'v3 mobile overflow');
 await page.screenshot({path:'studio-v3-mobile.png',fullPage:true});
-await page.setViewportSize({width:1440,height:1050});
+await page.setViewportSize({width:1440,height:1650});
 await v3.locator('#bays').selectOption('4');
 await page.screenshot({path:'studio-v3-desktop.png',fullPage:true});
 assert.equal(await v3.locator('#envelope').textContent().then(x=>x.includes('within limits')),true);
