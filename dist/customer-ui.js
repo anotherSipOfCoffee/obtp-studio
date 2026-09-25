@@ -10,7 +10,7 @@
  'Sauna size':'Pirties dydis','S · compact':'S · kompaktiška','M · standard':'M · standartinė','L · longer entrance in solved plan':'L · erdvesnis prieangis',
  'External storage + outdoor seat':'Sandėliukas ir lauko suolas','Roof':'Stogas','Flat · membrane':'Plokščias · membraninė danga','Single slope · metal':'Vienšlaitis · skarda','Gable · metal':'Dvišlaitis · skarda',
  'Terrace depth':'Terasos gylis','Window width':'Lango plotis','Façade':'Fasado apdaila','Vertical timber':'Vertikalios dailylentės','1,200 mm':'1 200 mm',
- 'Cut':'Pjūvis','Solved plan':'Eskizinis planas','Reset view':'Atkurti vaizdą','Rotate 90°':'Pasukti 90°',
+ 'Cut':'Pjūvis','Plan':'Planas','Reset view':'Atkurti vaizdą','Rotate 90°':'Pasukti 90°',
  'Assembly layers':'Konstrukcijos sluoksniai','Complete cassette frame':'Visa konstrukcija','Floor + walls + roof':'Grindys, sienos ir stogas','Floor + walls':'Grindys ir sienos','Floor only':'Tik grindys','Exploded view':'Išskleistas vaizdas','Display offsets only, not an assembly sequence.':'Tai dalių peržiūra, ne montavimo seka.',
  'Design notes and model limits':'Projektavimo pastabos ir modelio ribos','Shown components · detailed schedule':'Elementų sąrašas','Object':'Elementas','Role':'Paskirtis','Quantity':'Kiekis','Modeled component':'Modelio elementas',
  'Fixed camera · Rotate 90° or scroll to zoom':'Fiksuotas vaizdas · pasukite 90° arba keiskite mastelį pelės ratuku',
