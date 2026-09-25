@@ -64,16 +64,16 @@
  function compactSaunaPlan(size='m',storage=false){
   if(!Object.hasOwn({s:1,m:1,l:1},size))throw Error('Sauna size must be S, M or L');
   if(typeof storage!=='boolean')throw Error('Sauna storage choice must be boolean');
-  const hotLength={s:3,m:4,l:5}[size],rows=hotLength+(storage?2:0),bays=rows+1;
+  const hotLength={s:3,m:4,l:5}[size],rows=hotLength,bays=rows+1;
   return {bays,columns:6,rows,stepMm:600,gridWidthMm:3600,gridLengthMm:rows*600,
    circulation:'compact',showerMode:'outdoor',size,storage,changingLength:hotLength,
    blocks:[
     {id:'sauna',label:'Sauna',x:0,y:0,width:4,length:hotLength},
     {id:'hall',label:'Little entrance hall / towel shelf',x:4,y:0,width:2,length:hotLength},
-    ...(storage?[{id:'storage',label:'Shallow storage room · rear outside entry',x:0,y:hotLength,width:6,length:2}]:[])
+    ...(storage?[{id:'storage',label:'Side storage annex · study only',x:7,y:0,width:2,length:2}]:[])
    ],
-   access:'Front outside entry to the little hall; hall connects to sauna and exterior shower'+(storage?'; separate rear outside entry to storage':''),
-   exteriorAccessCandidates:storage?3:2,corridorAreaM2:0,lobbyAreaM2:0,valid:true};
+   access:'Front outside entry to the little hall; hall connects to sauna; shower reached outside'+(storage?'; separate outside entry to right-side storage annex':''),
+   exteriorAccessCandidates:storage?2:1,corridorAreaM2:0,lobbyAreaM2:0,valid:true};
  }
  function bounds(api,scene,filter){
   const models=new Map(scene.models.map(m=>[m.id,m])),low=[Infinity,Infinity,Infinity],high=[-Infinity,-Infinity,-Infinity];
@@ -129,6 +129,13 @@
   // Full roof and outside skins are always measured, even in a filtered frame view.
   const full=api.generate({bays,height,layer:'all',skin:true,connectionRevision:'revised'});
   const metrics=measure(api,full);
+  if(compact?.storage){
+   // Enclose the proposed side room in a conservative full-length bounding
+   // rectangle; shell walls/roof are still the only generated construction.
+   metrics.proposedArea=(metrics.planWidth+1500)*metrics.planLength/1e6;
+   metrics.checks.area=metrics.proposedArea>0&&metrics.proposedArea<=LIMITS.outsidePlanAreaM2;
+   metrics.valid=Object.values(metrics.checks).every(Boolean);
+  }
   if(!metrics.valid)throw Error('Outside LT I-group dimensional envelope: '+Object.entries(metrics.checks).filter(([,ok])=>!ok).map(([key])=>key).join(', '));
   const scene=api.generate({bays,height,layer,skin:false,connectionRevision:'revised'});
   const plan=preset==='sauna'?(compact||saunaPlan({bays,...saunaBlocks})):null;
@@ -160,7 +167,7 @@
    plan.functionallyValid=plan.subblocks.status==='spatial-candidate'&&plan.showerMode!=='outdoor'; // Exterior-only winter washing remains a research hold.
    plan.technicalValid=false; // Nominal heater volume never proves finished fit or installation.
   }
-  return {scene,metrics,program:PROGRAMS[preset],preset,plan,bays,valid:true,researchHold:plan?.showerMode==='outdoor',classificationVerified:false,openingsEnabled:false};
+  return {scene,metrics,program:PROGRAMS[preset],preset,plan,bays,valid:!compact?.storage,researchHold:plan?.showerMode==='outdoor'||Boolean(compact?.storage),classificationVerified:false,openingsEnabled:false};
  }
  const exported={LIMITS,PROGRAMS,SAUNA_CATALOGUE,SAUNA_OUTDOOR,curatedSauna,compactSaunaPlan,bounds,measure,saunaPlan,create};
  if(typeof module!=='undefined')module.exports=exported;
