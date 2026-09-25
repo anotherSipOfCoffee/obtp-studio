@@ -14,7 +14,7 @@
  for(const id of ['sauna-length','wash-length'])for(let n=2;n<=15;n++){
   const option=document.createElement('option');option.value=String(n);option.textContent=n+' steps · '+(n*.6).toFixed(1)+' m allocated';$(id).append(option);
  }
- $('sauna-length').value='3';$('wash-length').value='3';
+ $('sauna-length').value='4';$('wash-length').value='4';
  function saunaBlocks(){return {saunaWidth:Number($('sauna-width').value),saunaLength:Number($('sauna-length').value),washLength:Number($('wash-length').value)};}
  function limitSauna(changed){
   const available=Number($('bays').value)-3; // one perimeter row plus two changing rows
@@ -64,7 +64,8 @@
     for(const block of plan.blocks){const el=document.createElement('div');el.className='sauna-block '+block.id;el.style.gridColumn=`${block.x+1} / span ${block.width}`;el.style.gridRow=`${block.y+1} / span ${block.length}`;el.textContent=`${block.label} · ${(block.width*.6).toFixed(1)} × ${(block.length*.6).toFixed(1)} m allocated`;diagram.append(el);}
     const facts=document.createElement('div');facts.className='block-facts';
     const p=document.createElement('p');p.textContent=`Planning grid ${plan.gridWidthMm.toLocaleString('en')} × ${plan.gridLengthMm.toLocaleString('en')} mm within ${scene.clear[0].toLocaleString('en')} × ${scene.clear[1].toLocaleString('en')} mm clear interior; perimeter residual and partition/finish thickness remain unassigned.`;facts.append(p);
-    const caveat=document.createElement('small');caveat.textContent='Program plan only. Blocks are not generated partitions or openings. Heater clearance, bench fit, waterproofing, ventilation, drainage and service connections remain to be designed.';$('program').append(diagram,facts,caveat);
+    const caveat=document.createElement('small');caveat.textContent='Program plan only. Blocks are not generated partitions or openings. Heater clearance, bench fit, waterproofing, ventilation, drainage and service connections remain to be designed.';
+    const reference=document.createElement('p'),link=document.createElement('a');link.href='https://github.com/anotherSipOfCoffee/obtp-studio/blob/main/docs/SAUNA_MANUAL_PLAN_R01.md';link.target='_blank';link.rel='noopener';link.textContent='Review the 10-module manual plan R01 ↗';reference.append(link);$('program').append(diagram,facts,caveat,reference);
    }else{const diagram=document.createElement('div');diagram.className='zone-plan';diagram.setAttribute('aria-label',program.name+' conceptual program allocation');for(let i=0;i<program.zones.length;i++){const zone=document.createElement('span');zone.style.width=(program.shares[i]*100)+'%';zone.textContent=program.zones[i];diagram.append(zone);}const caveat=document.createElement('small');caveat.textContent='Concept allocation across the interior length, without partitions, access openings, services or wet-room assembly in the generated model.';$('program').append(diagram,caveat);}
    $('schedule').replaceChildren();
    for(const row of api.schedule(scene)){
