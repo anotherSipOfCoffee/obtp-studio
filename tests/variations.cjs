@@ -1,5 +1,6 @@
 const { chromium } = require('playwright');
 const assert = require('node:assert/strict');
+const fs = require('node:fs');
 (async()=>{const browser=await chromium.launch({headless:true,args:['--use-gl=angle','--use-angle=swiftshader','--enable-webgl']});
 try{const page=await browser.newPage();const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto((process.env.OBTP_BASE_URL || 'http://127.0.0.1:8765/'));
 async function version(key){const id=await page.locator('iframe:not([hidden])').getAttribute('id');await page.frameLocator('#'+id).locator('#studio-version').selectOption(key);}
@@ -113,7 +114,14 @@ assert.equal(await v3.locator('canvas').evaluate(()=>OBTPStudioV3.plan.subblocks
 assert.equal(await v3.locator('canvas').evaluate(()=>OBTPStudioV3.plan.subblocks.components.some(c=>c.kind==='storage')),true);
 assert.equal(await v3.locator('canvas').evaluate(()=>OBTPStudioV3.plan.subblocks.components.some(c=>c.kind==='outdoor-seat')),true);
 assert.equal(await v3.locator('#floor-plan [data-cad-block="outside-seat"]').count(),1);
-assert.equal(await v3.locator('canvas').evaluate(()=>OBTPStudioCAD.exportDXF(OBTPStudioV3.plan.subblocks,OBTPStudioV3.plan,OBTPStudioV3.scene).includes('OBTP_OUTDOOR_SHOWER_STUDY')),true);
+const [saunaCAD]=await Promise.all([page.waitForEvent('download'),v3.locator('#download-cad').click()]);
+assert.equal(saunaCAD.suggestedFilename(),'OBTP_Sauna_L_Side_Storage_Archicad_R14.dxf');
+const cadBytes=fs.readFileSync(await saunaCAD.path(),'utf8');
+assert.match(cadBytes,/BLOCK_RECORD/);
+assert.match(cadBytes,/OBTP_OUTDOOR_SEAT_STUDY/);
+const [sixCAD]=await Promise.all([page.waitForEvent('download'),v3.getByText('Download all six plans in one DXF').click()]);
+assert.equal(sixCAD.suggestedFilename(),'OBTP_Sauna_All_Six_Plans_Archicad_R14.dxf');
+assert.match(fs.readFileSync(await sixCAD.path(),'utf8'),/OBTP_Sauna_S_Side_Storage_R13/);
 await page.screenshot({path:'studio-sauna-l-storage-plan.png',fullPage:true});
 for(const [size,bays,area] of [['s',4,'11.14'],['m',5,'13.90'],['l',6,'16.66']]){
  await v3.locator('#sauna-size').selectOption(size);
