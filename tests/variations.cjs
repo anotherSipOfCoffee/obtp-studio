@@ -66,11 +66,15 @@ await v3.locator('#preset').selectOption('workshop');assert.equal(await v3.locat
 await page.screenshot({path:'studio-workshop.png',fullPage:true});
 await v3.locator('#preset').selectOption('sauna');assert.equal(await v3.locator('#bays').inputValue(),'18');
 assert.deepEqual([await v3.locator('#sauna-length').inputValue(),await v3.locator('#wash-length').inputValue()],['4','4']);
+assert.equal(await v3.locator('canvas').evaluate(()=>OBTPStudioV3.plan.nominalVolumeM3),9.072);
+assert.equal(await v3.locator('canvas').evaluate(()=>OBTPStudioV3.plan.technicalValid),false);
+assert.match(await v3.locator('#status').textContent(),/Sauna plan under review/);
 assert.match(await v3.locator('#program a').getAttribute('href'),/SAUNA_MANUAL_PLAN_R01[.]md$/);
 await page.screenshot({path:'studio-sauna.png',fullPage:true});
 await v3.locator('#bays').selectOption('8');assert.equal(await v3.locator('#program').textContent().then(x=>x.includes('Washing / bathing')),true);
 assert(await v3.locator('#sauna-fields').isVisible());assert.equal(await v3.locator('.sauna-block').count(),3);
 await v3.locator('#sauna-width').selectOption('4');await v3.locator('#sauna-length').selectOption('4');await v3.locator('#wash-length').selectOption('3');
+assert.match(await v3.locator('#program').textContent(),/outside preliminary range/);
 assert.equal(await v3.locator('.sauna-block.service').count(),1);
 assert.deepEqual(await v3.locator('canvas').evaluate(()=>OBTPStudioV3.plan.blocks.map(b=>[b.id,b.width,b.length])),[['changing',6,3],['sauna',4,4],['washing',2,3],['service',2,1]]);
 await page.screenshot({path:'studio-sauna-blocks-compact.png',fullPage:true});
