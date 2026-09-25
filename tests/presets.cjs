@@ -37,6 +37,9 @@ assert.throws(()=>p.create(api,{preset:'matrix',columns:9,rows:4}),/columns/);
 for(const bays of [8,10,18])for(const saunaWidth of [2,3,4])for(let saunaLength=2;saunaLength<=bays-3;saunaLength++)for(let washLength=2;washLength<=bays-3;washLength++){
  const result=p.create(api,{preset:'sauna',bays,saunaBlocks:{saunaWidth,saunaLength,washLength}}),plan=result.plan;
  assert.equal(plan.valid,true);assert(plan.changingLength>=2);
+ assert.equal(plan.technicalValid,false);
+ assert(Math.abs(plan.nominalVolumeM3-saunaWidth*saunaLength*0.36*2.1)<1e-9);
+ assert.equal(plan.referenceHeaterVolumeInRange,plan.nominalVolumeM3>=7&&plan.nominalVolumeM3<=12);
  const cells=new Set();for(const block of plan.blocks)for(let y=block.y;y<block.y+block.length;y++)for(let x=block.x;x<block.x+block.width;x++){
   const key=x+','+y;assert(!cells.has(key),'Blocks overlap at '+key);cells.add(key);
  }
@@ -50,4 +53,6 @@ assert.throws(()=>p.create(api,{preset:'sauna',bays:8,saunaBlocks:{saunaWidth:5}
 const studio=p.create(api,{preset:'studio',bays:10}),workshop=p.create(api,{preset:'workshop',bays:10}),sauna=p.create(api,{preset:'sauna',bays:10}),again=p.create(api,{preset:'studio',bays:10});
 assert.deepEqual([studio.metrics.area,workshop.metrics.area,sauna.metrics.area,again.metrics.area],Array(4).fill(studio.metrics.area));
 assert.equal(again.plan,null);
+assert.equal(p.create(api,{preset:'sauna',bays:10,saunaBlocks:{saunaWidth:3,saunaLength:4,washLength:4}}).plan.referenceHeaterVolumeInRange,true);
+assert.equal(p.create(api,{preset:'sauna',bays:10,saunaBlocks:{saunaWidth:2,saunaLength:4,washLength:4}}).plan.referenceHeaterVolumeInRange,false);
 console.log('PASS: shared Studio / Workshop / Sauna module, 49.75 m² bound, internal distinction, height and support gates');
