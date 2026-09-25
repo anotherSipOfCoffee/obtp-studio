@@ -84,6 +84,8 @@ assert.equal(await v3.locator('#envelope').textContent().then(x=>x.includes('49.
 await v3.locator('#preset').selectOption('workshop');assert.equal(await v3.locator('#bays').inputValue(),'18');
 await page.screenshot({path:'studio-workshop.png',fullPage:true});
 await v3.locator('#preset').selectOption('sauna');assert.equal(await v3.locator('#bays').inputValue(),'18');
+assert.equal(await v3.locator('#diagram').evaluate(()=>OBTPStudioV3.plan.subblocks.status),'spatial-candidate');
+assert.equal(await v3.locator('#download-cad').isEnabled(),true);
 assert.deepEqual([await v3.locator('#sauna-length').inputValue(),await v3.locator('#wash-length').inputValue()],['4','4']);
 assert.equal(await v3.locator('canvas').evaluate(()=>OBTPStudioV3.plan.nominalVolumeM3),9.072);
 assert.equal(await v3.locator('canvas').evaluate(()=>OBTPStudioV3.plan.technicalValid),false);
@@ -98,7 +100,12 @@ assert.deepEqual(await v3.locator('canvas').evaluate(()=>[OBTPStudioV3.plan.exte
 await page.screenshot({path:'studio-sauna-shared-two-access.png',fullPage:true});
 await v3.locator('#sauna-circulation').selectOption('wetLobby');
 assert.match(await v3.locator('#function-screen').textContent(),/spatial candidate, unverified/);
+assert.deepEqual(await v3.locator('#diagram').evaluate(()=>OBTPStudioV3.plan.subblocks.doors.map(d=>d.id)),['sauna-lobby','washing-lobby','lobby-changing']);
 await v3.locator('[data-view="plan"]').click();
+assert.equal(await v3.locator('#floor-plan [data-cad-block]').count(),5);
+assert.equal(await v3.locator('#floor-plan [data-cad-door]').count(),5);
+await page.screenshot({path:'studio-sauna-r06-generated-blocks.png',fullPage:true});
+assert.equal(await v3.locator('#diagram').evaluate(()=>OBTPStudioCAD.exportDXF(OBTPStudioV3.plan.subblocks,OBTPStudioV3.plan,OBTPStudioV3.scene).includes('OBTP_HEATER_SW80')),true);
 assert.deepEqual(await v3.locator('#floor-plan [data-block]').evaluateAll(xs=>xs.map(x=>x.getAttribute('data-block'))),['changing','lobby','sauna','washing']);
 assert.match(await v3.locator('#floor-plan').getAttribute('aria-label'),/dashed Sauna program allowances are unbuilt/);
 const beforePlan=await v3.locator('#floor-plan').getAttribute('viewBox');
@@ -117,6 +124,7 @@ await page.screenshot({path:'studio-sauna-wet-lobby.png',fullPage:true});
 await v3.locator('#sauna-circulation').selectOption('sharedTwoAccess');
 await v3.locator('#bays').selectOption('10');
 await v3.locator('#sauna-circulation').selectOption('deadEnd');
+assert.equal(await v3.locator('#diagram').evaluate(()=>OBTPStudioV3.plan.subblocks.status),'spatial-candidate');
 assert(!(await v3.locator('#sauna-width-field').isVisible()));
 assert.deepEqual(await v3.locator('canvas').evaluate(()=>[OBTPStudioV3.plan.exteriorAccessCandidates,OBTPStudioV3.plan.corridorAreaM2,OBTPStudioV3.plan.changingLength,OBTPStudioV3.plan.nominalVolumeM3]),[1,6.48,3,9.072]);
 await page.screenshot({path:'studio-sauna-dead-end.png',fullPage:true});
@@ -133,6 +141,7 @@ await v3.locator('#bays').selectOption('8');assert.equal(await v3.locator('#prog
 assert(await v3.locator('#sauna-fields').isVisible());assert.equal(await v3.locator('.sauna-block').count(),3);
 await v3.locator('#sauna-width').selectOption('4');await v3.locator('#sauna-length').selectOption('4');await v3.locator('#wash-length').selectOption('3');
 assert.match(await v3.locator('#function-screen').textContent(),/needs a task-specific revision/);
+assert.equal(await v3.locator('#download-cad').isDisabled(),true);
 assert.match(await v3.locator('#program').textContent(),/outside preliminary range/);
 assert.equal(await v3.locator('.sauna-block.service').count(),1);
 assert.deepEqual(await v3.locator('canvas').evaluate(()=>OBTPStudioV3.plan.blocks.map(b=>[b.id,b.width,b.length])),[['changing',6,3],['sauna',4,4],['washing',2,3],['service',2,1]]);
