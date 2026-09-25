@@ -32,7 +32,20 @@
    api.box('shower-head-study',[x+425,y+385,z+1925],[70,140,90],'study')
   ];
   const model=api.model('OBTP-OUTDOOR-SHOWER-STUDY',assets);
-  const models=[model],items=[{id:'outside-shower-study',block:model.id,stage:'study-outdoor-shower',translation:[0,0,0],highlight:true}];
+  const models=[model],items=[{id:'outside-shower-study',block:model.id,stage:'study-outdoor-shower',translation:[0,0,0]}];
+  // Sauna furniture is an independent placement study. The real cassette
+  // dimensions and structure continue to come exclusively from System.
+  for(const c of plan.subblocks.components.filter(c=>['bench','foot-bench','heater'].includes(c.kind))){
+   const b=c.rect,bx=ox+b.x,by=oy+b.y,upper=c.kind==='bench',level=upper?900:450;
+   const parts=[];
+   if(c.kind==='heater')parts.push(api.box('heater-envelope',[bx,by,z],[b.w,b.h,700],'furniture-study'));
+   else{
+    const n=5,gap=12,depth=(b.h-(n-1)*gap)/n;
+    for(let j=0;j<n;j++)parts.push(api.box('seat-slat-'+j,[bx,by+j*(depth+gap),z+level-38],[b.w,depth,38],'furniture-study'));
+    for(const px of [bx+45,bx+b.w-90])for(const py of [by+45,by+b.h-90])parts.push(api.box('bench-leg-'+px+'-'+py,[px,py,z],[45,45,level-38],'furniture-study'));
+   }
+   const furnishing=api.model('SAUNA-'+c.id+'-STUDY',parts);models.push(furnishing);items.push({id:c.id+'-study',block:furnishing.id,stage:'study-furniture',translation:[0,0,0]});
+  }
   const seat=plan.subblocks.components.find(c=>c.kind==='outdoor-seat');
   if(seat){const sx=ox+seat.rect.x,sy=oy+seat.rect.y;
    const sitting=api.model('OBTP-OUTDOOR-SEAT-STUDY',[
