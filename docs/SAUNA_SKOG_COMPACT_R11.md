@@ -8,6 +8,8 @@ Status: spatial planning candidates. This supersedes the current product choices
 
 The independent parameters are **size S/M/L** and **separate storage room yes/no**. When on, the shallow room is on the far side of the hot room from the entrance. It has its own rear outside door: retrieving dry stored items does not require crossing a heated room. Storage is 3.6 × 1.2 m (4.32 m²) on the nominal grid; this is a narrow full-width room, **not** a 0.4 × 0.5 m cupboard. If 4.32 m² remains too large for the brief, a genuinely smaller room needs a revised layout or a partitioned use for the remaining rear band.
 
+[Compare all six nominal floor plans](SAUNA_SKOG_COMPACT_R11.svg). Brown dashed segments are proposed door edges; the blue square is the exterior shower study.
+
 | Size | Hot room nominal | Hall nominal | Bays without / with storage | Exterior wall plan area without / with storage |
 | --- | --- | --- | ---: | ---: |
 | S | 2.4 × 1.8 m | 1.2 × 1.8 m | 4 / 6 | 11.140704 / 16.655904 m² |
