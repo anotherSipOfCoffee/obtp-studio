@@ -11,7 +11,7 @@
  renderer.reset=()=>{fixedCamera();renderer.zoom=1;renderer.draw();};fixedCamera();
  let view='3d',currentScene=null,currentPlan=null,cut=null;
  function showView(){
-  const isPlan=view==='plan';$('diagram').hidden=isPlan;$('floor-plan').hidden=!isPlan;
+  const isPlan=view==='plan';$('diagram').hidden=isPlan;$('floor-plan').toggleAttribute('hidden',!isPlan);
   for(const button of document.querySelectorAll('[data-view]'))button.setAttribute('aria-pressed',String(button.dataset.view===view));
   $('view-description').textContent=isPlan?'Model wall section at 1.10 m above floor · dashed Sauna blocks are unbuilt allowances':view==='cut'?'Frame clipped at 1.10 m above floor · roof hidden · fixed camera':'Fixed 45° camera · scroll to zoom';
   if(!currentScene)return;
