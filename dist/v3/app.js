@@ -1,9 +1,27 @@
 'use strict';
 (()=>{
- const $=id=>document.getElementById(id),api=window.OBTPCassette,presets=window.OBTPStudioPresets;
+ const $=id=>document.getElementById(id),api=window.OBTPCassette,presets=window.OBTPStudioPresets,linked=window.OBTPStudioLinkedView;
  let renderer;
  try {renderer=new SourceMeshView($('diagram'));}
  catch(e){$('status').textContent=e.message;return;}
+ // Architecture's fixed view: 45° in plan, with wheel zoom still available.
+ // The cut and plan buttons change only the display of the generated scene.
+ const fixedCamera=()=>{renderer.angle=-Math.PI/4;renderer.elev=.55;};
+ $('diagram').onpointerdown=$('diagram').onpointermove=$('diagram').onpointerup=$('diagram').onpointercancel=null;
+ renderer.reset=()=>{fixedCamera();renderer.zoom=1;renderer.draw();};fixedCamera();
+ let view='3d',currentScene=null,currentPlan=null,cut=null;
+ function showView(){
+  const isPlan=view==='plan';$('diagram').hidden=isPlan;$('floor-plan').toggleAttribute('hidden',!isPlan);
+  for(const button of document.querySelectorAll('[data-view]'))button.setAttribute('aria-pressed',String(button.dataset.view===view));
+  $('view-description').textContent=isPlan?'Model wall section at 1.10 m above floor · dashed Sauna blocks are unbuilt allowances':view==='cut'?'Frame clipped at 1.10 m above floor · roof hidden · fixed camera':'Fixed 45° camera · scroll to zoom';
+  if(!currentScene)return;
+  if(isPlan){
+   const {preset,bays,columns,rows}=window.OBTPStudioV3;
+   const source=preset==='matrix'?window.OBTPMatrix.generate({columns,rows,layer:'all',skin:true}):api.generate({bays,height,layer:'all',skin:true,connectionRevision:'revised'});
+   linked.renderPlan($('floor-plan'),api,source,currentPlan);
+  }else{if(view==='cut'&&!cut){cut=linked.cutScene(api,currentScene);cut.models.forEach(m=>renderer.register(m));}
+   renderer.setScene(view==='cut'?cut.items:currentScene.items,{explode:Number($('explode').value)/100});fixedCamera();renderer.draw();}
+ }
  // Studio owns configuration; System alone defines and places modules.
  const height=2100;
  $('bays').value='4';
@@ -51,7 +69,7 @@
    const {scene,metrics,program,preset,plan,researchHold}=presets.create(api,{preset:$('preset').value,bays,columns,rows,height,layer:$('layer').value,saunaBlocks:saunaBlocks()});
    for(const m of renderer.meshes.values())for(const p of m.parts)renderer.gl.deleteBuffer(p.buffer);
    renderer.meshes.clear();scene.models.forEach(m=>renderer.register(m));
-   renderer.setScene(scene.items,{explode:Number($('explode').value)/100});
+   currentScene=scene;currentPlan=plan;cut=null;
    $('assembly-title').textContent=isMatrix?columns+' × '+rows+' Matrix cells · research prototype':bays+' module cassette · '+program.name;
    $('dimensions').textContent=isMatrix?scene.clear[0].toLocaleString('en')+' × '+scene.clear[1].toLocaleString('en')+' mm inner-face grid · '+height.toLocaleString('en')+' mm wall height':scene.length.toLocaleString('en')+' × '+scene.width.toLocaleString('en')+' mm setting-out · '+height.toLocaleString('en')+' mm wall height';
    $('status').textContent=isMatrix?scene.items.length+' study components · geometry preview only':scene.items.length+' cassette instances · geometry ready'+(plan?' · Sauna plan under review':'');
@@ -87,7 +105,8 @@
     $('schedule').append(tr);
    }
    window.OBTPStudioV3={scene,items:scene.items,renderer,bays,columns,rows,preset,metrics,program,plan,researchHold};
-  } catch(e){$('status').textContent=e.message;$('envelope').textContent='Outside I-group envelope · '+e.message;window.OBTPStudioV3=null;renderer.setScene([]);$('schedule').replaceChildren();}
+   showView();
+  } catch(e){$('status').textContent=e.message;$('envelope').textContent='Outside I-group envelope · '+e.message;window.OBTPStudioV3=null;currentScene=null;cut=null;renderer.setScene([]);$('floor-plan').replaceChildren();$('schedule').replaceChildren();}
  }
  $('preset').addEventListener('change',()=>{const matrix=$('preset').value==='matrix',sauna=$('preset').value==='sauna';$('matrix-fields').hidden=!matrix;$('bays-field').hidden=matrix;$('sauna-fields').hidden=!sauna;
   if(matrix){$('rows').value=$('bays').value;limitMatrix('rows');}
@@ -103,6 +122,7 @@
  });
  for(const id of ['sauna-width','sauna-length','wash-length'])$(id).addEventListener('change',()=>{limitSauna(id);render();});
  $('layer').addEventListener('change',render);
+ for(const button of document.querySelectorAll('[data-view]'))button.addEventListener('click',()=>{view=button.dataset.view;showView();});
  $('explode').addEventListener('input',()=>{$('amount').textContent=$('explode').value+'%';renderer.explode=Number($('explode').value)/100;renderer.draw();});
  $('reset').addEventListener('click',()=>{$('explode').value='0';$('amount').textContent='0%';renderer.explode=0;renderer.reset();});
  limitMatrix('rows');render();
