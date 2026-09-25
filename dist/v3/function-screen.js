@@ -13,6 +13,7 @@
  }
  function screenSauna(plan){
   const reasons=[],holds=[],blocks=Object.fromEntries(plan.blocks.map(b=>[b.id,b]));
+  if(plan.subblocks?.status==='no-fit')reasons.push(...plan.subblocks.failures.map(x=>'Sub-block fit: '+x));
   if(!['sauna','washing','changing'].every(id=>blocks[id]&&area(blocks[id])>0))reasons.push('The hot room, shower/washing and changing/rest functions must each have an allocated block.');
   if(blocks.sauna&&blocks.washing){
    const s=blocks.sauna,w=blocks.washing;
@@ -29,7 +30,7 @@
   if(plan.circulation==='deadEnd'||plan.circulation==='through')holds.push('The separate side corridor consumes '+plan.corridorAreaM2.toFixed(2)+' m²; room access and the rotated heater/bench arrangement have not been fitted.');
   if(plan.circulation==='wetLobby')holds.push('The wet lobby separates changing from wet-room approaches in plan; floor falls, enclosure and drying remain unbuilt.');
   if(plan.exteriorAccessCandidates===2)holds.push('Two exterior entrances are only candidates; verify privacy and whether both are useful for the site.');
-  holds.push('Sauna-to-washing access, door swings, heater clearances, benches, ventilation and waterproof construction remain unbuilt/unverified.');
+  holds.push('Candidate door and equipment rectangles are geometric studies; finished clearances, actual openings, benches, ventilation and waterproof construction remain unbuilt/unverified.');
   return {brief:'Small non-residential Finnish-style sauna with heat, shower and changing/rest',spatialCandidate:reasons.length===0,reasons,holds,benchmark:'1.8 m study blocks; 1.5× washing and 2× changing are advisory comparisons, not legal rules'};
  }
  function screen(preset,scene,metrics,plan){return preset==='studio'?screenStudio(scene,metrics):preset==='sauna'?screenSauna(plan):null;}

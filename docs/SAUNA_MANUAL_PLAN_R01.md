@@ -8,6 +8,8 @@ Whole-plan circulation follow-up: [R03 three-layout comparison](SAUNA_CIRCULATIO
 
 The [R05 wet-lobby study](SAUNA_WET_LOBBY_R05.md) extends the same cassette by two 600 mm modules to separate wet-room approaches from changing/rest while retaining the R01 wet-block allocations. It is an alternative full-plan research candidate, not an approved retrofit to this 10-module reference.
 
+[R06](SAUNA_SUBBLOCKS_R06.md) generates heater, bench, shower, changing-seat and candidate door placements from room adjacency and current dimensions. In its compact one-entry route the Sauna door faces washing, so the heater moves to the opposite wall. This replaces R02's fixed-coordinate *placement strategy* for that route; the manual R02 diagram remains an earlier comparison, not a detail to copy into R06.
+
 ## Reference envelope and block set-out
 
 Select Cassette 01, Sauna, **10 modules**. System still generates the existing cassette. Its outside-wall plan is 4,596 × 6,024 mm = **27.686304 m²**. The unpartitioned clear interior estimate is 4,182 × 5,610 mm = **23.461020 m²**. The coordination rectangle inside it is six 600 mm columns × nine 600 mm rows = **3,600 × 5,400 mm**. The 582 mm width residual and 210 mm length residual have no assigned location or partition/finish specification. Coordinate values below are grid lines, not finished clear dimensions.

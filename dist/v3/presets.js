@@ -1,6 +1,7 @@
 'use strict';
 /* Studio owns program and envelope validation. OBTP System owns every cassette. */
 (function(root){
+ const subblocks=typeof module!=='undefined'&&module.exports?require('./subblocks.js'):root.OBTPStudioSubblocks;
  const LIMITS=Object.freeze({outsidePlanAreaM2:50,heightMm:5000,supportSpacingMm:6000});
  const PROGRAMS=Object.freeze({
   studio:{name:'Studio',use:'Non-residential creative / hobby workspace',zones:['Open workspace','Optional service / storage'],shares:[.8,.2],defaultBays:4,minBays:1},
@@ -97,6 +98,8 @@
    plan.nominalVolumeM3=block.width*plan.stepMm*block.length*plan.stepMm*scene.clear[2]/1e9;
    plan.referenceHeater={model:'Harvia The Wall SW80',minVolumeM3:7,maxVolumeM3:12};
    plan.referenceHeaterVolumeInRange=plan.nominalVolumeM3>=7&&plan.nominalVolumeM3<=12;
+   plan.subblocks=subblocks.solve(plan);
+   plan.functionallyValid=plan.subblocks.status==='spatial-candidate'; // Room allocation only; never a construction release.
    plan.technicalValid=false; // Nominal heater volume never proves finished fit or installation.
   }
   return {scene,metrics,program:PROGRAMS[preset],preset,plan,valid:true,classificationVerified:false,openingsEnabled:false};

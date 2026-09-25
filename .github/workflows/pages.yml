@@ -41,6 +41,8 @@ jobs:
           node _system/tests/matrix.cjs
           node tests/presets.cjs
           node tests/function-screen.cjs
+          node tests/subblocks.cjs
+          node tools/export_sauna_cad.cjs
       - name: Install browser verification
         run: |
           npm install --no-save playwright@1.55.0
