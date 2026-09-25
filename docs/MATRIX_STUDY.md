@@ -1,0 +1,9 @@
+# Studio Matrix research preview
+
+Matrix is a fourth Cassette selector entry with column and row controls. It imports the pinned System `dist/cassette/matrix.js`; Studio owns only input state, measured-dimensional screening and display. Studio, Workshop and Sauna continue to use the unchanged shared Cassette 01 generator.
+
+The 600 × 600 mm planning cell is measured between inner perimeter wall faces. A 195 mm wall/corner depth and outside 12 mm plywood face expand the displayed wall rectangle by 414 mm in each direction. Studio measures actual generated wall part bounds, not just the cell count. It measures full model height with roof and skins, even when the frame view hides panels. Until a structural bearer is generated and checked, the **entire clear transverse width** is screened against 6 m; a short tiled cassette is not misrepresented as a supported roof span.
+
+The preview clamps row/column controls against its conservative 50 m² outside-wall footprint and rejects out-of-range API input. At 8 × 15 it shows 49.084596 m², 43.2 m² nominal internal grid area, 2.576 m bare-frame height and a conservative 4.8 m bearing-width screen. A 8 × 16 result would exceed 50 m² and is disabled. These are dimensional screens, not certified Lithuanian statutory area, structural capacities or permit exemption. Matrix returns `valid:false`, `researchHold:true` even when its displayed geometry fits all three screens. No export/released output is offered.
+
+Corner posts, perimeter tiles and transverse seams are research pieces without fastening schedules, foundation supports, roof finish or openings. See the pinned System `docs/cassette/MATRIX_STUDY.md` for precise scope and unresolved structural choices. Continue physical and engineering research before Matrix is presented as a valid structural preset.

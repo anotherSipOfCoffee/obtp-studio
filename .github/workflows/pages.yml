@@ -38,6 +38,8 @@ jobs:
           python tools/prepare_system.py
           node _system/tests/catalogue.cjs
           node _system/tests/cassette.cjs
+          node _system/tests/matrix.cjs
+          node tests/presets.cjs
       - name: Install browser verification
         run: |
           npm install --no-save playwright@1.55.0
@@ -101,4 +103,3 @@ jobs:
         with:
           name: studio-live-variation-check
           path: studio-*.png
-
