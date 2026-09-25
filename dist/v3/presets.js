@@ -3,9 +3,9 @@
 (function(root){
  const LIMITS=Object.freeze({outsidePlanAreaM2:50,heightMm:5000,supportSpacingMm:6000});
  const PROGRAMS=Object.freeze({
-  studio:{name:'Studio',use:'Non-residential creative / hobby workspace',zones:['Open workspace','Optional service / storage'],defaultBays:4,minBays:1},
-  workshop:{name:'Workshop',use:'Non-residential auxiliary workshop',zones:['Uninterrupted work area','Work bench / storage allowance'],defaultBays:8,minBays:1},
-  sauna:{name:'Sauna',use:'Non-residential sauna / pirtis',zones:['Sauna room allowance','Washing allowance','Changing / rest allowance','Technical allowance'],defaultBays:10,minBays:8}
+  studio:{name:'Studio',use:'Non-residential creative / hobby workspace',zones:['Open workspace','Optional service / storage'],shares:[.8,.2],defaultBays:4,minBays:1},
+  workshop:{name:'Workshop',use:'Non-residential auxiliary workshop',zones:['Uninterrupted work area','Work bench / storage allowance'],shares:[.85,.15],defaultBays:8,minBays:1},
+  sauna:{name:'Sauna',use:'Non-residential sauna / pirtis',zones:['Sauna room allowance','Washing allowance','Changing / rest allowance','Technical allowance'],shares:[.35,.2,.35,.1],defaultBays:10,minBays:8}
  });
  function bounds(api,scene,filter){
   const models=new Map(scene.models.map(m=>[m.id,m])),low=[Infinity,Infinity,Infinity],high=[-Infinity,-Infinity,-Infinity];
