@@ -74,6 +74,7 @@ await page.screenshot({path:'studio-sauna.png',fullPage:true});
 await v3.locator('#bays').selectOption('10');
 await v3.locator('#sauna-circulation').selectOption('sharedTwoAccess');
 assert.equal(await v3.locator('.plan-door').count(),2);
+assert.match(await v3.locator('#program a').getAttribute('href'),/SAUNA_ROUTE_R04[.]md$/);
 assert.deepEqual(await v3.locator('canvas').evaluate(()=>[OBTPStudioV3.plan.exteriorAccessCandidates,OBTPStudioV3.plan.corridorAreaM2,OBTPStudioV3.plan.nominalVolumeM3]),[2,0,9.072]);
 await page.screenshot({path:'studio-sauna-shared-two-access.png',fullPage:true});
 await v3.locator('#sauna-circulation').selectOption('deadEnd');
