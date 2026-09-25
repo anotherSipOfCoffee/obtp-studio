@@ -1,0 +1,7 @@
+# Sauna CAD R14 · complete DXF for Archicad import
+
+Archicad reported the earlier lightweight R13 file as damaged. Its layer table had an invalid handle; ezdxf silently repaired that defect when reading, so the original parser-only check had missed it. This release reconstructs the source program geometry in a full AutoCAD 2010 ASCII DXF with standard drawing tables and explicit handles, then saves, reopens and audits every output. The seven R14 files have **zero audit errors and zero automatic fixes** after being written.
+
+The [one-file six-plan correction set](../dist/v3/cad/r14/OBTP_Sauna_All_Six_Plans_Archicad_R14.dxf) includes S, M and L, each without and with side storage. Each variant is an individual CAD BLOCK referenced once in model space, in three rows and two columns, with a label above it. Units are millimetres. The six [separate R14 DXFs](../dist/v3/cad/r14/) are also linked from the Studio Sauna controls. `tools/export_sauna_archicad.py` generates both from the same `tools/export_sauna_variants.cjs` solver-derived drawings; it requires `ezdxf` 1.4.x. The browser downloads the generated, audited files instead of building minimal DXF text when clicked.
+
+This repairs the known table defect and tests a second import parser. Archicad itself is not available in the build environment, so compatibility is pending a real import. The plans still contain proposed opening edges, accessory blocks, exterior shower and seat, and an unbuilt storage annex. They are correction studies, not construction drawings or a permit exemption claim.
