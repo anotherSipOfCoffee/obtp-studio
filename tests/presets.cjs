@@ -62,6 +62,21 @@ for(const bays of [8,10,18])for(const circulation of ['deadEnd','through'])for(l
 }
 const sharedTwo=p.create(api,{preset:'sauna',bays:10,saunaBlocks:{circulation:'sharedTwoAccess',saunaWidth:3,saunaLength:4,washLength:4}});
 assert.equal(sharedTwo.plan.exteriorAccessCandidates,2);assert.equal(sharedTwo.plan.corridorAreaM2,0);
+for(const bays of [12,18])for(const saunaWidth of [2,3,4])for(let saunaLength=2;saunaLength<=bays-8;saunaLength++)for(let washLength=2;washLength<=bays-8;washLength++){
+ const result=p.create(api,{preset:'sauna',bays,saunaBlocks:{circulation:'wetLobby',saunaWidth,saunaLength,washLength}}),plan=result.plan;
+ assert(plan.changingLength>=5);assert.equal(plan.blocks.find(b=>b.id==='lobby').length,2);
+ const cells=new Set();for(const block of plan.blocks)for(let y=block.y;y<block.y+block.length;y++)for(let x=block.x;x<block.x+block.width;x++){
+  const key=x+','+y;assert(!cells.has(key),'Wet-lobby blocks overlap at '+key);cells.add(key);
+ }
+ assert.equal(cells.size,plan.columns*plan.rows);assert.equal(plan.exteriorAccessCandidates,2);assert.equal(plan.lobbyAreaM2,4.32);
+ assert.equal(plan.corridorAreaM2,0);assert.equal(plan.technicalValid,false);
+ assert(result.metrics.area<=50&&result.metrics.height<=5000&&result.metrics.supportSpacing<=6000);
+}
+const lobby=p.create(api,{preset:'sauna',bays:12,saunaBlocks:{circulation:'wetLobby'}});
+assert.equal(lobby.metrics.area,33.201504);assert.equal(lobby.plan.changingLength,5);
+assert.equal(lobby.plan.blocks.find(b=>b.id==='sauna').y,7);
+assert.throws(()=>p.create(api,{preset:'sauna',bays:10,saunaBlocks:{circulation:'wetLobby'}}),/at least 12/);
+assert.throws(()=>p.create(api,{preset:'sauna',bays:12,saunaBlocks:{circulation:'wetLobby',saunaLength:5,washLength:4}}),/Changing\/rest/);
 assert.throws(()=>p.create(api,{preset:'sauna',bays:8,saunaBlocks:{circulation:'through',saunaLength:4,washLength:4}}),/Changing\/rest/);
 assert.throws(()=>p.create(api,{preset:'sauna',bays:10,saunaBlocks:{circulation:'bridge'}}),/Unknown Sauna circulation/);
 const studio=p.create(api,{preset:'studio',bays:10}),workshop=p.create(api,{preset:'workshop',bays:10}),sauna=p.create(api,{preset:'sauna',bays:10}),again=p.create(api,{preset:'studio',bays:10});
