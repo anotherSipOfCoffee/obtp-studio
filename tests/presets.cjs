@@ -84,4 +84,19 @@ assert.deepEqual([studio.metrics.area,workshop.metrics.area,sauna.metrics.area,a
 assert.equal(again.plan,null);
 assert.equal(p.create(api,{preset:'sauna',bays:10,saunaBlocks:{saunaWidth:3,saunaLength:4,washLength:4}}).plan.referenceHeaterVolumeInRange,true);
 assert.equal(p.create(api,{preset:'sauna',bays:10,saunaBlocks:{saunaWidth:2,saunaLength:4,washLength:4}}).plan.referenceHeaterVolumeInRange,false);
+for(const [size,circulation,bays,area] of [['s','shared',9,24.928704],['m','shared',11,30.443904],['l','wetLobby',14,38.716704],['l','through',14,38.716704]]){
+ const result=p.create(api,{preset:'sauna',bays:18,saunaSelection:{size,circulation,shower:'indoor'}});
+ assert.equal(result.bays,bays,'The selected whole plan determines cassette count');
+ assert.equal(result.metrics.area,area);
+ assert.equal(result.plan.selection.size,size);
+ assert.equal(result.plan.subblocks.status,'spatial-candidate');
+ assert.equal(result.plan.technicalValid,false);
+ assert.equal(result.metrics.valid,true);
+}
+const selectedLobby=p.create(api,{preset:'sauna',saunaSelection:{size:'l',circulation:'wetLobby'}});
+assert.equal(selectedLobby.plan.exteriorAccessCandidates,1);
+assert.equal(selectedLobby.plan.subblocks.outside.length,1);
+assert.throws(()=>p.curatedSauna('s','through'),/no tested layout/);
+assert.throws(()=>p.curatedSauna('m','shared','outdoor'),/research hold/);
+assert.throws(()=>p.curatedSauna('l','wetLobby','both'),/research hold/);
 console.log('PASS: shared Studio / Workshop / Sauna module, 49.75 m² bound, internal distinction, height and support gates');

@@ -3,6 +3,21 @@
 (function(root){
  const subblocks=typeof module!=='undefined'&&module.exports?require('./subblocks.js'):root.OBTPStudioSubblocks;
  const LIMITS=Object.freeze({outsidePlanAreaM2:50,heightMm:5000,supportSpacingMm:6000});
+ // Complete indoor planning briefs. Modules are derived from a vetted layout,
+ // never used as the primary Sauna product selector.
+ const SAUNA_CATALOGUE=Object.freeze({
+  s:Object.freeze({shared:Object.freeze({bays:9,saunaWidth:3,saunaLength:4,washLength:4})}),
+  m:Object.freeze({shared:Object.freeze({bays:11,saunaWidth:3,saunaLength:4,washLength:6})}),
+  l:Object.freeze({wetLobby:Object.freeze({bays:14,saunaWidth:3,saunaLength:4,washLength:6}),through:Object.freeze({bays:14,saunaWidth:3,saunaLength:3,washLength:5})})
+ });
+ function curatedSauna(size='m',circulation,shower='indoor'){
+  const variants=SAUNA_CATALOGUE[size];
+  if(!variants)throw Error('Unknown Sauna size');
+  circulation??=Object.keys(variants)[0];
+  if(!Object.hasOwn(variants,circulation))throw Error('This Sauna circulation has no tested layout at size '+size.toUpperCase());
+  if(shower!=='indoor')throw Error('Year-round exterior shower is a research hold: water, wastewater, frost protection and an exterior route have no generated solution');
+  return {bays:variants[circulation].bays,blocks:{...variants[circulation],circulation},size,circulation,shower};
+ }
  const PROGRAMS=Object.freeze({
   studio:{name:'Studio',use:'Non-residential creative / hobby workspace',zones:['Open workspace','Optional service / storage'],shares:[.8,.2],defaultBays:4,minBays:1},
   workshop:{name:'Workshop',use:'Non-residential auxiliary workshop',zones:['Uninterrupted work area','Work bench / storage allowance'],shares:[.85,.15],defaultBays:8,minBays:1},
@@ -69,8 +84,10 @@
   const checks={area:area>0&&area<=LIMITS.outsidePlanAreaM2+1e-9,height:height>0&&height<=LIMITS.heightMm,supportSpacing:supportSpacing>0&&supportSpacing<=LIMITS.supportSpacingMm};
   return {area,internalArea,height,supportSpacing,planWidth,planLength,checks,valid:Object.values(checks).every(Boolean)};
  }
- function create(api,{preset='studio',bays=4,columns=4,rows=4,height=2100,layer='all',saunaBlocks}={}){
+ function create(api,{preset='studio',bays=4,columns=4,rows=4,height=2100,layer='all',saunaBlocks,saunaSelection}={}){
   if(!Object.hasOwn(PROGRAMS,preset))throw Error('Unknown non-residential preset');
+  const curated=preset==='sauna'&&saunaSelection?curatedSauna(saunaSelection.size,saunaSelection.circulation,saunaSelection.shower):null;
+  if(curated){bays=curated.bays;saunaBlocks=curated.blocks;}
   if(preset==='matrix'){
    if(height!==2100)throw Error('Matrix prototype has fixed 2,100 mm walls');
    if(!root.OBTPMatrix)throw Error('Pinned System Matrix source is missing');
@@ -92,6 +109,14 @@
   if(!metrics.valid)throw Error('Outside LT I-group dimensional envelope: '+Object.entries(metrics.checks).filter(([,ok])=>!ok).map(([key])=>key).join(', '));
   const scene=api.generate({bays,height,layer,skin:false,connectionRevision:'revised'});
   const plan=preset==='sauna'?saunaPlan({bays,...saunaBlocks}):null;
+  if(curated){
+   plan.selection={size:curated.size,circulation:curated.circulation,shower:curated.shower};
+   if(curated.circulation==='wetLobby'){
+    plan.singleEntry=true;
+    plan.exteriorAccessCandidates=1;
+    plan.access='One proposed outside entry into changing/rest; a wet lobby separates both wet-room approaches';
+   }
+  }
   if(plan&&(scene.clear[0]<plan.gridWidthMm||scene.clear[1]<plan.gridLengthMm))throw Error('Sauna planning grid exceeds the generated clear interior');
   if(plan){
    const block=plan.blocks.find(b=>b.id==='sauna');
@@ -102,9 +127,9 @@
    plan.functionallyValid=plan.subblocks.status==='spatial-candidate'; // Room allocation only; never a construction release.
    plan.technicalValid=false; // Nominal heater volume never proves finished fit or installation.
   }
-  return {scene,metrics,program:PROGRAMS[preset],preset,plan,valid:true,classificationVerified:false,openingsEnabled:false};
+  return {scene,metrics,program:PROGRAMS[preset],preset,plan,bays,valid:true,classificationVerified:false,openingsEnabled:false};
  }
- const exported={LIMITS,PROGRAMS,bounds,measure,saunaPlan,create};
+ const exported={LIMITS,PROGRAMS,SAUNA_CATALOGUE,curatedSauna,bounds,measure,saunaPlan,create};
  if(typeof module!=='undefined')module.exports=exported;
  root.OBTPStudioPresets=exported;
 })(typeof window==='undefined'?globalThis:window);

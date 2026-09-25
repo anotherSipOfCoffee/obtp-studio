@@ -29,29 +29,12 @@
   const option=document.createElement('option');option.value=String(n);option.textContent=n+' '+(id==='columns'?'columns':'rows')+' · '+(n*.6).toFixed(1)+' m';$(id).append(option);
  }
  $('columns').value='4';$('rows').value='4';
- for(const id of ['sauna-length','wash-length'])for(let n=2;n<=15;n++){
-  const option=document.createElement('option');option.value=String(n);option.textContent=n+' steps · '+(n*.6).toFixed(1)+' m allocated';$(id).append(option);
- }
- $('sauna-length').value='4';$('wash-length').value='4';
- let previousCirculation='shared',savedSharedBlocks=null;
- const shared=c=>c==='shared'||c==='sharedTwoAccess'||c==='wetLobby';
- function saunaBlocks(){return {circulation:$('sauna-circulation').value,saunaWidth:Number($('sauna-width').value),saunaLength:Number($('sauna-length').value),washLength:Number($('wash-length').value)};}
- function limitSauna(changed){
-  const circulation=$('sauna-circulation').value,lobby=circulation==='wetLobby',isShared=shared(circulation);
-  if(lobby&&Number($('bays').value)<12)$('bays').value='12';
-  for(const option of $('bays').options)option.disabled=Number(option.value)<(lobby?12:8);
-  const available=Number($('bays').value)-(lobby?8:3); // reserve five changing rows and two lobby rows in R05
-  $('sauna-width-field').hidden=!isShared;
-  $('sauna-circulation-note').textContent=lobby?'R05 study: at least 12 modules, five changing rows and a two-row wet lobby before the Sauna and washing blocks. The two outside entries remain unbuilt.':isShared?'Changing/rest occupies the front and accesses both wet blocks. The two-side-access study reserves a dry crossing through this space.':'A 1.2 m nominal side corridor connects changing, washing and sauna. All three rooms have 2.4 m allocated width; their lengths plus at least 1.2 m for changing must fit the current modules.';
-  if(!isShared){
-   $('sauna-length').value=String(Math.min(Number($('sauna-length').value),available-2));
-   $('wash-length').value=String(Math.min(Number($('wash-length').value),available-Number($('sauna-length').value)));
-  }
-  for(const id of ['sauna-length','wash-length']){
-   const max=isShared?available:available-Number($(id==='sauna-length'?'wash-length':'sauna-length').value);
-   if(Number($(id).value)>max)$(id).value=String(max);
-   for(const option of $(id).options)option.disabled=Number(option.value)>max;
-  }
+ function limitSauna(){
+  const variants=presets.SAUNA_CATALOGUE[$('sauna-size').value];
+  for(const option of $('sauna-circulation').options)option.disabled=!Object.hasOwn(variants,option.value);
+  if(!Object.hasOwn(variants,$('sauna-circulation').value))$('sauna-circulation').value=Object.keys(variants)[0];
+  const chosen=presets.curatedSauna($('sauna-size').value,$('sauna-circulation').value);
+  $('sauna-circulation-note').textContent=chosen.bays+' cassette modules · '+(chosen.circulation==='through'?'two site accesses required; the through corridor is a conditional study':chosen.circulation==='wetLobby'?'wet lobby and one proposed outside entry; its original two-access drawing requires revision':'one entry and a shared changing/rest route')+'. Outdoor-only and combined showers need a year-round exterior route, frost-safe supply and wastewater design before selection.';
  }
  const area=(c,r)=>((600*c+414)*(600*r+414))/1e6;
  function limitMatrix(changed){
@@ -64,13 +47,15 @@
  }
  function render(){
   try {
-   const bays=Number($('bays').value);
+   const sauna=$('preset').value==='sauna';
+   const selection=sauna?{size:$('sauna-size').value,circulation:$('sauna-circulation').value,shower:$('sauna-shower').value}:null;
+   const bays=sauna?presets.curatedSauna(selection.size,selection.circulation,selection.shower).bays:Number($('bays').value);
    const columns=Number($('columns').value),rows=Number($('rows').value),isMatrix=$('preset').value==='matrix';
-   const {scene,metrics,program,preset,plan,researchHold}=presets.create(api,{preset:$('preset').value,bays,columns,rows,height,layer:$('layer').value,saunaBlocks:saunaBlocks()});
+   const {scene,metrics,program,preset,plan,researchHold}=presets.create(api,{preset:$('preset').value,bays,columns,rows,height,layer:$('layer').value,saunaSelection:selection});
    for(const m of renderer.meshes.values())for(const p of m.parts)renderer.gl.deleteBuffer(p.buffer);
    renderer.meshes.clear();scene.models.forEach(m=>renderer.register(m));
    currentScene=scene;currentPlan=plan;cut=null;
-   $('assembly-title').textContent=isMatrix?columns+' × '+rows+' Matrix cells · research prototype':bays+' module cassette · '+program.name;
+   $('assembly-title').textContent=isMatrix?columns+' × '+rows+' Matrix cells · research prototype':sauna?'Sauna '+selection.size.toUpperCase()+' · '+bays+' cassette modules':bays+' module cassette · '+program.name;
    $('dimensions').textContent=isMatrix?scene.clear[0].toLocaleString('en')+' × '+scene.clear[1].toLocaleString('en')+' mm inner-face grid · '+height.toLocaleString('en')+' mm wall height':scene.length.toLocaleString('en')+' × '+scene.width.toLocaleString('en')+' mm setting-out · '+height.toLocaleString('en')+' mm wall height';
    $('status').textContent=isMatrix?scene.items.length+' study components · geometry preview only':scene.items.length+' cassette instances · geometry ready'+(plan?' · Sauna plan under review':'');
    const fmt=n=>n.toFixed(2),mm=n=>(n/1000).toFixed(3);
@@ -85,11 +70,11 @@
    $('program').replaceChildren();const heading=document.createElement('strong');heading.textContent=isMatrix?'Matrix · 600 mm coordination':program.name+' · program allowances';const use=document.createElement('p');use.textContent=program.use;$('program').append(heading,use);
    if(isMatrix){const detail=document.createElement('p');detail.textContent=(columns*rows)+' planning cells · '+columns+' columns × '+rows+' rows. Straight wall bays use the shared 600 mm cassette; floors and roofs are grouped up to 2,400 × 1,200 mm with separate perimeter pieces.';const caveat=document.createElement('small');caveat.textContent='Walls follow only the outside boundary. The corner posts and bearing details are placeholders; no room partitions, openings, supports or verified connections are generated.';$('program').append(detail,caveat);}
    else if(plan){
-    heading.textContent='Sauna · adjustable program blocks';
+    heading.textContent='Sauna '+selection.size.toUpperCase()+' · curated indoor plan study';
     const diagram=document.createElement('div');diagram.className='sauna-plan';diagram.setAttribute('role','img');diagram.setAttribute('aria-label','Plan grid: '+plan.access);
     diagram.style.gridTemplateColumns=`repeat(${plan.columns},1fr)`;diagram.style.gridTemplateRows=`repeat(${plan.rows},minmax(28px,1fr))`;
     for(const block of plan.blocks){const el=document.createElement('div');el.className='sauna-block '+block.id;el.style.gridColumn=`${block.x+1} / span ${block.width}`;el.style.gridRow=`${block.y+1} / span ${block.length}`;el.textContent=`${block.label} · ${(block.width*.6).toFixed(1)} × ${(block.length*.6).toFixed(1)} m allocated`;diagram.append(el);}
-    for(const side of ({shared:['front'],sharedTwoAccess:['west','east'],wetLobby:['west','east'],deadEnd:['front'],through:['front','rear']})[plan.circulation]){const mark=document.createElement('span');mark.className='plan-door '+side;mark.setAttribute('aria-hidden','true');if(plan.circulation==='shared')mark.style.left='43%';diagram.append(mark);}
+    for(const side of ({shared:['front'],sharedTwoAccess:['west','east'],wetLobby:['front'],deadEnd:['front'],through:['front','rear']})[plan.circulation]){const mark=document.createElement('span');mark.className='plan-door '+side;mark.setAttribute('aria-hidden','true');if(plan.circulation==='shared'||plan.circulation==='wetLobby')mark.style.left='43%';diagram.append(mark);}
     const facts=document.createElement('div');facts.className='block-facts';
     const p=document.createElement('p');p.textContent=`Planning grid ${plan.gridWidthMm.toLocaleString('en')} × ${plan.gridLengthMm.toLocaleString('en')} mm within ${scene.clear[0].toLocaleString('en')} × ${scene.clear[1].toLocaleString('en')} mm clear interior; perimeter residual and partition/finish thickness remain unassigned.`;facts.append(p);
     const flow=document.createElement('p');flow.textContent=`${plan.access}. ${plan.exteriorAccessCandidates} candidate outside ${plan.exteriorAccessCandidates===1?'access':'accesses'}; ${plan.corridorAreaM2.toFixed(2)} m² allocated to a separate corridor${plan.lobbyAreaM2?`; ${plan.lobbyAreaM2.toFixed(2)} m² to the wet lobby`:''}.`;facts.append(flow);
@@ -99,7 +84,7 @@
     const download=document.createElement('button');download.type='button';download.id='download-cad';download.textContent='Download CAD blocks · DXF';download.disabled=plan.subblocks.status!=='spatial-candidate'||!functionScreen.screenSauna(plan).spatialCandidate;
     download.addEventListener('click',()=>{const contents=window.OBTPStudioCAD.exportDXF(plan.subblocks,plan,scene),url=URL.createObjectURL(new Blob([contents],{type:'application/dxf'})),a=document.createElement('a');a.href=url;a.download=`obtp-sauna-${plan.circulation}-${bays}-study.dxf`;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);});
     const cadNote=document.createElement('small');cadNote.textContent='Editable BLOCK/INSERT CAD study. DXF opens in DWG-capable software; no native DWG file or built opening is generated.';
-    const reference=document.createElement('p'),link=document.createElement('a');link.href='https://github.com/anotherSipOfCoffee/obtp-studio/blob/main/docs/'+({shared:'SAUNA_MANUAL_PLAN_R01.md',sharedTwoAccess:'SAUNA_ROUTE_R04.md',wetLobby:'SAUNA_WET_LOBBY_R05.md',deadEnd:'SAUNA_CIRCULATION_R03.md',through:'SAUNA_CIRCULATION_R03.md'})[plan.circulation];link.target='_blank';link.rel='noopener';link.textContent=plan.circulation==='shared'?'Review the 10-module manual plan R01 ↗':plan.circulation==='sharedTwoAccess'?'Review the two-access whole-plan study R04 ↗':plan.circulation==='wetLobby'?'Review the wet-lobby whole-plan study R05 ↗':'Compare complete circulation layouts R03 ↗';reference.append(link);$('program').append(diagram,facts,placement,download,cadNote,caveat,reference);
+    const reference=document.createElement('p'),link=document.createElement('a');link.href='https://github.com/anotherSipOfCoffee/obtp-studio/blob/main/docs/SAUNA_CURATED_SIZES_R07.md';link.target='_blank';link.rel='noopener';link.textContent='Review curated Sauna plans and unresolved details ↗';reference.append(link);$('program').append(diagram,facts,placement,download,cadNote,caveat,reference);
    }else{const diagram=document.createElement('div');diagram.className='zone-plan';diagram.setAttribute('aria-label',program.name+' conceptual program allocation');for(let i=0;i<program.zones.length;i++){const zone=document.createElement('span');zone.style.width=(program.shares[i]*100)+'%';zone.textContent=program.zones[i];diagram.append(zone);}const caveat=document.createElement('small');caveat.textContent='Concept allocation across the interior length, without partitions, access openings, services or wet-room assembly in the generated model.';$('program').append(diagram,caveat);}
    const functionResult=functionScreen.screen(preset,scene,metrics,plan);
    $('function-screen').replaceChildren();$('function-screen').hidden=!functionResult;
@@ -117,19 +102,14 @@
    showView();
   } catch(e){$('status').textContent=e.message;$('envelope').textContent='Outside I-group envelope · '+e.message;window.OBTPStudioV3=null;currentScene=null;cut=null;renderer.setScene([]);$('floor-plan').replaceChildren();$('function-screen').replaceChildren();$('schedule').replaceChildren();}
  }
- $('preset').addEventListener('change',()=>{const matrix=$('preset').value==='matrix',sauna=$('preset').value==='sauna';$('matrix-fields').hidden=!matrix;$('bays-field').hidden=matrix;$('sauna-fields').hidden=!sauna;
+ $('preset').addEventListener('change',()=>{const matrix=$('preset').value==='matrix',sauna=$('preset').value==='sauna';$('matrix-fields').hidden=!matrix;$('bays-field').hidden=matrix||sauna;$('sauna-fields').hidden=!sauna;
   if(matrix){$('rows').value=$('bays').value;limitMatrix('rows');}
-  else{const min=presets.PROGRAMS[$('preset').value].minBays;if(Number($('bays').value)<min)$('bays').value=String(min);for(const o of $('bays').options)o.disabled=Number(o.value)<min;}
+  else if(!sauna){const min=presets.PROGRAMS[$('preset').value].minBays;if(Number($('bays').value)<min)$('bays').value=String(min);for(const o of $('bays').options)o.disabled=Number(o.value)<min;}
   if(sauna)limitSauna();render();});
  for(const id of ['columns','rows'])$(id).addEventListener('change',()=>{limitMatrix(id);render();});
- $('bays').addEventListener('change',()=>{if($('preset').value==='sauna')limitSauna();render();});
- $('sauna-circulation').addEventListener('change',()=>{
-  const next=$('sauna-circulation').value;
-  if(shared(previousCirculation)&&!shared(next)){savedSharedBlocks={width:$('sauna-width').value,sauna:$('sauna-length').value,wash:$('wash-length').value};$('sauna-length').value='3';$('wash-length').value='3';}
-  if(!shared(previousCirculation)&&shared(next)&&savedSharedBlocks){$('sauna-width').value=savedSharedBlocks.width;$('sauna-length').value=savedSharedBlocks.sauna;$('wash-length').value=savedSharedBlocks.wash;}
-  previousCirculation=next;limitSauna();render();
- });
- for(const id of ['sauna-width','sauna-length','wash-length'])$(id).addEventListener('change',()=>{limitSauna(id);render();});
+ $('bays').addEventListener('change',render);
+ for(const id of ['sauna-size','sauna-circulation'])$(id).addEventListener('change',()=>{limitSauna();render();});
+ $('sauna-shower').addEventListener('change',render);
  $('layer').addEventListener('change',render);
  for(const button of document.querySelectorAll('[data-view]'))button.addEventListener('click',()=>{view=button.dataset.view;showView();});
  $('explode').addEventListener('input',()=>{$('amount').textContent=$('explode').value+'%';renderer.explode=Number($('explode').value)/100;renderer.draw();});
