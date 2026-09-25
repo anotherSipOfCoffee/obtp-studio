@@ -1,6 +1,6 @@
 # Shared Studio presets and dimensional gate
 
-Studio, Workshop and Sauna use `dist/v3/presets.js` to configure the same pinned `OBTPCassette.generate` implementation. Presets alter labels and spatial allowances; they do not add partitions, openings, plumbing or thermal layers. Switching keeps the current module count, except Sauna raises counts below eight to eight. Studio v1 remains the original independent conceptual reference; v2 remains the WikiHouse assembly, with its own unchanged 1–8 bay controls. The preset selector applies to v3 Cassette 01.
+Studio, Workshop and Sauna use `dist/v3/presets.js` to configure the same pinned `OBTPCassette.generate` implementation. Presets alter labels and spatial allowances, shown as a proportional concept diagram; they do not add partitions, openings, plumbing or thermal layers. Switching keeps the current module count, except Sauna raises counts below eight to eight. Studio v1 remains the original independent conceptual reference; v2 remains the WikiHouse assembly, with its own unchanged 1–8 bay controls. The preset selector applies to v3 Cassette 01.
 
 ## Existing measurements
 
