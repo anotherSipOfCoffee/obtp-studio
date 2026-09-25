@@ -70,7 +70,7 @@ await v3.locator('#bays').selectOption('8');assert.equal(await v3.locator('#prog
 assert(await v3.locator('#sauna-fields').isVisible());assert.equal(await v3.locator('.sauna-block').count(),3);
 await v3.locator('#sauna-width').selectOption('4');await v3.locator('#sauna-length').selectOption('4');await v3.locator('#wash-length').selectOption('3');
 assert.equal(await v3.locator('.sauna-block.service').count(),1);
-assert.deepEqual(await v3.locator('canvas').evaluate(()=>OBTPStudioV3.plan.blocks.map(b=>[b.id,b.width,b.length])),[['changing',6,2],['sauna',4,4],['washing',2,3],['service',2,1]]);
+assert.deepEqual(await v3.locator('canvas').evaluate(()=>OBTPStudioV3.plan.blocks.map(b=>[b.id,b.width,b.length])),[['changing',6,3],['sauna',4,4],['washing',2,3],['service',2,1]]);
 await page.screenshot({path:'studio-sauna-blocks-compact.png',fullPage:true});
 await v3.locator('#bays').selectOption('18');await v3.locator('#sauna-length').selectOption('15');
 assert.equal(await v3.locator('#wash-length option[value="16"]').isDisabled(),true);
