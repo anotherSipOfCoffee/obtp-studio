@@ -10,10 +10,12 @@
  });
  // A spatial planning layer only. Coordinates follow the 600 mm cassette
  // setting-out; no internal walls or openings are added to System geometry.
- function saunaPlan({bays,saunaWidth=3,saunaLength=4,washLength=4,circulation='shared'}={}){
+ function saunaPlan({bays,saunaWidth=3,saunaLength,washLength,circulation='shared'}={}){
   if(!Number.isInteger(bays)||bays<8||bays>18)throw Error('Sauna needs 8–18 cassette modules');
   if(!['shared','sharedTwoAccess','wetLobby','deadEnd','through'].includes(circulation))throw Error('Unknown Sauna circulation study');
   if(circulation==='wetLobby'&&bays<12)throw Error('Wet-lobby Sauna study needs at least 12 cassette modules');
+  const baseLength=circulation==='deadEnd'||circulation==='through'?3:4;
+  saunaLength??=baseLength;washLength??=baseLength;
   const columns=6,rows=bays-1,washWidth=columns-saunaWidth;
   if(![saunaWidth,saunaLength,washLength].every(Number.isInteger)||saunaWidth<2||saunaWidth>4||saunaLength<2||washLength<2)
    throw Error('Sauna block dimensions must be whole 600 mm steps within their ranges');
