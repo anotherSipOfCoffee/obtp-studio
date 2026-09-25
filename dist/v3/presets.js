@@ -80,6 +80,13 @@
   const scene=api.generate({bays,height,layer,skin:false,connectionRevision:'revised'});
   const plan=preset==='sauna'?saunaPlan({bays,...saunaBlocks}):null;
   if(plan&&(scene.clear[0]<plan.gridWidthMm||scene.clear[1]<plan.gridLengthMm))throw Error('Sauna planning grid exceeds the generated clear interior');
+  if(plan){
+   const block=plan.blocks.find(b=>b.id==='sauna');
+   plan.nominalVolumeM3=block.width*plan.stepMm*block.length*plan.stepMm*scene.clear[2]/1e9;
+   plan.referenceHeater={model:'Harvia The Wall SW80',minVolumeM3:7,maxVolumeM3:12};
+   plan.referenceHeaterVolumeInRange=plan.nominalVolumeM3>=7&&plan.nominalVolumeM3<=12;
+   plan.technicalValid=false; // Nominal heater volume never proves finished fit or installation.
+  }
   return {scene,metrics,program:PROGRAMS[preset],preset,plan,valid:true,classificationVerified:false,openingsEnabled:false};
  }
  const exported={LIMITS,PROGRAMS,bounds,measure,saunaPlan,create};
