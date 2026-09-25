@@ -65,6 +65,8 @@ assert.equal(await v3.locator('#envelope').textContent().then(x=>x.includes('49.
 await v3.locator('#preset').selectOption('workshop');assert.equal(await v3.locator('#bays').inputValue(),'18');
 await page.screenshot({path:'studio-workshop.png',fullPage:true});
 await v3.locator('#preset').selectOption('sauna');assert.equal(await v3.locator('#bays').inputValue(),'18');
+assert.deepEqual([await v3.locator('#sauna-length').inputValue(),await v3.locator('#wash-length').inputValue()],['4','4']);
+assert.match(await v3.locator('#program a').getAttribute('href'),/SAUNA_MANUAL_PLAN_R01[.]md$/);
 await page.screenshot({path:'studio-sauna.png',fullPage:true});
 await v3.locator('#bays').selectOption('8');assert.equal(await v3.locator('#program').textContent().then(x=>x.includes('Washing / bathing')),true);
 assert(await v3.locator('#sauna-fields').isVisible());assert.equal(await v3.locator('.sauna-block').count(),3);
