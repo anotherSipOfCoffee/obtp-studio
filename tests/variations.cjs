@@ -85,6 +85,8 @@ assert.equal(await v3.locator('#envelope').textContent().then(x=>x.includes('49.
 await v3.locator('#preset').selectOption('workshop');assert.equal(await v3.locator('#bays').inputValue(),'18');
 await page.screenshot({path:'studio-workshop.png',fullPage:true});
 await v3.locator('#preset').selectOption('sauna');
+assert.equal(await v3.locator('#solved-view').getAttribute('aria-pressed'),'true');
+assert(await v3.locator('#solved-plan').isVisible());
 assert(!(await v3.locator('#bays-field').isVisible()),'Sauna size replaces the raw module-count control');
 assert.equal(await v3.locator('#sauna-size').inputValue(),'m');
 assert(!(await v3.locator('#sauna-storage').isChecked()));
@@ -98,6 +100,9 @@ for(const [size,bays,area] of [['s',4,'11.14'],['m',5,'13.90'],['l',6,'16.66']])
  assert.equal(await v3.locator('canvas').evaluate(()=>OBTPStudioV3.plan.technicalValid),false);
  assert.match(await v3.locator('#envelope').textContent(),new RegExp(area+' / 50.00'));
  assert(await v3.locator('#download-cad').isEnabled());
+ assert.match(await v3.locator('#solved-plan').getAttribute('src'),new RegExp(`sauna-${size}-open[.]svg$`));
+ await v3.locator('#solved-plan').evaluate(img=>img.decode());
+ assert(await v3.locator('#solved-plan').evaluate(img=>img.naturalWidth>0));
  await page.screenshot({path:'studio-sauna-'+size+'.png',fullPage:true});
 }
 await v3.locator('[data-view="plan"]').click();
@@ -114,6 +119,11 @@ assert.equal(await v3.locator('canvas').evaluate(()=>OBTPStudioV3.plan.subblocks
 assert.equal(await v3.locator('canvas').evaluate(()=>OBTPStudioV3.plan.subblocks.components.some(c=>c.kind==='storage')),true);
 assert.equal(await v3.locator('canvas').evaluate(()=>OBTPStudioV3.plan.subblocks.components.some(c=>c.kind==='outdoor-seat')),true);
 assert.equal(await v3.locator('#floor-plan [data-cad-block="outside-seat"]').count(),1);
+await v3.locator('#solved-view').click();
+assert.match(await v3.locator('#solved-plan').getAttribute('src'),/sauna-l-storage[.]svg$/);
+await v3.locator('#solved-plan').evaluate(img=>img.decode());
+await v3.locator('[data-view="plan"]').click();
+await v3.locator('#program details summary').click();
 const [saunaCAD]=await Promise.all([page.waitForEvent('download'),v3.locator('#download-cad').click()]);
 assert.equal(saunaCAD.suggestedFilename(),'OBTP_Sauna_L_Side_Storage_Archicad_R14.dxf');
 const cadBytes=fs.readFileSync(await saunaCAD.path(),'utf8');
