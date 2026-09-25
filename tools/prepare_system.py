@@ -21,3 +21,7 @@ for relative in ["dist/index.html", "dist/v2/index.html", "dist/v2/app.js", "dis
         raise SystemExit("Missing deployment version token: " + relative)
     file.write_text(text.replace("__STUDIO_BUILD__", revision).replace("__SYSTEM_COMMIT_SHORT__", head[:12]).replace("__SYSTEM_COMMIT__", head))
 
+
+# Finite Sauna catalogue is compiled from the canonical GH/Python source.
+subprocess.run(["python", str(source / "authoring/grasshopper/export_web.py"),
+                str(root / "dist/v3/generated"), "--revision", head], check=True)
