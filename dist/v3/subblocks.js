@@ -71,7 +71,7 @@
   for(const d of candidates)for(const item of components.filter(i=>i.room===d.to))if(overlap(d.sweep,item.rect,40))failures.push(d.id+' swing intersects '+item.id);
   const outside=[];
   if(rooms.corridor){outside.push(entry('entry-front','corridor',rooms,'front',900));if(plan.circulation==='through')outside.push(entry('entry-rear','corridor',rooms,'rear',900));}
-  else if(plan.circulation==='shared')outside.push(entry('entry-front','changing',rooms,'front',900));
+  else if(plan.circulation==='shared'||plan.singleEntry)outside.push(entry('entry-front','changing',rooms,'front',900));
   else {outside.push(entry('entry-west','changing',rooms,'west',900,changing.y+600));outside.push(entry('entry-east','changing',rooms,'east',900,changing.y+600));}
   if(outside.some(x=>!x))failures.push('An outside entry candidate does not fit its nominal wall');
   if(plan.circulation==='shared'||plan.circulation==='sharedTwoAccess')warnings.push('The preferred shower-linked route requires a new Sauna–washing partition door; the R02 manually placed heater must be reoriented.');
