@@ -50,6 +50,20 @@ for(const bays of [8,10,18])for(const saunaWidth of [2,3,4])for(let saunaLength=
 }
 assert.throws(()=>p.create(api,{preset:'sauna',bays:8,saunaBlocks:{saunaLength:6}}),/Changing\/rest/);
 assert.throws(()=>p.create(api,{preset:'sauna',bays:8,saunaBlocks:{saunaWidth:5}}),/block dimensions/);
+for(const bays of [8,10,18])for(const circulation of ['deadEnd','through'])for(let saunaLength=2;saunaLength<=bays-5;saunaLength++)for(let washLength=2;washLength<=bays-3-saunaLength;washLength++){
+ const result=p.create(api,{preset:'sauna',bays,saunaBlocks:{circulation,saunaLength,washLength}}),plan=result.plan;
+ const cells=new Set();for(const block of plan.blocks)for(let y=block.y;y<block.y+block.length;y++)for(let x=block.x;x<block.x+block.width;x++){
+  const key=x+','+y;assert(!cells.has(key),'Corridor blocks overlap at '+key);cells.add(key);
+ }
+ assert.equal(cells.size,plan.columns*plan.rows);assert.equal(plan.blocks.find(b=>b.id==='corridor').length,plan.rows);
+ assert(plan.blocks.filter(b=>['sauna','washing','changing'].includes(b.id)).every(b=>b.x===2&&b.width===4));
+ assert.equal(plan.exteriorAccessCandidates,circulation==='through'?2:1);assert.equal(plan.corridorAreaM2,1200*plan.rows*600/1e6);
+ assert.equal(plan.technicalValid,false);assert(result.metrics.area<=50&&result.metrics.height<=5000&&result.metrics.supportSpacing<=6000);
+}
+const sharedTwo=p.create(api,{preset:'sauna',bays:10,saunaBlocks:{circulation:'sharedTwoAccess',saunaWidth:3,saunaLength:4,washLength:4}});
+assert.equal(sharedTwo.plan.exteriorAccessCandidates,2);assert.equal(sharedTwo.plan.corridorAreaM2,0);
+assert.throws(()=>p.create(api,{preset:'sauna',bays:8,saunaBlocks:{circulation:'through',saunaLength:4,washLength:4}}),/Changing\/rest/);
+assert.throws(()=>p.create(api,{preset:'sauna',bays:10,saunaBlocks:{circulation:'bridge'}}),/Unknown Sauna circulation/);
 const studio=p.create(api,{preset:'studio',bays:10}),workshop=p.create(api,{preset:'workshop',bays:10}),sauna=p.create(api,{preset:'sauna',bays:10}),again=p.create(api,{preset:'studio',bays:10});
 assert.deepEqual([studio.metrics.area,workshop.metrics.area,sauna.metrics.area,again.metrics.area],Array(4).fill(studio.metrics.area));
 assert.equal(again.plan,null);
