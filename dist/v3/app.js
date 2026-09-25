@@ -110,7 +110,7 @@
     const detail=document.createElement('a');detail.href='https://github.com/anotherSipOfCoffee/obtp-studio/blob/main/docs/FUNCTIONAL_VARIANTS_R01.md';detail.target='_blank';detail.rel='noopener';detail.textContent='Read variant comparison and remaining checks ↗';$('function-screen').append(detail);}
    $('schedule').replaceChildren();
    const volume=isMatrix?null:api.woodVolume(api.generate({bays,height,layer:'all',skin:true,connectionRevision:'revised',includeFoundation:true}));
-   $('wood-total').textContent=volume?`Modelled wood: ${volume.total.toFixed(3)} m³ · timber ${volume.timber.toFixed(3)} + plywood ${volume.plywood.toFixed(3)} m³`:'Wood quantity awaits a verified Matrix material schedule';
+   $('wood-total').textContent=volume?`Modelled wood in generated cassette shell: ${volume.total.toFixed(3)} m³ · timber ${volume.timber.toFixed(3)} + plywood ${volume.plywood.toFixed(3)} m³${sauna?' · solved-plan fit and side storage excluded':''}`:'Wood quantity awaits a verified Matrix material schedule';
    for(const row of api.schedule(scene)){
     const tr=document.createElement('tr');
     const role=row.id.startsWith('FOUNDATION')?'Foundation bearing study':row.id.startsWith('F600')||row.id.startsWith('M-F')?'Floor cassette':row.id.startsWith('R600')||row.id.startsWith('M-R')?'Roof cassette':row.id.startsWith('M-CORNER')?'Corner study':'Wall cassette';
