@@ -105,13 +105,15 @@ assert.equal(await v3.locator('#floor-plan [data-cad-block="shower"]').count(),0
 assert.equal(await v3.locator('#floor-plan [data-cad-block="outside-shower"]').count(),1);
 await v3.locator('#sauna-storage').check();
 assert.equal(await v3.locator('#floor-plan [data-block]').count(),3);
-assert.equal(await v3.locator('#floor-plan [data-cad-door]').count(),4);
-assert.equal(await v3.locator('canvas').evaluate(()=>OBTPStudioV3.bays),8);
-assert.equal(await v3.locator('canvas').evaluate(()=>OBTPStudioV3.plan.subblocks.outside.some(d=>d.id==='storage-entry-rear')),true);
+assert.equal(await v3.locator('#floor-plan [data-cad-door]').count(),3);
+assert.equal(await v3.locator('canvas').evaluate(()=>OBTPStudioV3.bays),6);
+assert.equal(await v3.locator('canvas').evaluate(()=>OBTPStudioV3.plan.blocks.find(b=>b.id==='storage').x),7);
+assert.equal(await v3.locator('canvas').evaluate(()=>OBTPStudioV3.plan.blocks.find(b=>b.id==='storage').y),0);
+assert.equal(await v3.locator('canvas').evaluate(()=>OBTPStudioV3.plan.subblocks.outside.some(d=>d.id==='storage-entry-side')),true);
 assert.equal(await v3.locator('canvas').evaluate(()=>OBTPStudioV3.plan.subblocks.components.some(c=>c.kind==='storage')),true);
 assert.equal(await v3.locator('canvas').evaluate(()=>OBTPStudioCAD.exportDXF(OBTPStudioV3.plan.subblocks,OBTPStudioV3.plan,OBTPStudioV3.scene).includes('OBTP_OUTDOOR_SHOWER_STUDY')),true);
 await page.screenshot({path:'studio-sauna-l-storage-plan.png',fullPage:true});
-for(const [size,bays,area] of [['s',6,'16.66'],['m',7,'19.41'],['l',8,'22.17']]){
+for(const [size,bays,area] of [['s',4,'11.14'],['m',5,'13.90'],['l',6,'16.66']]){
  await v3.locator('#sauna-size').selectOption(size);
  assert.equal(await v3.locator('canvas').evaluate(()=>OBTPStudioV3.bays),bays);
  assert.match(await v3.locator('#envelope').textContent(),new RegExp(area+' / 50.00'));
