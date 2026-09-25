@@ -1,0 +1,7 @@
+# Studio v3 linked views R01
+
+Studio v3 now presents 3D, Cut and Plan as views of one System-generated cassette configuration. Changing the preset, cassette count, layer or Sauna program dimensions updates the same configuration in the active view. The plan is a horizontal section of the generated, skinned exterior wall assets at **1,100 mm above the modeled floor surface** (floor surface Z = 238 mm; section Z = 1,338 mm). It draws each wall asset intersection from its world bounds. Sauna program rectangles use the same plan's 600 mm grid and are centered within the modeled footprint; dashed lines designate **unbuilt planning allowances**, not partitions or doors.
+
+The Cut view clips the rendered structural frame at the same Z = 1,338 mm plane and hides roof cassette objects. It is a display-only derivative; the full source scene, schedules and envelope checks remain unchanged. It does not add a section cap, wall assembly, access opening, waterproofing, or technical installation. System still owns source geometry and placement. The camera holds a 45° plan angle and fixed elevation across 3D/Cut, with wheel zoom available and Reset returning to the fixed orientation.
+
+The original 3D layer and exploded controls remain available. Plan always depicts the complete exterior wall section even when a subset of assembly layers is selected, so its underlying building outline remains linked to the generated full configuration. The plan coordinates and modeled section are research geometry; they are not measured finished clear dimensions or approval drawings.
