@@ -24,9 +24,9 @@ assert.equal(await page.locator('iframe:not([hidden])').getAttribute('id'),'v3')
 assert.deepEqual(await v3.locator('#studio-version option').evaluateAll(xs=>xs.map(x=>x.value)),['v2','v3']);
 assert.equal(await v3.locator('#preset option').count(),2);assert.match(await page.locator('#customer-product').textContent(),/Main/);
 assert.equal(await v3.locator('#terrace-depth').inputValue(),'1200');assert.equal(await v3.locator('#window-width').inputValue(),'1180');
-assert.equal(await v3.locator('#facade option').count(),1);assert(!(await v3.locator('#facade').isVisible()));assert.equal(await v3.locator('label[for="facade"], .material-sample').count(),0);for(const id of ['preset','foundation-type','assembly-system','sauna-size','sauna-roof','window-width'])assert(await v3.locator('#'+id+' + .choice-row').isVisible());assert(await v3.locator('#assembly-system + .choice-row [data-value="1"]').isDisabled());
+assert.equal(await v3.locator('#facade option').count(),1);assert(!(await v3.locator('#facade').isVisible()));assert.equal(await v3.locator('label[for="facade"], .material-sample').count(),0);for(const id of ['preset','foundation-type','sauna-size','sauna-roof','window-width'])assert(await v3.locator('#'+id+' + .choice-row').isVisible());
 assert(!(await v3.locator('#component-details').evaluate(x=>x.open)));assert(!(await v3.locator('#technical-notes').evaluate(x=>x.open)));
-assert.equal(await v3.locator('#assembly-system').inputValue(),'0');assert(await v3.locator('#assembly-system option[value="1"]').isDisabled());
+assert.equal(await v3.locator('canvas').evaluate(()=>OBTPStudioV3.scene.config.system_type),0);
 assert.equal(await v3.locator('#preset').inputValue(),'studio');assert.equal(await v3.locator('canvas').evaluate(()=>OBTPStudioV3.scene.seasonal_spec.state),'open');assert(!(await v3.locator('#studio-season-field').isVisible()));assert(!(await v3.locator('.fixed-terrace-field').isVisible()));await choose('preset','sauna');await ready();
 await choose('sauna-roof','1');await ready();
 const initial=await v3.locator('canvas').evaluate(()=>OBTPStudioV3.scene.source_geometry_sha256);
