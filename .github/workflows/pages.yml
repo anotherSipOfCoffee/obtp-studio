@@ -33,6 +33,7 @@ jobs:
           repository: anotherSipOfCoffee/obtp-system
           ref: ${{ steps.system.outputs.commit }}
           path: _system
+      - run: python -m pip install reportlab
       - name: Prepare pinned System modules
         run: |
           python tools/prepare_system.py

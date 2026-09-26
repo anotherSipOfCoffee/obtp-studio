@@ -1,6 +1,8 @@
 'use strict';
 (()=>{
  const exact={
+ 'Envelope study: 195 mm wall insulation, 220 mm floor and ceiling insulation; sealed sauna foil and ventilated lining cavity. Heater, ventilation and moisture assessment remain to be confirmed.':'Tikrinama atitvarų sandara: sienose 195 mm, grindyse ir perdangoje 220 mm šiltinimo sluoksnis; sandari pirties folija ir oro tarpas už apdailos. Krosnelė, vėdinimas ir drėgminė būklė dar tikslinami.',
+ 'No':'Ne','Yes':'Taip','Flat':'Plokščias','Single slope':'Vienšlaitis','Gable':'Dvišlaitis','Appearance':'Vaizdavimas','White model':'Baltas modelis','Materials':'Medžiagos','Drawings':'Brėžiniai','Your drawings.':'Jūsų brėžiniai.','Download PDF':'Atsisiųsti PDF','Open PDF':'Atverti PDF','Plan, two sections, window schedule and reserved construction details.':'Planas, du pjūviai, lango žiniaraštis ir vieta konstrukcijų mazgams.','OBTP / SAUNA':'OBTP / PIRTIS','A place to slow down.':'Erdvė atsikvėpti.','A modular sauna with a small entrance hall, outdoor shower and optional storage. Choose the size and details that suit your space.':'Modulinė pirtis su nedideliu prieangiu, lauko dušu ir pasirenkamu sandėliuku. Pasirinkite jums tinkantį dydį ir detales.','Plan generated from the selected 3D model, with dimensions authored in Python/GH.':'Planas ir matmenys parengti pagal pasirinktą 3D modelį.',
  'Your sauna preview.':'Jūsų pirties peržiūra.',
  'GitHub ↗':'GitHub ↗','Additional information':'Papildoma informacija','Configurator':'Konfigūratorius','Language':'Kalba','Version':'Konstrukcijos sistema',
  'OBTP Cassette 01 · Sauna':'OBTP Cassette 01 · Pirtis','WikiHouse · source assembly':'WikiHouse · konstrukcijos peržiūra',
@@ -35,7 +37,7 @@
  'floor':'grindys','roof':'stogas','walls':'sienos','partitions':'pertvaros','furniture':'įranga ir baldai','foundation':'pamatai','interior':'vidaus apdaila','ceiling':'lubos','facade':'fasadas','terrace':'terasa','canopy':'stoginė'
  };
  const patterns=[
- [/^Sauna ([SML])(.*)$/,(_,s,t)=>`Pirtis ${s}${t.replace(' · external storage',' · sandėliukas').replace(' · owner reference plan',' · pradinis eskizas')}`],
+ [/^Sauna ([SML])(.*)$/,(_,s,t)=>`Pirtis ${s}${t.replace(' · external storage',' · sandėliukas').replace(' · model plan',' · planas pagal modelį')}`],
  [/^(\d+) × (\d+) mm structural footprint · (\d+) mm overall model height$/,(_,a,b,h)=>`${a} × ${b} mm konstrukcijos matmenys · bendras aukštis ${h} mm`],
  [/^GH-R03 · (\d+) modeled parts · design study$/,(_,n)=>`Modelio peržiūra · ${n} elementų`],
  [/^Outdoor shower · (\d+) mm entrance terrace · (\d+) mm sauna window on entrance façade\.$/,(_,t,w)=>`Lauko dušas · ${t} mm terasa · ${w} mm langas įėjimo fasade.`],
