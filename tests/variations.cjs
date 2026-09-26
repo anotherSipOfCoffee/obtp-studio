@@ -15,6 +15,7 @@ async function ready(){await page.waitForFunction(()=>{const w=document.getEleme
 await ready();assert(await v3.locator('#customer-product').isVisible());await page.locator('#customer-config').click();
 assert.deepEqual(await v3.locator('canvas').evaluate(()=>OBTPStudioV3.scene.cell_spec.cell_mm),[900,1200]);
 assert.equal(await page.title(),'studio 9120');
+assert.equal(await v3.locator('#assembly-system').count(),0);
 assert.equal(await v3.locator('canvas').evaluate(()=>OBTPStudioV3.scene.dimensions.width_mm),2400);
 assert(await v3.locator('canvas').evaluate(()=>{const s=OBTPStudioV3.scene;return s.manufacturing.cladding.physical_pieces>0&&s.items.some(i=>i.stage==='facade')&&s.manufacturing.physical_pieces+s.manufacturing.cladding.physical_pieces===s.items.length;}));
 assert(await v3.locator('canvas').evaluate(()=>{const s=OBTPStudioV3.scene;return s.comparison.current.geometry_sha256===s.source_geometry_sha256&&s.comparison.previous.geometry_sha256!==s.source_geometry_sha256;}));
