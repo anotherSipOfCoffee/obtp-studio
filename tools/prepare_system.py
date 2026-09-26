@@ -1,5 +1,6 @@
 """Prepare deployment from a verified pinned System checkout."""
-import json, pathlib, shutil, subprocess
+import json, pathlib, shutil, subprocess, sys, time
+from generated_cache import identity, reusable, seal
 root = pathlib.Path(__file__).resolve().parents[1]
 lock = json.loads((root / "system.lock.json").read_text())
 source = root / "_system"
@@ -22,10 +23,27 @@ for relative in ["dist/index.html", "dist/v2/index.html", "dist/v2/app.js", "dis
     file.write_text(text.replace("__STUDIO_BUILD__", revision).replace("__SYSTEM_COMMIT_SHORT__", head[:12]).replace("__SYSTEM_COMMIT__", head))
 
 
-# Generated catalogue is disposable; never mix previous revision outputs.
+# Cache only the canonical export, never Studio HTML or its revision tokens.
 generated=root/'dist/v3/generated'
-if generated.exists():shutil.rmtree(generated)
-
-# Finite Sauna catalogue is compiled from the canonical GH/Python source.
-subprocess.run(["python", str(source / "authoring/grasshopper/export_web.py"),
-                str(root / "dist/v3/generated"), "--revision", head], check=True)
+expected = identity(root, head)
+started = time.monotonic()
+if reusable(generated, expected):
+    print(f'Reused verified System export in {time.monotonic()-started:.1f}s', flush=True)
+else:
+    print('No complete matching export; generating the full catalogue.', flush=True)
+    if generated.exists():shutil.rmtree(generated)
+    process = subprocess.Popen([sys.executable, '-u',
+        str(source / 'authoring/grasshopper/export_web.py'),
+        str(generated), '--revision', head])
+    while True:
+        try:
+            code = process.wait(timeout=30)
+            break
+        except subprocess.TimeoutExpired:
+            count = sum(1 for _ in generated.glob('*.json.gz'))
+            print(f'Export running: {count} configurations written; '
+                  f'{time.monotonic()-started:.0f}s elapsed', flush=True)
+    if code:
+        raise SystemExit(code)
+    count = seal(generated, expected)
+    print(f'Verified {count} configurations in {time.monotonic()-started:.1f}s', flush=True)
