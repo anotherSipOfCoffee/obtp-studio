@@ -1,6 +1,16 @@
 'use strict';
 (()=>{
  const exact={
+ 'Studio':'Studija','Studio size':'Studijos dydis','Storage shelves':'Medžiagų lentynos','Configure your studio.':'Susikurkite savo studiją.','Your studio preview.':'Jūsų studijos peržiūra.','Space to create.':'Erdvė kurti.','OBTP / MODULAR STUDIO':'OBTP / MODULINĖ STUDIJA',
+ 'Creative workspace · covered outdoor work area · preparation and storage.':'Kūrybos kambarys · dengta lauko darbo erdvė · paruošimas ir laikymas.',
+ 'Two enclosed workspaces around a covered outdoor work area. For creative work, preparation and material storage.':'Dvi uždaros darbo patalpos, kurias jungia dengta lauko erdvė. Skirta kūrybai, pasiruošimui ir medžiagoms laikyti.',
+ 'Studio envelope study: heating, ventilation and vapour control remain to be specified.':'Studijos atitvarų sprendiniai tikrinami. Šildymas, vėdinimas ir garų kontrolė dar neparinkti.',
+ 'Creative/hobby workspace and material preparation/storage; no sleeping or residential use.':'Kūrybos ir pomėgių erdvė, medžiagų paruošimas bei laikymas. Neskirta nakvynei ar gyvenimui.',
+ 'Covered centre counted in full roof/terrace area bound; classification and site-specific SLD requirements remain unverified.':'Dengta vidurinė dalis įtraukta į stogo ir terasos ploto ribą. Statinio klasifikavimas ir SLD poreikis tikrinami konkrečiam sklypui.',
+ 'Open-bay headers, foundations, connections, weatherproofing and roof bracing require engineering review.':'Atviros dalies sijas, pamatus, jungtis, sandarumą ir stogo standumą turi patikrinti projektuotojai.',
+ 'Window/door products, vapour control, heating and ventilation require project-specific selection.':'Langai, durys, garų kontrolė, šildymas ir vėdinimas parenkami konkrečiam projektui.',
+ 'Native Rhino/GH execution acceptance remains pending.':'Patikra Rhino / Grasshopper aplinkoje dar nebaigta.',
+
  'Configure':'Keisti pasirinkimus','Close configuration':'Uždaryti pasirinkimus','Configuration':'Pasirinkimai','Module type':'Modulio tipas','Window frame width':'Lango rėmo plotis','A3 · plan and sections 1:25 · window 1:10 · vertical window details 1:2.':'A3 · planas ir pjūviai 1:25 · langas 1:10 · vertikalūs lango mazgai 1:2.',
  'Envelope study: 195 mm wall insulation, 220 mm floor and ceiling insulation; sealed sauna foil and ventilated lining cavity. Heater, ventilation and moisture assessment remain to be confirmed.':'Tikrinama atitvarų sandara: sienose 195 mm, grindyse ir perdangoje 220 mm šiltinimo sluoksnis; sandari pirties folija ir oro tarpas už apdailos. Krosnelė, vėdinimas ir drėgminė būklė dar tikslinami.',
  'No':'Ne','Yes':'Taip','Flat':'Plokščias','Single slope':'Vienšlaitis','Gable':'Dvišlaitis','Appearance':'Vaizdavimas','White model':'Baltas modelis','Materials':'Medžiagos','Drawings':'Brėžiniai','Your drawings.':'Jūsų brėžiniai.','Download PDF':'Atsisiųsti PDF','Open PDF':'Atverti PDF','Plan, two sections, window schedule and reserved construction details.':'Planas, du pjūviai, lango žiniaraštis ir vieta konstrukcijų mazgams.','OBTP / SAUNA':'OBTP / PIRTIS','A place to slow down.':'Erdvė atsikvėpti.','A modular sauna with a small entrance hall, outdoor shower and optional storage. Choose the size and details that suit your space.':'Modulinė pirtis su nedideliu prieangiu, lauko dušu ir pasirenkamu sandėliuku. Pasirinkite jums tinkantį dydį ir detales.','Plan generated from the selected 3D model, with dimensions authored in Python/GH.':'Planas ir matmenys parengti pagal pasirinktą 3D modelį.',
@@ -38,6 +48,8 @@
  'floor':'grindys','roof':'stogas','walls':'sienos','partitions':'pertvaros','furniture':'įranga ir baldai','foundation':'pamatai','interior':'vidaus apdaila','ceiling':'lubos','facade':'fasadas','terrace':'terasa','canopy':'stoginė'
  };
  const patterns=[
+ [/^Studio ([SML])(.*)$/,(_,s,t)=>`Studija ${s}${t.replace(' · storage shelves',' · lentynos').replace(' · model plan',' · planas pagal modelį')}`],
+ [/^Enclosed floor area after wall finishes: (.*)$/,(_,v)=>`Uždarų patalpų plotas po sienų apdailos: ${v.replaceAll('.',',')}`],
  [/^Sauna ([SML])(.*)$/,(_,s,t)=>`Pirtis ${s}${t.replace(' · external storage',' · sandėliukas').replace(' · model plan',' · planas pagal modelį')}`],
  [/^(\d+) × (\d+) mm structural footprint · (\d+) mm overall model height$/,(_,a,b,h)=>`${a} × ${b} mm konstrukcijos matmenys · bendras aukštis ${h} mm`],
  [/^GH-R03 · (\d+) modeled parts · design study$/,(_,n)=>`Modelio peržiūra · ${n} elementų`],
@@ -55,7 +67,7 @@
   const prev=history.get(n),source=prev&&n.nodeValue===prev.target?prev.source:n.nodeValue,trim=source.trim();let translated=trim;
   if(lang==='lt'){translated=exact[trim]??trim;if(translated===trim)for(const [re,fn]of patterns)if(re.test(trim)){translated=trim.replace(re,fn);break;}}
   const target=source.replace(trim,translated);history.set(n,{source,target});if(n.nodeValue!==target)n.nodeValue=target;
- }const select=document.getElementById('language');if(select)select.value=lang;document.title=lang==='lt'?'OBTP · Pirties konfigūratorius':'OBTP · Sauna configurator';}
+ }const select=document.getElementById('language');if(select)select.value=lang;document.title=lang==='lt'?'OBTP · Modulių konfigūratorius':'OBTP · Module configurator';}
  window.OBTPLang={set(value){lang=value==='en'?'en':'lt';localStorage.setItem('obtp-language',lang);apply();window.dispatchEvent(new Event('obtp:language'));for(const frame of document.querySelectorAll('iframe'))frame.contentWindow?.OBTPLang?.set(lang);},get:()=>lang};
  new MutationObserver(apply).observe(document.body,{childList:true,subtree:true,characterData:true});apply();
 })();
