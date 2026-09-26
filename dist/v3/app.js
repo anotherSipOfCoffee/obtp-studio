@@ -6,8 +6,8 @@
  let scene=null,view='3d',turns=0,serial=0;
  const camera=()=>{renderer.angle=-Math.PI/4+turns*Math.PI/2;renderer.elev=.55;};
  for(const event of ['onpointerdown','onpointermove','onpointerup','onpointercancel'])$('diagram')[event]=null;
- const selection=()=>({program:$('preset').value,system:Number($('assembly-system')?.value||0),size:$('sauna-size').value,storage:$('sauna-storage').checked,roof:Number($('sauna-roof').value),terrace:Number($('terrace-depth').value)/600,window:Number($('window-width').value),facade:Number($('facade').value)});
- const key=s=>`${s.program}-${s.size}-${s.storage?'storage':'open'}-r${s.roof}-t${s.terrace}-w${s.window}-f${s.facade}`;
+ const selection=()=>({program:$('preset').value,season:$('studio-season').value,system:Number($('assembly-system')?.value||0),size:$('sauna-size').value,storage:$('sauna-storage').checked,roof:Number($('sauna-roof').value),terrace:Number($('terrace-depth').value)/600,window:Number($('window-width').value),facade:Number($('facade').value)});
+ const key=s=>`${s.program}-${s.size}-${s.storage?'storage':'open'}-r${s.roof}-t${s.terrace}-w${s.window}-f${s.facade}${s.program==='studio'&&s.season==='summer'?'-summer':''}`;
  const buildTag=new URL(location.href).searchParams.get('build')||'local';
  const manifest=fetch('generated/manifest.json?build='+encodeURIComponent(buildTag)).then(r=>{if(!r.ok)throw Error('Authoring catalogue unavailable');return r.json();});
  function clear(){for(const m of renderer.meshes.values())for(const p of m.parts){renderer.gl.deleteBuffer(p.buffer);if(p.edgeBuffer)renderer.gl.deleteBuffer(p.edgeBuffer);}renderer.meshes.clear();renderer.setScene([]);}
@@ -28,6 +28,8 @@
   const studio=$('preset').value==='studio';
   for(const option of $('sauna-roof').options)option.disabled=studio&&option.value!=='0';
   if(studio)$('sauna-roof').value='0';
+  $('studio-season-field').hidden=!studio;
+  for(const button of document.querySelectorAll('#sauna-roof + .choice-row button')){button.disabled=studio&&button.dataset.value!=='0';button.setAttribute('aria-checked',String(button.dataset.value===$('sauna-roof').value));}
   const request=++serial;scene=null;window.OBTPStudioV3=null;clear();$('status').textContent='Loading script-authored model…';$('wood-total').textContent='';$('schedule').replaceChildren();
   try{
    const s=selection(),catalogue=await manifest,entry=catalogue.entries.find(e=>e.key===key(s));if(!entry)throw Error('Configuration is not in the verified export catalogue');
@@ -39,7 +41,7 @@
    if((next.config.system_type??0)!==s.system)throw Error('Requested construction system is not available');
    if(next.source_revision!==catalogue.source_revision||!Object.values(next.checks).every(Boolean))throw Error('Invalid or mismatched model export');scene=next;
    const m=scene.metrics;$('status').textContent=s.program==='studio'?'Your studio preview.':'Your sauna preview.';
-   $('sauna-circulation-note').textContent=s.program==='studio'?'Creative workspace · covered outdoor work area · preparation and storage.':`Outdoor shower · ${s.terrace*600} mm entrance terrace · ${s.window} mm sauna window on entrance façade.`;
+   $('sauna-circulation-note').textContent=s.program==='studio'?'Creative workspace · heated central room with sliding glazing · preparation and storage.':`Outdoor shower · ${s.terrace*600} mm entrance terrace · ${s.window} mm sauna window on entrance façade.`;
    $('wood-total').textContent=`Modeled wood: ${m.total_wood_m3.toFixed(3)} m³ · structure, plywood, lining, cladding and deck; furniture and waste excluded`;
    $('envelope').replaceChildren();for(const text of ['LT I-group dimensional screen',`Conservative roof/terrace area bound: ${m.building_area_bound_m2.toFixed(2)} / 50.00 m² ✓`,`Height: ${(m.height_mm/1000).toFixed(2)} / 5.00 m ✓`,`Maximum support spacing: ${(m.max_bearing_line_span_mm/1000).toFixed(2)} / 6.00 m ✓`,`${s.program==='studio'?'Enclosed floor area after wall finishes':'Main internal rectangle before finishes'}: ${m.main_clear_floor_less_partition_m2.toFixed(2)} m²`,`Terrace: ${m.terrace_area_m2.toFixed(2)} m²`,'Site and land-use conditions must be checked separately. The conservative area bound is not a certified legal area calculation.']){const p=document.createElement('p');p.textContent=text;$('envelope').append(p);}
    $('program').replaceChildren();if(scene.envelope_spec){const p=document.createElement('p');p.textContent=s.program==='studio'?'Studio envelope study: heating, ventilation and vapour control remain to be specified.':'Envelope study: 195 mm wall insulation, 220 mm floor and ceiling insulation; sealed sauna foil and ventilated lining cavity. Heater, ventilation and moisture assessment remain to be confirmed.';$('program').append(p);}for(const text of scene.holds){const p=document.createElement('p');p.textContent=text;$('program').append(p);}
@@ -51,7 +53,7 @@
    show();window.OBTPProgramRender?.();window.OBTPUpdatePDF?.();window.OBTPSuppliersRender?.(scene);
   }catch(e){if(request!==serial)return;clear();$('status').textContent='Model unavailable: '+e.message;$('envelope').textContent='No valid output loaded';}
  }
- for(const id of ['preset','sauna-size','sauna-storage','sauna-roof','terrace-depth','window-width','facade'])$(id).addEventListener('change',load);
+ for(const id of ['preset','studio-season','sauna-size','sauna-storage','sauna-roof','terrace-depth','window-width','facade'])$(id).addEventListener('change',load);
  $('layer').addEventListener('change',show);
  document.addEventListener('change',e=>{if(e.target.id==='appearance'){renderer.arctic=e.target.value==='arctic';renderer.draw();}});
  for(const b of document.querySelectorAll('[data-view]'))b.addEventListener('click',()=>{view=b.dataset.view;show();});
