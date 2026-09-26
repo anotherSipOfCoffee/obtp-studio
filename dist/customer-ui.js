@@ -1,7 +1,7 @@
 'use strict';
 (()=>{
  const exact={
- 'Configure':'Keisti pasirinkimus','Close configuration':'Uždaryti pasirinkimus','Configuration':'Pasirinkimai','Module type':'Modulio tipas','Window frame width':'Lango rėmo plotis','A3 · plan and sections 1:25 · window 1:10 · jamb detail 1:2.':'A3 · planas ir pjūviai 1:25 · langas 1:10 · lango jungtis 1:2.',
+ 'Configure':'Keisti pasirinkimus','Close configuration':'Uždaryti pasirinkimus','Configuration':'Pasirinkimai','Module type':'Modulio tipas','Window frame width':'Lango rėmo plotis','A3 · plan and sections 1:25 · window 1:10 · vertical window details 1:2.':'A3 · planas ir pjūviai 1:25 · langas 1:10 · vertikalūs lango mazgai 1:2.',
  'Envelope study: 195 mm wall insulation, 220 mm floor and ceiling insulation; sealed sauna foil and ventilated lining cavity. Heater, ventilation and moisture assessment remain to be confirmed.':'Tikrinama atitvarų sandara: sienose 195 mm, grindyse ir perdangoje 220 mm šiltinimo sluoksnis; sandari pirties folija ir oro tarpas už apdailos. Krosnelė, vėdinimas ir drėgminė būklė dar tikslinami.',
  'No':'Ne','Yes':'Taip','Flat':'Plokščias','Single slope':'Vienšlaitis','Gable':'Dvišlaitis','Appearance':'Vaizdavimas','White model':'Baltas modelis','Materials':'Medžiagos','Drawings':'Brėžiniai','Your drawings.':'Jūsų brėžiniai.','Download PDF':'Atsisiųsti PDF','Open PDF':'Atverti PDF','Plan, two sections, window schedule and reserved construction details.':'Planas, du pjūviai, lango žiniaraštis ir vieta konstrukcijų mazgams.','OBTP / SAUNA':'OBTP / PIRTIS','A place to slow down.':'Erdvė atsikvėpti.','A modular sauna with a small entrance hall, outdoor shower and optional storage. Choose the size and details that suit your space.':'Modulinė pirtis su nedideliu prieangiu, lauko dušu ir pasirenkamu sandėliuku. Pasirinkite jums tinkantį dydį ir detales.','Plan generated from the selected 3D model, with dimensions authored in Python/GH.':'Planas ir matmenys parengti pagal pasirinktą 3D modelį.',
  'Your sauna preview.':'Jūsų pirties peržiūra.',
@@ -56,6 +56,6 @@
   if(lang==='lt'){translated=exact[trim]??trim;if(translated===trim)for(const [re,fn]of patterns)if(re.test(trim)){translated=trim.replace(re,fn);break;}}
   const target=source.replace(trim,translated);history.set(n,{source,target});if(n.nodeValue!==target)n.nodeValue=target;
  }const select=document.getElementById('language');if(select)select.value=lang;document.title=lang==='lt'?'OBTP · Pirties konfigūratorius':'OBTP · Sauna configurator';}
- window.OBTPLang={set(value){lang=value==='en'?'en':'lt';localStorage.setItem('obtp-language',lang);apply();for(const frame of document.querySelectorAll('iframe'))frame.contentWindow?.OBTPLang?.set(lang);},get:()=>lang};
+ window.OBTPLang={set(value){lang=value==='en'?'en':'lt';localStorage.setItem('obtp-language',lang);apply();window.dispatchEvent(new Event('obtp:language'));for(const frame of document.querySelectorAll('iframe'))frame.contentWindow?.OBTPLang?.set(lang);},get:()=>lang};
  new MutationObserver(apply).observe(document.body,{childList:true,subtree:true,characterData:true});apply();
 })();

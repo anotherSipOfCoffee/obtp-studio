@@ -13,6 +13,7 @@ assert.equal(await v3.locator('#preset option').count(),1);assert.match(await pa
 assert.equal(await v3.locator('#terrace-depth').inputValue(),'1200');assert.equal(await v3.locator('#window-width').inputValue(),'1180');
 assert.equal(await v3.locator('#facade option').count(),1);
 assert(!(await v3.locator('#component-details').evaluate(x=>x.open)));assert(!(await v3.locator('#technical-notes').evaluate(x=>x.open)));
+assert.equal(await v3.locator('#assembly-system').inputValue(),'0');assert(await v3.locator('#assembly-system option[value="1"]').isDisabled());
 const initial=await v3.locator('canvas').evaluate(()=>OBTPStudioV3.scene.source_geometry_sha256);
 for(const size of ['s','m','l']){await choose('sauna-size',size);await ready();assert.equal(await v3.locator('canvas').evaluate(()=>OBTPStudioV3.selection.size),size);await page.screenshot({path:`studio-sauna-${size}.png`,fullPage:true});}
 await choose('sauna-storage','true');await ready();assert(await v3.locator('canvas').evaluate(()=>OBTPStudioV3.scene.config.storage));
@@ -25,7 +26,7 @@ const angle=await v3.locator('canvas').evaluate(()=>OBTPStudioV3.renderer.angle)
 await v3.locator('#reset').click();await page.screenshot({path:'studio-sauna-panels-cut.png',fullPage:true});
 await choose('sauna-size','m');await ready();await choose('sauna-storage','false');await ready();await choose('sauna-roof','1');await ready();await choose('terrace-depth','1200');await ready();
 assert.equal(await v3.locator('canvas').evaluate(()=>OBTPStudioV3.scene.source_geometry_sha256),initial);
-await page.locator('#customer-info').click();assert(await v3.locator('#customer-information').isVisible());
+await page.locator('#customer-info').click();assert(await v3.locator('#customer-information').isVisible());await v3.locator('#supplier-information summary').click();assert((await v3.locator('#supplier-information .supplier-row').count())>=5);for(const img of await v3.locator('#supplier-information img').all())assert(await img.evaluate(async x=>{await x.decode();return x.naturalWidth>0;}));await page.screenshot({path:'studio-r06-suppliers.png',fullPage:true});
 await v3.locator('#component-details summary').click();assert(await v3.locator('#schedule tr').count()>0);
 assert.match(await v3.locator('#wood-total').textContent(),/Modeled wood: \d+[.]\d{3} m³/);
 await page.locator('#customer-config').click();assert(await v3.locator('#configurator').isVisible());

@@ -15,3 +15,5 @@
  #configurator.config-open>aside .choice-row{margin-bottom:18px}
  #config-backdrop:not([hidden]){display:block;position:fixed;inset:0;border:0;z-index:30;background:#25251f14;cursor:default}
 }
+.supplier-row{display:grid;grid-template-columns:120px minmax(0,1fr);gap:20px;padding:18px 0;border-bottom:1px solid #d7d3cb;align-items:center}.supplier-row img{object-fit:contain;max-width:110px;max-height:45px}.supplier-row p{margin:5px 0}.supplier-row strong{font-weight:500}#supplier-information{margin:24px 0}#supplier-information summary{cursor:pointer}
+@media(max-width:500px){.supplier-row{grid-template-columns:90px minmax(0,1fr);gap:12px}.supplier-row img{max-width:85px}}
