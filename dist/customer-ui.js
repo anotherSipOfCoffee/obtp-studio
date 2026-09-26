@@ -1,17 +1,28 @@
 'use strict';
 (()=>{
  const exact={
+ 'Three-system comparison':'Trijų sistemų palyginimas',
+ 'Provisional manufacturing types. Material grades, machining and connections remain unresolved. Only façade finish boards are excluded.':'Preliminarūs gamybinių detalių tipai. Medžiagų klasės, apdirbimas ir jungtys dar nepatvirtinti. Neįtrauktos tik fasado apdailos lentos.',
+ 'Original':'Pradinė','First cell system':'Pirmasis modulinis tinklas','Revised':'Atnaujinta',
+ 'Manufactured part candidates':'Preliminarūs gamybinių detalių tipai',
+ 'Physical pieces, excluding cladding':'Detalės be fasado apdailos lentų',
+ 'Assembly types / installed':'Mazgų tipai / kiekis',
+ 'Façade cladding pieces — separate':'Fasado apdailos lentos – atskirai',
+ 'Types removed by cladding exclusion':'Neįtrauktų apdailos tipų įtaka',
+ 'Three-system comparison report':'Trijų sistemų palyginimo ataskaita',
+ 'Part and separate cladding schedules':'Detalių ir atskiras fasado apdailos žiniaraštis',
+
  'Windows and doors':'Langai ir durys','Components and quantities':'Elementai ir kiekiai','Assembly guide':'Surinkimo gairės',
  'PDF generation is temporarily disabled.':'PDF generavimas laikinai išjungtas.',
  'PDF downloads are unavailable. The 3D model and plan remain available in the configurator.':'PDF atsisiųsti negalima. 3D modelį ir planą galite peržiūrėti konfigūratoriuje.',
- 'OBTP / TIMBER FRAME':'OBTP / MEDINIS KARKASAS', 'Timber beams':'Medinės sijos','Concrete grillage · study':'Rostverkas · derinama','Foundation':'Pamatai','Piles + timber support frame':'Poliai ir medinės sijos','Piles + concrete grillage · study':'Poliai ir rostverkas · derinama','Timber studios and saunas.':'Medinės studijos ir pirtys.','We design timber studios and saunas using a shared modular frame. Choose a size, roof and layout.':'Projektuojame medines studijas ir pirtis, naudodami bendrą modulinį karkasą. Pasirinkite dydį, stogą ir planą.','One frame. Two uses.':'Bendras karkasas studijai ir pirčiai.','Compare the studio and sauna layouts, then view your selection in 3D and plan.':'Palyginkite studijos ir pirties planus. Pasirinktą variantą apžiūrėkite 3D vaizde ir plane.',
- 'Main':'Pagrindinis','OBTP / MODULAR SPACES':'OBTP / MODULINĖS ERDVĖS','Room for what matters.':'Erdvė tam, kas svarbu.',
+ 'studio 9120 / TIMBER FRAME':'studio 9120 / MEDINIS KARKASAS', 'Timber beams':'Medinės sijos','Concrete grillage · study':'Rostverkas · derinama','Foundation':'Pamatai','Piles + timber support frame':'Poliai ir medinės sijos','Piles + concrete grillage · study':'Poliai ir rostverkas · derinama','Timber studios and saunas.':'Medinės studijos ir pirtys.','We design timber studios and saunas using a shared modular frame. Choose a size, roof and layout.':'Projektuojame medines studijas ir pirtis, naudodami bendrą modulinį karkasą. Pasirinkite dydį, stogą ir planą.','One frame. Two uses.':'Bendras karkasas studijai ir pirčiai.','Compare the studio and sauna layouts, then view your selection in 3D and plan.':'Palyginkite studijos ir pirties planus. Pasirinktą variantą apžiūrėkite 3D vaizde ir plane.',
+ 'Main':'Pagrindinis','studio 9120 / MODULAR SPACES':'studio 9120 / MODULINĖS ERDVĖS','Room for what matters.':'Erdvė tam, kas svarbu.',
  'We develop compact timber spaces for work, creativity and sauna rituals. One modular system, thoughtful layouts and a close connection to the outdoors.':'Kuriame kompaktiškas medines erdves darbui, kūrybai ir pirties ritualams. Jas jungia viena modulinė sistema, apgalvoti planai ir artimas ryšys su aplinka.',
  'Explore the configurator':'Atraskite savo variantą','A simple structure. Your own rhythm.':'Paprasta sandara. Jūsų ritmas.',
  'Choose a studio for focused work or a sauna for a slower moment. Explore the size, layout and details in the configurator.':'Studija susikaupti ir kurti, pirtis – sulėtinti tempą. Konfiguratoriuje pasirinkite dydį ir detales, peržiūrėkite erdvę bei jos planą.',
  'Architectural visualisations. Final details follow the selected configuration.':'Architektūrinės vizualizacijos. Galutinės detalės priklauso nuo pasirinktos konfigūracijos.',
 
- 'Studio':'Studija','Studio size':'Studijos dydis','Storage shelves':'Medžiagų lentynos','Configure your studio.':'Susikurkite savo studiją.','Your studio preview.':'Jūsų studijos peržiūra.','Space to create.':'Erdvė kurti.','OBTP / MODULAR STUDIO':'OBTP / MODULINĖ STUDIJA',
+ 'Studio':'Studija','Studio size':'Studijos dydis','Storage shelves':'Medžiagų lentynos','Configure your studio.':'Susikurkite savo studiją.','Your studio preview.':'Jūsų studijos peržiūra.','Space to create.':'Erdvė kurti.','studio 9120 / MODULAR STUDIO':'studio 9120 / MODULINĖ STUDIJA',
  'Sliding glass doors':'Stumdomos stiklo durys','Closed · winter':'Uždaryta · žiema','Open · summer':'Atidaryta · vasara',
  'Creative workspace · heated central room with sliding glazing · preparation and storage.':'Kūrybos kambarys · šildoma centrinė erdvė su stumdomomis stiklo durimis · paruošimas ir laikymas.',
  'Workspaces joined by a heated central room with sliding glazing for summer. For creative work, preparation and material storage.':'Darbo patalpas jungia šildoma centrinė erdvė, kurią vasarą galima atverti sustūmus stiklo duris. Skirta kūrybai, pasiruošimui ir medžiagoms laikyti.',
@@ -26,11 +37,11 @@
 
  'Configure':'Keisti pasirinkimus','Close configuration':'Uždaryti pasirinkimus','Configuration':'Pasirinkimai','Module type':'Modulio tipas','Window frame width':'Lango rėmo plotis','A3 · plan and sections 1:25 · window 1:10 · vertical window details 1:2.':'A3 · planas ir pjūviai 1:25 · langas 1:10 · vertikalūs lango mazgai 1:2.',
  'Envelope study: 195 mm wall insulation, 220 mm floor and ceiling insulation; sealed sauna foil and ventilated lining cavity. Heater, ventilation and moisture assessment remain to be confirmed.':'Tikrinama atitvarų sandara: sienose 195 mm, grindyse ir perdangoje 220 mm šiltinimo sluoksnis; sandari pirties folija ir oro tarpas už apdailos. Krosnelė, vėdinimas ir drėgminė būklė dar tikslinami.',
- 'No':'Ne','Yes':'Taip','Flat':'Plokščias','Single slope':'Vienšlaitis','Gable':'Dvišlaitis','Appearance':'Vaizdavimas','White model':'Baltas modelis','Materials':'Medžiagos','Drawings':'Brėžiniai','Your drawings.':'Jūsų brėžiniai.','Download PDF':'Atsisiųsti PDF','Open PDF':'Atverti PDF','Plan, two sections, window schedule and reserved construction details.':'Planas, du pjūviai, lango žiniaraštis ir vieta konstrukcijų mazgams.','OBTP / SAUNA':'OBTP / PIRTIS','A place to slow down.':'Erdvė atsikvėpti.','A modular sauna with a small entrance hall, outdoor shower and optional storage. Choose the size and details that suit your space.':'Modulinė pirtis su nedideliu prieangiu, lauko dušu ir pasirenkamu sandėliuku. Pasirinkite jums tinkantį dydį ir detales.','Plan generated from the selected 3D model, with dimensions authored in Python/GH.':'Planas ir matmenys parengti pagal pasirinktą 3D modelį.',
+ 'No':'Ne','Yes':'Taip','Flat':'Plokščias','Single slope':'Vienšlaitis','Gable':'Dvišlaitis','Appearance':'Vaizdavimas','White model':'Baltas modelis','Materials':'Medžiagos','Drawings':'Brėžiniai','Your drawings.':'Jūsų brėžiniai.','Download PDF':'Atsisiųsti PDF','Open PDF':'Atverti PDF','Plan, two sections, window schedule and reserved construction details.':'Planas, du pjūviai, lango žiniaraštis ir vieta konstrukcijų mazgams.','studio 9120 / SAUNA':'studio 9120 / PIRTIS','A place to slow down.':'Erdvė atsikvėpti.','A modular sauna with a small entrance hall, outdoor shower and optional storage. Choose the size and details that suit your space.':'Modulinė pirtis su nedideliu prieangiu, lauko dušu ir pasirenkamu sandėliuku. Pasirinkite jums tinkantį dydį ir detales.','Plan generated from the selected 3D model, with dimensions authored in Python/GH.':'Planas ir matmenys parengti pagal pasirinktą 3D modelį.',
  'Your sauna preview.':'Jūsų pirties peržiūra.',
  'GitHub ↗':'GitHub ↗','Additional information':'Papildoma informacija','Configurator':'Konfigūratorius','Language':'Kalba','Version':'Konstrukcijos sistema',
  'OBTP Cassette 01 · Sauna':'OBTP Cassette 01 · Pirtis','WikiHouse · source assembly':'WikiHouse · konstrukcijos peržiūra',
- 'STUDIO V3 / CASSETTE 01':'OBTP / MODULINĖ PIRTIS','Configure your sauna.':'Susikurkite savo pirtį.',
+ 'STUDIO V3 / CASSETTE 01':'studio 9120 / MODULINĖ PIRTIS','Configure your sauna.':'Susikurkite savo pirtį.',
  'Choose your size, roof, terrace and window.':'Pasirinkite dydį, stogą ir langą. Terasos gylis – 1200 mm.',
  'Preset':'Paskirtis','Sauna':'Pirtis','Studio · later':'Studija · ruošiama','Workshop · later':'Dirbtuvės · ruošiama','Matrix · research':'Modulių matrica · tyrimas',
  'Sauna size':'Pirties dydis','S · compact':'S · kompaktiška','M · standard':'M · standartinė','L · longer entrance in solved plan':'L · erdvesnis prieangis',
@@ -67,6 +78,7 @@
  'floor':'grindys','roof':'stogas','walls':'sienos','partitions':'pertvaros','furniture':'įranga ir baldai','foundation':'pamatai','interior':'vidaus apdaila','ceiling':'lubos','facade':'fasadas','terrace':'terasa','canopy':'stoginė'
  };
  const patterns=[
+ [/^Same-footprint revised part candidates: (.+)$/, 'Atnaujintos sistemos detalių tipai, nekeičiant pastato matmenų: $1'],
  [/^Studio ([SML])(.*)$/,(_,s,t)=>`Studija ${s}${t.replace(' · storage shelves',' · lentynos').replace(' · model plan',' · planas pagal modelį')}`],
  [/^Enclosed floor area after wall finishes: (.*)$/,(_,v)=>`Uždarų patalpų plotas po sienų apdailos: ${v.replaceAll('.',',')}`],
  [/^Sauna ([SML])(.*)$/,(_,s,t)=>`Pirtis ${s}${t.replace(' · external storage',' · sandėliukas').replace(' · model plan',' · planas pagal modelį')}`],
@@ -86,7 +98,7 @@
   const prev=history.get(n),source=prev&&n.nodeValue===prev.target?prev.source:n.nodeValue,trim=source.trim();let translated=trim;
   if(lang==='lt'){translated=exact[trim]??trim;if(translated===trim)for(const [re,fn]of patterns)if(re.test(trim)){translated=trim.replace(re,fn);break;}}
   const target=source.replace(trim,translated);history.set(n,{source,target});if(n.nodeValue!==target)n.nodeValue=target;
- }const select=document.getElementById('language');if(select)select.value=lang;document.title=lang==='lt'?'OBTP · Modulių konfigūratorius':'OBTP · Module configurator';}
+ }const select=document.getElementById('language');if(select)select.value=lang;document.title='studio 9120';}
  window.OBTPLang={set(value){lang=value==='en'?'en':'lt';localStorage.setItem('obtp-language',lang);apply();window.dispatchEvent(new Event('obtp:language'));for(const frame of document.querySelectorAll('iframe'))frame.contentWindow?.OBTPLang?.set(lang);},get:()=>lang};
  new MutationObserver(apply).observe(document.body,{childList:true,subtree:true,characterData:true});apply();
 })();

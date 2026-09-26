@@ -16,3 +16,5 @@ __pycache__/
 
 # Built from pinned canonical GH/Python source during deployment
 dist/v3/generated/
+
+/_system

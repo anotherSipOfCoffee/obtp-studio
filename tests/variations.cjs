@@ -1,6 +1,6 @@
 'use strict';
 const {chromium}=require('playwright'),assert=require('node:assert/strict');
-(async()=>{const browser=await chromium.launch({headless:true,args:['--use-gl=angle','--use-angle=swiftshader','--enable-webgl']});
+(async()=>{const browser=await chromium.launch({executablePath:process.env.OBTP_CHROMIUM_EXECUTABLE,headless:true,args:['--use-gl=angle','--use-angle=swiftshader','--enable-webgl']});
 try{const page=await browser.newPage({viewport:{width:1440,height:1100}}),errors=[];page.on('pageerror',e=>errors.push(e.message));
 await page.goto(process.env.OBTP_BASE_URL||'http://127.0.0.1:8765/');const v3=page.frameLocator('#v3'),v2=page.frameLocator('#v2');
 assert.equal(await page.locator('html').getAttribute('lang'),'lt');await page.locator('#language').selectOption('en');
@@ -14,8 +14,11 @@ async function assertPDFDisabled(language){
 async function ready(){await page.waitForFunction(()=>{const w=document.getElementById('v3').contentWindow;return Boolean(w?.OBTPStudioV3?.scene);},{},{timeout:60000});}
 await ready();assert(await v3.locator('#customer-product').isVisible());await page.locator('#customer-config').click();
 assert.deepEqual(await v3.locator('canvas').evaluate(()=>OBTPStudioV3.scene.cell_spec.cell_mm),[900,1200]);
+assert.equal(await page.title(),'studio 9120');
+assert.equal(await v3.locator('canvas').evaluate(()=>OBTPStudioV3.scene.dimensions.width_mm),2400);
+assert(await v3.locator('canvas').evaluate(()=>{const s=OBTPStudioV3.scene;return s.manufacturing.cladding.physical_pieces>0&&s.items.some(i=>i.stage==='facade')&&s.manufacturing.physical_pieces+s.manufacturing.cladding.physical_pieces===s.items.length;}));
 assert(await v3.locator('canvas').evaluate(()=>{const s=OBTPStudioV3.scene;return s.comparison.current.geometry_sha256===s.source_geometry_sha256&&s.comparison.previous.geometry_sha256!==s.source_geometry_sha256;}));
-assert.equal(await v3.locator('#program a[href*="-previous-plan.svg"]').count(),1);
+assert.equal(await v3.locator('#program a[href*="review/index.html"]').count(),1);
 assert.equal(await page.locator('iframe:not([hidden])').getAttribute('id'),'v3');
 assert.deepEqual(await v3.locator('#studio-version option').evaluateAll(xs=>xs.map(x=>x.value)),['v2','v3']);
 assert.equal(await v3.locator('#preset option').count(),2);assert.match(await page.locator('#customer-product').textContent(),/Main/);
@@ -56,4 +59,11 @@ await page.setViewportSize({width:390,height:844});await v3.locator('#mobile-con
 assert.equal(await v3.locator('canvas').evaluate(()=>OBTPStudioV3.scene.config.program_type),0);
 assert.match(await v3.locator('h1').first().textContent(),/Susikurkite savo pirtį/);
 await page.locator('#customer-config').click();await page.setViewportSize({width:1440,height:1100});await choose('foundation-type','1');await ready();assert.equal(await v3.locator('canvas').evaluate(()=>OBTPStudioV3.scene.foundation_spec.type),1);assert(await v3.locator('canvas').evaluate(()=>OBTPStudioV3.scene.foundation_spec.connected_platform));assert.deepEqual(errors,[]);console.log('PASS: R04 exported-model defaults, all buyer controls, source identity roundtrip, cut, locked camera, wood, reference plans, mobile and WikiHouse version');
+await page.setViewportSize({width:1560,height:1000});
+await page.goto((process.env.OBTP_BASE_URL||'http://127.0.0.1:8765/')+'v3/generated/review/index.html');
+await page.waitForFunction(()=>window.REVIEW_READY,{},{timeout:60000});
+assert.equal(await page.locator('canvas').count(),6);
+await page.screenshot({path:'studio-r15-comparison.png',fullPage:true});
+await page.locator('#deck').click();await page.locator('.grid').screenshot({path:'studio-r15-terrace-direction.png'});
+assert.deepEqual(errors,[]);console.log('PASS: standalone three-system model comparison and terrace view');
 }finally{await browser.close();}})().catch(e=>{console.error(e);process.exit(1)});

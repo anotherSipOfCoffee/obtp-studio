@@ -48,13 +48,22 @@
    $('envelope').replaceChildren();for(const text of ['LT I-group dimensional screen',`Conservative roof/terrace area bound: ${m.building_area_bound_m2.toFixed(2)} / 50.00 m² ✓`,`Height: ${(m.height_mm/1000).toFixed(2)} / 5.00 m ✓`,`Maximum support spacing: ${(m.max_bearing_line_span_mm/1000).toFixed(2)} / 6.00 m ✓`,`${scene.cell_spec||s.program==='studio'?'Enclosed floor area after wall finishes':'Main internal rectangle before finishes'}: ${m.main_clear_floor_less_partition_m2.toFixed(2)} m²`,`Terrace: ${m.terrace_area_m2.toFixed(2)} m²`,'Site and land-use conditions must be checked separately. The conservative area bound is not a certified legal area calculation.']){const p=document.createElement('p');p.textContent=text;$('envelope').append(p);}
    $('program').replaceChildren();if(scene.envelope_spec){const p=document.createElement('p');p.textContent=s.program==='studio'?'Studio envelope study: heating, ventilation and vapour control remain to be specified.':'Envelope study: 195 mm wall insulation, 220 mm floor and ceiling insulation; sealed sauna foil and ventilated lining cavity. Heater, ventilation and moisture assessment remain to be confirmed.';$('program').append(p);}for(const text of scene.holds){const p=document.createElement('p');p.textContent=text;$('program').append(p);}
    if(scene.comparison){
-    const heading=document.createElement('h3');heading.textContent='Compared with the previous system';$('program').append(heading);
-    const note=document.createElement('p');note.textContent='Same choices, different dimensions. Counts are model quantities, not cost or construction approval.';$('program').append(note);
-    const table=document.createElement('table');const body=document.createElement('tbody');table.append(body);
-    const a=scene.comparison.previous,b=scene.comparison.current;
-    const rows=[['Measure','Previous','Cell system'],['Structural footprint',`${a.length_mm} × ${a.width_mm} mm`,`${b.length_mm} × ${b.width_mm} mm`],['Wall assemblies',a.wall_assemblies,b.wall_assemblies],['Wood parts',a.physical_wood_parts,b.physical_wood_parts],['Geometric wood types',a.geometric_wood_types,b.geometric_wood_types],['Foundation supports',a.foundation_supports,b.foundation_supports]];
+    const heading=document.createElement('h3');heading.textContent='Three-system comparison';$('program').append(heading);
+    const note=document.createElement('p');note.textContent='Provisional manufacturing types. Material grades, machining and connections remain unresolved. Only façade finish boards are excluded.';$('program').append(note);
+    const versions=[scene.comparison.previous,scene.comparison.first_integrated,scene.comparison.current];
+    const table=document.createElement('table'),body=document.createElement('tbody');table.append(body);
+    const rows=[['Measure','Original','First cell system','Revised'],
+      ['Structural footprint',...versions.map(a=>`${a.dimensions.length_mm+a.dimensions.annex_length_mm} × ${a.dimensions.width_mm} mm`)],
+      ['Manufactured part candidates',...versions.map(a=>a.unique_manufactured_part_candidates)],
+      ['Physical pieces, excluding cladding',...versions.map(a=>a.physical_pieces)],
+      ['Assembly types / installed',...versions.map(a=>`${a.unique_assembly_candidates} / ${a.assemblies_installed}`)],
+      ['Façade cladding pieces — separate',...versions.map(a=>a.cladding.physical_pieces)],
+      ['Types removed by cladding exclusion',...versions.map(a=>a.cladding_exclusion_type_effect)]];
     for(const [i,row]of rows.entries()){const tr=document.createElement('tr');for(const value of row){const td=document.createElement(i?'td':'th');td.textContent=value;tr.append(td);}body.append(tr);}$('program').append(table);
-    for(const [label,suffix]of [['Previous system plan','-previous-plan.svg'],['Current system plan','-plan.svg']]){const p=document.createElement('p'),a=document.createElement('a');a.textContent=label;a.href='generated/'+key(s)+suffix+'?build='+scene.source_revision;a.target='_blank';a.rel='noopener';p.append(a);$('program').append(p);}
+    const same=document.createElement('p');same.textContent=`Same-footprint revised part candidates: ${scene.comparison.same_footprint.unique_manufactured_part_candidates}`;$('program').append(same);
+    for(const [label,path]of [['Three-system comparison report','review/index.html'],['Part and separate cladding schedules',scene.manufacturing.schedule_file],['Current system plan',key(s)+'-plan.svg']]){
+      const p=document.createElement('p'),a=document.createElement('a');a.textContent=label;a.href='generated/'+path+'?build='+scene.source_revision;a.target='_blank';a.rel='noopener';p.append(a);$('program').append(p);
+    }
    }
    const link=document.createElement('a');link.href=`https://github.com/anotherSipOfCoffee/obtp-system/tree/${scene.source_revision}/authoring/grasshopper`;link.target='_blank';link.rel='noopener';link.textContent=`Canonical Python/GH source · ${scene.source_revision.slice(0,12)}`;$('program').append(link);
    const download=document.createElement('p');const a=document.createElement('a');a.href='generated/OBTP_Grasshopper_R12.zip';a.textContent='Download this revision’s GH authoring scripts';download.append(a);$('program').append(download);
