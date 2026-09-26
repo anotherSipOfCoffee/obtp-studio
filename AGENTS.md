@@ -1,3 +1,6 @@
+# Latest website request — PDF pause and controls
+Owner requests disabling PDF generation and showing downloads as disabled, removing the gable roof option, translating Flat as Plokščias, matching all configuration parameters to the existing choice-button UI, and removing the single-option façade section. See docs/WEB_RELEASE_R13.md. Preserve 3D/SVG plans and Rhino/source downloads. This supersedes older website PDF and three-roof instructions.
+
 # R12 release authorised by owner
 Owner explicitly requested all previous R11 fixes plus unified foundation, component optimisation, supplier opening schedules and roof support corrections, including website publication. Preserve previous changes. Shared GH/Python remains canonical; engineering and supplier quote gaps remain explicit.
 

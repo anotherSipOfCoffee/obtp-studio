@@ -16,7 +16,8 @@ def digest(path):
 
 def identity(root, revision):
     return {
-        'schema': 1,
+        'schema': 2,
+        'pdf_enabled': False,
         'source_revision': revision,
         'python': platform.python_version(),
         'platform': platform.system() + '-' + platform.machine(),
@@ -41,17 +42,21 @@ def validate_catalogue(directory, revision):
     manifest = json.loads((directory / 'manifest.json').read_text(encoding='utf-8'))
     if manifest['source_revision'] != revision or not manifest['entries']:
         raise ValueError('Wrong source revision or empty catalogue')
+    if manifest.get('pdf_enabled') is not False or any(directory.glob('*.pdf')):
+        raise ValueError('PDF generation must be disabled')
     keys = set()
     for entry in manifest['entries']:
         key = entry['key']
         if key in keys or pathlib.PurePath(key).name != key or '/' in key or '\\' in key:
             raise ValueError('Invalid or duplicate configuration key')
         keys.add(key)
+        if entry.get('pdf') is not False:
+            raise ValueError('PDF availability must be disabled')
         if entry['file'] != key + '.json.gz':
             raise ValueError('Unexpected geometry filename')
         if digest(directory / entry['file']) != entry['sha256']:
             raise ValueError('Geometry checksum mismatch')
-        for suffix in ('.pdf', '-openings.pdf', '-components.pdf', '-assembly.pdf', '-plan.svg'):
+        for suffix in ('-plan.svg',):
             if not (directory / (key + suffix)).is_file():
                 raise ValueError('Incomplete drawing set: ' + key + suffix)
     for name in ('OBTP_Grasshopper_Source.zip', 'OBTP_Grasshopper_R12.zip'):

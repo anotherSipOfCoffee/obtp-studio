@@ -19,12 +19,12 @@ class ExportCacheTests(unittest.TestCase):
         self.directory = pathlib.Path(self.temp.name)
         self.expected = {'source_revision': 'system-a', 'python': 'test-runtime'}
         self.geometry = b'compressed model fixture'
-        self.manifest = {'source_revision': 'system-a', 'entries': [{
+        self.manifest = {'source_revision': 'system-a', 'pdf_enabled': False, 'entries': [{
             'key': 'studio-m', 'file': 'studio-m.json.gz',
-            'sha256': hashlib.sha256(self.geometry).hexdigest()}]}
+            'sha256': hashlib.sha256(self.geometry).hexdigest(), 'pdf': False}]}
         self.write_manifest()
         (self.directory / 'studio-m.json.gz').write_bytes(self.geometry)
-        for suffix in ('.pdf', '-openings.pdf', '-components.pdf', '-assembly.pdf', '-plan.svg'):
+        for suffix in ('-plan.svg',):
             (self.directory / ('studio-m' + suffix)).write_bytes(b'drawing fixture')
         for name in ('OBTP_Grasshopper_Source.zip', 'OBTP_Grasshopper_R12.zip'):
             (self.directory / name).write_bytes(b'package fixture')
@@ -40,12 +40,12 @@ class ExportCacheTests(unittest.TestCase):
         for change in ({'source_revision': 'system-b'}, {'python': 'new-runtime'}):
             self.assertFalse(reusable(self.directory, self.expected | change))
 
-    def test_modified_pdf_is_rejected(self):
+    def test_stale_pdf_is_rejected(self):
         (self.directory / 'studio-m-components.pdf').write_bytes(b'old revision')
         self.assertFalse(reusable(self.directory, self.expected))
 
     def test_missing_drawing_is_rejected(self):
-        (self.directory / 'studio-m-assembly.pdf').unlink()
+        (self.directory / 'studio-m-plan.svg').unlink()
         self.assertFalse(reusable(self.directory, self.expected))
         with self.assertRaises(ValueError):
             seal(self.directory, self.expected)
