@@ -46,3 +46,10 @@ jobs:
             studio-*.png
             cassette-validation.json
           retention-days: 30
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: studio-visual-check
+          path: studio-*.png
+          retention-days: 7
