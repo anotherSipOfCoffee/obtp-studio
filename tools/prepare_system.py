@@ -40,7 +40,8 @@ else:
             code = process.wait(timeout=30)
             break
         except subprocess.TimeoutExpired:
-            count = sum(1 for _ in generated.glob('*.json.gz'))
+            count = sum(1 for path in generated.glob('*.json.gz')
+                        if not path.name.endswith('-manufacturing.json.gz'))
             print(f'Export running: {count} configurations written; '
                   f'{time.monotonic()-started:.0f}s elapsed', flush=True)
     if code:
