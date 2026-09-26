@@ -25,3 +25,6 @@ The owner explicitly authorized the GH-R03 website update after pausing earlier 
 
 ## Customer language and information hierarchy
 Lithuanian is the default; English remains selectable. Use natural Lithuanian customer copy, not literal technical translations. Keep the main configurator focused on product choices and preview. Technical notes, material quantities, detailed schedules and source links belong in Additional information. Language switching must preserve configuration and views. Geometry authority remains the System Python/GH source.
+
+## R04 authoring and customer presentation
+Model-derived drawings, measured dimension anchors and drawing exports belong to System authoring/grasshopper/obtp/drawings.py and sheets.py. Do not add independent browser geometry. Source DXF symbols carry a source checksum. Cake House-style controls and Koto-inspired neutral gallery/navigation are authorized; reserved photography fields remain empty. White appearance is a display override. Read RESEARCH_R04.md for insulation, 4480 mm gable reference height, legal/title-block and native Rhino acceptance limits.
