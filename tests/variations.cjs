@@ -15,17 +15,18 @@ assert.equal(await v3.locator('#facade option').count(),1);
 assert(!(await v3.locator('#component-details').evaluate(x=>x.open)));assert(!(await v3.locator('#technical-notes').evaluate(x=>x.open)));
 assert.equal(await v3.locator('#assembly-system').inputValue(),'0');assert(await v3.locator('#assembly-system option[value="1"]').isDisabled());
 assert.equal(await v3.locator('#preset').inputValue(),'studio');assert.equal(await v3.locator('canvas').evaluate(()=>OBTPStudioV3.scene.seasonal_spec.state),'open');assert(!(await v3.locator('#studio-season-field').isVisible()));assert(!(await v3.locator('.fixed-terrace-field').isVisible()));await v3.locator('#preset').selectOption('sauna');await ready();
+await choose('sauna-roof','1');await ready();
 const initial=await v3.locator('canvas').evaluate(()=>OBTPStudioV3.scene.source_geometry_sha256);
 for(const size of ['s','m','l']){await choose('sauna-size',size);await ready();assert.equal(await v3.locator('canvas').evaluate(()=>OBTPStudioV3.selection.size),size);await page.screenshot({path:`studio-sauna-${size}.png`,fullPage:true});}
 await choose('sauna-storage','true');await ready();assert(await v3.locator('canvas').evaluate(()=>OBTPStudioV3.scene.config.storage));
 for(const width of ['580','880','1180']){await choose('window-width',width);await ready();assert.equal(await v3.locator('canvas').evaluate(()=>OBTPStudioV3.scene.config.window_width),Number(width));}
 assert.equal(await v3.locator('#terrace-depth option').count(),1);assert.equal(await v3.locator('canvas').evaluate(()=>OBTPStudioV3.scene.config.terrace_steps),2);
 for(const roof of ['0','1','2']){await choose('sauna-roof',roof);await ready();assert.equal(await v3.locator('canvas').evaluate(()=>OBTPStudioV3.scene.config.roof_type),Number(roof));}
-await v3.locator('[data-view="cut"]').click();assert(!(await v3.locator('canvas').evaluate(()=>OBTPStudioV3.renderer.items.some(x=>['roof','ceiling'].includes(x.stage)))));
+await v3.locator('[data-view="cut"]').click();assert(await v3.locator('canvas').evaluate(()=>{const s=OBTPStudioV3.scene,z=s.dimensions.floor_top_mm+1100;return s.cut.models.every(m=>m.assets.every(a=>a.vertices.every(v=>v[2]<=z+0.001)));}));assert(!(await v3.locator('canvas').evaluate(()=>OBTPStudioV3.renderer.items.some(x=>['roof','ceiling'].includes(x.stage)))));
 assert(await v3.locator('canvas').evaluate(()=>OBTPStudioV3.renderer.items.some(x=>x.stage==='interior')));
 const angle=await v3.locator('canvas').evaluate(()=>OBTPStudioV3.renderer.angle);await v3.locator('#rotate').click();assert(Math.abs(await v3.locator('canvas').evaluate(()=>OBTPStudioV3.renderer.angle)-(angle+Math.PI/2))<1e-9);
 await v3.locator('#reset').click();await page.screenshot({path:'studio-sauna-panels-cut.png',fullPage:true});
-await choose('sauna-size','m');await ready();await choose('sauna-storage','false');await ready();await choose('sauna-roof','1');await ready();await choose('terrace-depth','1200');await ready();
+await choose('sauna-size','m');await ready();await choose('sauna-storage','false');await ready();await choose('sauna-roof','1');await ready();
 assert.equal(await v3.locator('canvas').evaluate(()=>OBTPStudioV3.scene.source_geometry_sha256),initial);
 await page.locator('#customer-info').click();assert(await v3.locator('#customer-information').isVisible());await v3.locator('#supplier-information summary').click();assert((await v3.locator('#supplier-information .supplier-row').count())>=5);for(const img of await v3.locator('#supplier-information img').all())assert(await img.evaluate(async x=>{await x.decode();return x.naturalWidth>0;}));await page.screenshot({path:'studio-r06-suppliers.png',fullPage:true});
 await v3.locator('#component-details summary').click();assert(await v3.locator('#schedule tr').count()>0);
