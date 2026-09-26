@@ -61,6 +61,7 @@
       ['Types removed by cladding exclusion',...versions.map(a=>a.cladding_exclusion_type_effect)]];
     for(const [i,row]of rows.entries()){const tr=document.createElement('tr');for(const value of row){const td=document.createElement(i?'td':'th');td.textContent=value;tr.append(td);}body.append(tr);}$('program').append(table);
     const same=document.createElement('p');same.textContent=`Same-footprint revised part candidates: ${scene.comparison.same_footprint.unique_manufactured_part_candidates}`;$('program').append(same);
+    if(scene.comparison.before_opening){const p=document.createElement('p');p.textContent=`Opening-detail optimization at unchanged footprint: ${scene.comparison.before_opening.unique_manufactured_part_candidates} → ${scene.comparison.current.unique_manufactured_part_candidates} part candidates; ${scene.comparison.before_opening.physical_pieces} → ${scene.comparison.current.physical_pieces} pieces.`;$('program').append(p);}
     for(const [label,path]of [['Three-system comparison report','review/index.html'],['Part and separate cladding schedules',scene.manufacturing.schedule_file],['Current system plan',key(s)+'-plan.svg']]){
       const p=document.createElement('p'),a=document.createElement('a');a.textContent=label;a.href='generated/'+path+'?build='+scene.source_revision;a.target='_blank';a.rel='noopener';p.append(a);$('program').append(p);
     }
