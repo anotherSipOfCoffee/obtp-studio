@@ -6,4 +6,4 @@ const tools=document.createElement('details');tools.innerHTML='<summary>Assembly
 for(const a of [...document.querySelectorAll('aside a')]){const p=a.closest('p');if(p)info.append(p);}
 const note=document.createElement('p');note.textContent='Configuration preview. Final specifications and site requirements are confirmed separately.';document.getElementById('view-description').after(note);
 document.body.append(info);window.OBTPCustomerView=show=>{main.hidden=show;info.hidden=!show;window.scrollTo(0,0);};document.getElementById('back-config').onclick=()=>OBTPCustomerView(false);
-})();</script><script src="customer-design.js?build=__STUDIO_BUILD__"></script></body></html>
+})();</script><script src="customer-design.js?build=__STUDIO_BUILD__"></script><script src="supplier-ui.js?build=__STUDIO_BUILD__"></script></body></html>
