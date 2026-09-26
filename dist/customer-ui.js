@@ -1,6 +1,12 @@
 'use strict';
 (()=>{
  const exact={
+ 'Main':'Pagrindinis','OBTP / MODULAR SPACES':'OBTP / MODULINĖS ERDVĖS','Room for what matters.':'Erdvė tam, kas svarbu.',
+ 'We develop compact timber spaces for work, creativity and sauna rituals. One modular system, thoughtful layouts and a close connection to the outdoors.':'Kuriame kompaktiškas medines erdves darbui, kūrybai ir pirties ritualams. Jas jungia viena modulinė sistema, apgalvoti planai ir artimas ryšys su aplinka.',
+ 'Explore the configurator':'Atraskite savo variantą','A simple structure. Your own rhythm.':'Paprasta sandara. Jūsų ritmas.',
+ 'Choose a studio for focused work or a sauna for a slower moment. Explore the size, layout and details in the configurator.':'Studija susikaupti ir kurti, pirtis – sulėtinti tempą. Konfiguratoriuje pasirinkite dydį ir detales, peržiūrėkite erdvę bei jos planą.',
+ 'Architectural visualisations. Final details follow the selected configuration.':'Architektūrinės vizualizacijos. Galutinės detalės priklauso nuo pasirinktos konfigūracijos.',
+
  'Studio':'Studija','Studio size':'Studijos dydis','Storage shelves':'Medžiagų lentynos','Configure your studio.':'Susikurkite savo studiją.','Your studio preview.':'Jūsų studijos peržiūra.','Space to create.':'Erdvė kurti.','OBTP / MODULAR STUDIO':'OBTP / MODULINĖ STUDIJA',
  'Sliding glass doors':'Stumdomos stiklo durys','Closed · winter':'Uždaryta · žiema','Open · summer':'Atidaryta · vasara',
  'Creative workspace · heated central room with sliding glazing · preparation and storage.':'Kūrybos kambarys · šildoma centrinė erdvė su stumdomomis stiklo durimis · paruošimas ir laikymas.',
