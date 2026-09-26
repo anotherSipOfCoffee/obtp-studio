@@ -1,7 +1,6 @@
 {
   "repository": "anotherSipOfCoffee/obtp-system",
-  "commit": "a75a15402a38201b51516bb87f77b7982974eb2d",
+  "commit": "26c0a66da6eae112c47e208468b6e5163bb9a8a9",
   "source_path": "dist",
   "deployment_path": "dist/system-source"
 }
-
