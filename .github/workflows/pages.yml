@@ -33,7 +33,7 @@ jobs:
           repository: anotherSipOfCoffee/obtp-system
           ref: ${{ steps.system.outputs.commit }}
           path: _system
-      - run: python -m pip install reportlab
+      - run: python -m pip install reportlab rhino3dm==8.35.0
       - name: Prepare pinned System modules
         run: |
           python tools/prepare_system.py
