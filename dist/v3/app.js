@@ -25,6 +25,9 @@
   window.OBTPStudioV3={scene,renderer,metrics:scene.metrics,selection:s,sourceRevision:scene.source_revision};
  }
  async function load(){
+  const studio=$('preset').value==='studio';
+  for(const option of $('sauna-roof').options)option.disabled=studio&&option.value!=='0';
+  if(studio)$('sauna-roof').value='0';
   const request=++serial;scene=null;window.OBTPStudioV3=null;clear();$('status').textContent='Loading script-authored model…';$('wood-total').textContent='';$('schedule').replaceChildren();
   try{
    const s=selection(),catalogue=await manifest,entry=catalogue.entries.find(e=>e.key===key(s));if(!entry)throw Error('Configuration is not in the verified export catalogue');
@@ -41,7 +44,7 @@
    $('envelope').replaceChildren();for(const text of ['LT I-group dimensional screen',`Conservative roof/terrace area bound: ${m.building_area_bound_m2.toFixed(2)} / 50.00 m² ✓`,`Height: ${(m.height_mm/1000).toFixed(2)} / 5.00 m ✓`,`Maximum support spacing: ${(m.max_bearing_line_span_mm/1000).toFixed(2)} / 6.00 m ✓`,`${s.program==='studio'?'Enclosed floor area after wall finishes':'Main internal rectangle before finishes'}: ${m.main_clear_floor_less_partition_m2.toFixed(2)} m²`,`Terrace: ${m.terrace_area_m2.toFixed(2)} m²`,'Site and land-use conditions must be checked separately. The conservative area bound is not a certified legal area calculation.']){const p=document.createElement('p');p.textContent=text;$('envelope').append(p);}
    $('program').replaceChildren();if(scene.envelope_spec){const p=document.createElement('p');p.textContent=s.program==='studio'?'Studio envelope study: heating, ventilation and vapour control remain to be specified.':'Envelope study: 195 mm wall insulation, 220 mm floor and ceiling insulation; sealed sauna foil and ventilated lining cavity. Heater, ventilation and moisture assessment remain to be confirmed.';$('program').append(p);}for(const text of scene.holds){const p=document.createElement('p');p.textContent=text;$('program').append(p);}
    const link=document.createElement('a');link.href=`https://github.com/anotherSipOfCoffee/obtp-system/tree/${scene.source_revision}/authoring/grasshopper`;link.target='_blank';link.rel='noopener';link.textContent=`Canonical Python/GH source · ${scene.source_revision.slice(0,12)}`;$('program').append(link);
-   const download=document.createElement('p');const a=document.createElement('a');a.href='generated/OBTP_Grasshopper_R07.zip';a.textContent='Download this revision’s GH authoring scripts';download.append(a);$('program').append(download);
+   const download=document.createElement('p');const a=document.createElement('a');a.href='generated/OBTP_Grasshopper_R08.zip';a.textContent='Download this revision’s GH authoring scripts';download.append(a);$('program').append(download);
    $('function-screen').hidden=true;
    const groups={};for(const i of scene.items)groups[i.stage]=(groups[i.stage]||0)+1;
    for(const [role,count]of Object.entries(groups)){const tr=document.createElement('tr');for(const text of [role,'Modeled component',count]){const td=document.createElement('td');td.textContent=text;tr.append(td);}$('schedule').append(tr);}
