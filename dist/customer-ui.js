@@ -58,6 +58,12 @@
  'No engineered lintel, fastener schedule, racking, foundation or roof-weathering design.':'Sąramų, tvirtinimo, standumo, pamatų ir stogo sandarumo sprendiniai dar nepatvirtinti.',
  'Lining is modeled; vapour control, waterproofing, glazing safety, finished clearances and heater ventilation require verification.':'Apdaila sumodeliuota. Dar tikrinama garo izoliacija, hidroizoliacija, stiklinimo sauga, laisvi atstumai ir krosnelės vėdinimas.',
  'Grasshopper/Rhino 8 execution acceptance is pending.':'Patikra Grasshopper / Rhino 8 aplinkoje dar nebaigta.',
+ 'Compared with the previous system':'Palyginimas su ankstesne sistema',
+ 'Same choices, different dimensions. Counts are model quantities, not cost or construction approval.':'Tie patys pasirinkimai, skirtingi matmenys. Pateikiami modelio kiekiai, ne kaina ar statybai patvirtinta specifikacija.',
+ 'Measure':'Rodiklis','Previous':'Ankstesnė','Cell system':'Modulinis tinklas',
+ 'Structural footprint':'Konstrukcijos matmenys','Wall assemblies':'Sienų mazgų grupės','Wood parts':'Medinės detalės',
+ 'Geometric wood types':'Medinių detalių geometriniai tipai','Foundation supports':'Pamatų atramos',
+ 'Previous system plan':'Ankstesnės sistemos planas','Current system plan':'Dabartinės sistemos planas',
  'floor':'grindys','roof':'stogas','walls':'sienos','partitions':'pertvaros','furniture':'įranga ir baldai','foundation':'pamatai','interior':'vidaus apdaila','ceiling':'lubos','facade':'fasadas','terrace':'terasa','canopy':'stoginė'
  };
  const patterns=[

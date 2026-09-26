@@ -13,6 +13,9 @@ async function assertPDFDisabled(language){
 }
 async function ready(){await page.waitForFunction(()=>{const w=document.getElementById('v3').contentWindow;return Boolean(w?.OBTPStudioV3?.scene);},{},{timeout:60000});}
 await ready();assert(await v3.locator('#customer-product').isVisible());await page.locator('#customer-config').click();
+assert.deepEqual(await v3.locator('canvas').evaluate(()=>OBTPStudioV3.scene.cell_spec.cell_mm),[900,1200]);
+assert(await v3.locator('canvas').evaluate(()=>{const s=OBTPStudioV3.scene;return s.comparison.current.geometry_sha256===s.source_geometry_sha256&&s.comparison.previous.geometry_sha256!==s.source_geometry_sha256;}));
+assert.equal(await v3.locator('#program a[href*="-previous-plan.svg"]').count(),1);
 assert.equal(await page.locator('iframe:not([hidden])').getAttribute('id'),'v3');
 assert.deepEqual(await v3.locator('#studio-version option').evaluateAll(xs=>xs.map(x=>x.value)),['v2','v3']);
 assert.equal(await v3.locator('#preset option').count(),2);assert.match(await page.locator('#customer-product').textContent(),/Main/);

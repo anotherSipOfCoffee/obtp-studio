@@ -1,3 +1,6 @@
+# Current owner direction — cell-system integration
+The owner selected the simpler seam-based 900 × 1200 planning system, then explicitly requested full integration and comparison with the previous system. Implement in canonical Python/GH first and consume the pinned export in Studio. Read System authoring/grasshopper/RELEASE_R14_CELLS.md. Preserve the previous geometry through the explicit legacy resolver for regression/comparison; do not mistake the earlier standalone research documents for completed integration. Keep PDFs disabled, gable absent from the website, Lithuanian default and engineering holds explicit. Drive/Architecture remain separate.
+
 # Latest website request — PDF pause and controls
 Owner requests disabling PDF generation and showing downloads as disabled, removing the gable roof option, translating Flat as Plokščias, matching all configuration parameters to the existing choice-button UI, and removing the single-option façade section. See docs/WEB_RELEASE_R13.md. Preserve 3D/SVG plans and Rhino/source downloads. This supersedes older website PDF and three-roof instructions.
 
