@@ -1,7 +1,7 @@
 'use strict';
 (()=>{
  const $=id=>document.getElementById(id);
- const definitions=[['sauna-size',['S','M','L']],['sauna-storage',['No','Yes']],['sauna-roof',['Flat','Single slope','Gable']],['terrace-depth',['1200']],['window-width',['580','880','1180']]];
+ const definitions=[['studio-season',['Closed · winter','Open · summer']],['sauna-size',['S','M','L']],['sauna-storage',['No','Yes']],['sauna-roof',['Flat','Single slope','Gable']],['terrace-depth',['1200']],['window-width',['580','880','1180']]];
  for(const [id,labels]of definitions){
   const el=$(id),check=el.type==='checkbox',row=document.createElement('div');row.className='choice-row'+(id==='sauna-roof'?' roof':'');row.role='radiogroup';row.setAttribute('aria-labelledby',id+'-label');const label=document.querySelector('label[for="'+id+'"]')||el.closest('label');label.id=id+'-label';if(check){label.after(el);label.classList.remove('toggle-line');}el.classList.add('native-choice');el.tabIndex=-1;el.setAttribute('aria-hidden','true');el.after(row);
   const sync=()=>{for(const [i,b]of [...row.children].entries()){const on=check?el.checked===Boolean(i):el.selectedIndex===i;b.setAttribute('aria-checked',on);b.tabIndex=on?0:-1;}};
@@ -12,7 +12,7 @@
  const product=document.createElement('section');product.id='customer-product';product.className='customer-page';product.hidden=true;product.innerHTML='<p>Module type</p><p>Sauna</p><h1>A place to slow down.</h1><p class="customer-note">A modular sauna with a small entrance hall, outdoor shower and optional storage. Choose the size and details that suit your space.</p><div class="photo-empty" role="img" aria-label="Reserved exterior photograph"></div><div class="photo-grid"><div class="photo-empty" role="img" aria-label="Reserved interior photograph"></div><div class="photo-empty" role="img" aria-label="Reserved material photograph"></div></div><button id="product-config">Configure your sauna.</button>';document.body.append(product);
  const drawings=document.createElement('section');drawings.id='customer-drawings';drawings.className='customer-page';drawings.hidden=true;drawings.innerHTML='<h1>Your drawings.</h1><p>Plan, two sections, window schedule and reserved construction details.</p><div class="drawing-actions"><a id="pdf-download" download>Download PDF</a></div><p id="drawing-selection"></p><p>A3 · plan and sections 1:25 · window 1:10 · vertical window details 1:2.</p>';document.body.append(drawings);
  window.OBTPCustomerView=(value)=>{const section=value===true?'info':value===false?'config':value;for(const [id,key]of [['configurator','config'],['customer-information','info'],['customer-product','product'],['customer-drawings','drawings']])$(id).hidden=section!==key;window.OBTPConfigOverlay?.(false);$('mobile-config-toggle').hidden=section!=='config';window.scrollTo(0,0);if(section==='drawings')window.OBTPUpdatePDF?.();};$('product-config').onclick=()=>OBTPCustomerView('config');$('back-config').onclick=()=>OBTPCustomerView('config');
- window.OBTPUpdatePDF=()=>{const state=window.OBTPStudioV3;if(!state)return;const s=state.selection,key=`${s.program}-${s.size}-${s.storage?'storage':'open'}-r${s.roof}-t${s.terrace}-w${s.window}-f${s.facade}`;const url='generated/'+key+'.pdf?build='+state.sourceRevision;$('pdf-download').href=url;$('pdf-download').download=key+'.pdf';$('drawing-selection').textContent=`${s.size.toUpperCase()} · ${s.window} × 1880 mm · PIHLA Varma Kiinteä`;};
+ window.OBTPUpdatePDF=()=>{const state=window.OBTPStudioV3;if(!state)return;const s=state.selection,key=`${s.program}-${s.size}-${s.storage?'storage':'open'}-r${s.roof}-t${s.terrace}-w${s.window}-f${s.facade}${s.program==='studio'&&s.season==='summer'?'-summer':''}`;const url='generated/'+key+'.pdf?build='+state.sourceRevision;$('pdf-download').href=url;$('pdf-download').download=key+'.pdf';$('drawing-selection').textContent=`${s.size.toUpperCase()} · ${s.window} × 1880 mm · PIHLA Varma Kiinteä`;};
  window.OBTPProgramRender=()=>{
   const studio=$('preset').value==='studio';
   document.querySelector('aside h1').textContent=studio?'Configure your studio.':'Configure your sauna.';
@@ -21,7 +21,7 @@
   const storageLabel=$('sauna-storage-label');if(storageLabel)storageLabel.textContent=studio?'Storage shelves':'External storage + outdoor seat';
   const product=$('customer-product');product.querySelector('h1').textContent=studio?'Space to create.':'A place to slow down.';
   product.querySelectorAll('p')[1].textContent=studio?'Studio':'Sauna';
-  product.querySelector('.customer-note').textContent=studio?'Two enclosed workspaces around a covered outdoor work area. For creative work, preparation and material storage.':'A modular sauna with a small entrance hall, outdoor shower and optional storage. Choose the size and details that suit your space.';
+  product.querySelector('.customer-note').textContent=studio?'Workspaces joined by a heated central room with sliding glazing for summer. For creative work, preparation and material storage.':'A modular sauna with a small entrance hall, outdoor shower and optional storage. Choose the size and details that suit your space.';
   $('product-config').textContent=studio?'Configure your studio.':'Configure your sauna.';
   const mark=document.querySelector('aside > p');if(mark)mark.textContent=studio?'OBTP / MODULAR STUDIO':'STUDIO V3 / CASSETTE 01';
  };

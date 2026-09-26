@@ -2,6 +2,9 @@
 (()=>{
  const exact={
  'Studio':'Studija','Studio size':'Studijos dydis','Storage shelves':'Medžiagų lentynos','Configure your studio.':'Susikurkite savo studiją.','Your studio preview.':'Jūsų studijos peržiūra.','Space to create.':'Erdvė kurti.','OBTP / MODULAR STUDIO':'OBTP / MODULINĖ STUDIJA',
+ 'Sliding glass doors':'Stumdomos stiklo durys','Closed · winter':'Uždaryta · žiema','Open · summer':'Atidaryta · vasara',
+ 'Creative workspace · heated central room with sliding glazing · preparation and storage.':'Kūrybos kambarys · šildoma centrinė erdvė su stumdomomis stiklo durimis · paruošimas ir laikymas.',
+ 'Workspaces joined by a heated central room with sliding glazing for summer. For creative work, preparation and material storage.':'Darbo patalpas jungia šildoma centrinė erdvė, kurią vasarą galima atverti sustūmus stiklo duris. Skirta kūrybai, pasiruošimui ir medžiagoms laikyti.',
  'Creative workspace · covered outdoor work area · preparation and storage.':'Kūrybos kambarys · dengta lauko darbo erdvė · paruošimas ir laikymas.',
  'Two enclosed workspaces around a covered outdoor work area. For creative work, preparation and material storage.':'Dvi uždaros darbo patalpos, kurias jungia dengta lauko erdvė. Skirta kūrybai, pasiruošimui ir medžiagoms laikyti.',
  'Studio envelope study: heating, ventilation and vapour control remain to be specified.':'Studijos atitvarų sprendiniai tikrinami. Šildymas, vėdinimas ir garų kontrolė dar neparinkti.',
