@@ -1,3 +1,6 @@
+# Latest owner release R10
+Owner requests publication of Main/Pagrindinis with supplied gallery images, Studio default/open sliders, simplified fixed controls, recessed firewood niche and all-solid cut view. Preserve R09 GH package-loader/part-visibility fixes. Read System authoring/grasshopper/RELEASE_R10.md. This supersedes earlier Sauna-default and planning-only instructions for this release.
+
 # OBTP Studio agent rules
 
 ## Latest scoped authorization — Studio preset R07
