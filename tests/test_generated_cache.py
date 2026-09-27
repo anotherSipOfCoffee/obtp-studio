@@ -19,13 +19,15 @@ class ExportCacheTests(unittest.TestCase):
         self.directory = pathlib.Path(self.temp.name)
         self.expected = {'source_revision': 'system-a', 'python': 'test-runtime'}
         self.geometry = b'compressed model fixture'
-        self.manifest = {'source_revision': 'system-a', 'pdf_enabled': False, 'entries': [{
-            'key': 'studio-m', 'file': 'studio-m.json.gz',
-            'sha256': hashlib.sha256(self.geometry).hexdigest(), 'pdf': False}]}
+        self.manifest = {'source_revision': 'system-a', 'pdf_enabled': False, 'document_kinds': ['components','assembly'], 'entries': [{
+            'key': 'studio-m-open-r0-t2-w1180-f0-b0-summer', 'file': 'studio-m-open-r0-t2-w1180-f0-b0-summer.json.gz',
+            'sha256': hashlib.sha256(self.geometry).hexdigest(), 'pdf': False, 'documents': {kind:'studio-m-open-r0-t2-w1180-f0-b0-summer-'+kind+'.pdf' for kind in ('components','assembly')}}]}
         self.write_manifest()
-        (self.directory / 'studio-m.json.gz').write_bytes(self.geometry)
+        for kind in ('components','assembly'):
+            (self.directory/('studio-m-open-r0-t2-w1180-f0-b0-summer-'+kind+'.pdf')).write_bytes(b'%PDF-fixture')
+        (self.directory / 'studio-m-open-r0-t2-w1180-f0-b0-summer.json.gz').write_bytes(self.geometry)
         for suffix in ('-plan.svg',):
-            (self.directory / ('studio-m' + suffix)).write_bytes(b'drawing fixture')
+            (self.directory / ('studio-m-open-r0-t2-w1180-f0-b0-summer' + suffix)).write_bytes(b'drawing fixture')
         for name in ('OBTP_Grasshopper_Source.zip', 'OBTP_Grasshopper_R12.zip'):
             (self.directory / name).write_bytes(b'package fixture')
         seal(self.directory, self.expected)
@@ -41,17 +43,17 @@ class ExportCacheTests(unittest.TestCase):
             self.assertFalse(reusable(self.directory, self.expected | change))
 
     def test_stale_pdf_is_rejected(self):
-        (self.directory / 'studio-m-components.pdf').write_bytes(b'old revision')
+        (self.directory / 'studio-m-open-r0-t2-w1180-f0-b0-summer-components.pdf').write_bytes(b'old revision')
         self.assertFalse(reusable(self.directory, self.expected))
 
     def test_missing_drawing_is_rejected(self):
-        (self.directory / 'studio-m-plan.svg').unlink()
+        (self.directory / 'studio-m-open-r0-t2-w1180-f0-b0-summer-plan.svg').unlink()
         self.assertFalse(reusable(self.directory, self.expected))
         with self.assertRaises(ValueError):
             seal(self.directory, self.expected)
 
     def test_geometry_corruption_is_rejected(self):
-        (self.directory / 'studio-m.json.gz').write_bytes(b'corrupt')
+        (self.directory / 'studio-m-open-r0-t2-w1180-f0-b0-summer.json.gz').write_bytes(b'corrupt')
         self.assertFalse(reusable(self.directory, self.expected))
         with self.assertRaises(ValueError):
             seal(self.directory, self.expected)
