@@ -1,74 +1,54 @@
 'use strict';
-const {chromium}=require('playwright'),assert=require('node:assert/strict');
-(async()=>{const browser=await chromium.launch({executablePath:process.env.OBTP_CHROMIUM_EXECUTABLE,headless:true,args:['--use-gl=angle','--use-angle=swiftshader','--enable-webgl']});
-try{const page=await browser.newPage({viewport:{width:1440,height:1100}}),errors=[];page.on('pageerror',e=>errors.push(e.message));
-await page.goto((process.env.OBTP_BASE_URL||'http://127.0.0.1:8765/')+'configurator.html');const v3=page.frameLocator('#v3'),v2=page.frameLocator('#v2');
-assert.equal(await page.locator('html').getAttribute('lang'),'lt');await page.locator('#language').selectOption('en');
-async function choose(id,value){await v3.locator('#'+id+' + .choice-row [data-value="'+value+'"]').click();}
-async function assertPDFDisabled(language){
- const docs=await v3.locator('canvas').evaluate(()=>OBTPStudioV3.scene.documents);
- for(const [id,kind]of [['components-download','components'],['assembly-download','assembly']])assert.equal(await v3.locator('#'+id).isEnabled(),Boolean(docs[kind]));
- for(const kind of Object.keys(docs)){const url=new URL('v3/generated/'+docs[kind],page.url());const r=await page.request.get(url.href);assert(r.ok());assert.equal((await r.body()).subarray(0,5).toString(),'%PDF-');}
-
- for(const id of ['pdf-download','openings-download']){
-  const button=v3.locator('#'+id);assert(await button.isVisible());assert(await button.isDisabled());assert.equal(await button.getAttribute('href'),null);
+const {chromium}=require('playwright'),assert=require('node:assert/strict'),fs=require('node:fs');
+(async()=>{const browser=await chromium.launch({executablePath:process.env.OBTP_CHROMIUM_EXECUTABLE,headless:true,args:['--no-sandbox','--use-gl=angle','--use-angle=swiftshader','--enable-webgl']});
+try{
+ const base=process.env.OBTP_BASE_URL||'http://127.0.0.1:8765/';
+ const page=await browser.newPage({viewport:{width:1440,height:1000},acceptDownloads:true}),errors=[];page.on('pageerror',e=>errors.push(e.message));
+ await page.addInitScript(()=>{localStorage.setItem('obtp-preset','workshop');localStorage.setItem('obtp-size','l');localStorage.setItem('obtp-storage','false');});
+ await page.goto(base+'configurator.html?preset=workshop&size=l&storage=false&roof=2#v2');
+ const frame=page.frameLocator('#v3');
+ async function ready(program){await page.waitForFunction(p=>{const s=document.getElementById('v3').contentWindow?.OBTPStudioV3?.scene;return s&&s.config.program_type===p;},program,{timeout:60000});}
+ async function choose(program){await frame.locator('#preset + .choice-row [data-value="'+(program?'studio':'sauna')+'"]').click();await ready(program);}
+ await ready(1);
+ assert.equal(await page.locator('#customer-info,#v2,#v1').count(),0);
+ assert.equal(await frame.locator('#customer-information,#customer-product,#studio-version').count(),0);
+ assert.deepEqual(await frame.locator('#preset option').evaluateAll(xs=>xs.map(x=>x.value)),['sauna','studio']);
+ assert.equal(await frame.locator('.choice-row').count(),1);
+ assert(!page.url().includes('workshop'));
+ await page.locator('#language').selectOption('en');
+ for(const program of [0,1]){
+  await choose(program);
+  const data=await frame.locator('canvas').evaluate(()=>({s:OBTPStudioV3.scene,selected:OBTPStudioV3.selection}));
+  assert.equal(data.s.config.size,'M');assert.equal(data.s.config.storage,true);assert.equal(data.s.config.roof_type,0);assert.equal(data.s.config.foundation_type,0);assert.equal(data.s.config.window_width,1180);
+  assert.equal(data.s.documents_geometry_sha256,data.s.source_geometry_sha256);
+  assert(data.s.items.some(x=>x.stage==='facade'));assert.equal(data.s.manufacturing.physical_pieces+data.s.manufacturing.cladding.physical_pieces,data.s.items.length);
+  const before=data.s.source_geometry_sha256;
+  await frame.locator('canvas').evaluate(()=>{document.getElementById('sauna-size').value='l';document.getElementById('sauna-storage').checked=false;document.getElementById('sauna-roof').value='2';OBTPReload();});await ready(program);
+  assert.equal(await frame.locator('canvas').evaluate(()=>OBTPStudioV3.scene.source_geometry_sha256),before);
+  await frame.locator('[data-view="cut"]').click();
+  assert(await frame.locator('canvas').evaluate(()=>OBTPStudioV3.scene.cut.models.every(m=>m.assets.every(a=>a.vertices.every(v=>v[2]<=OBTPStudioV3.scene.dimensions.floor_top_mm+1100+.001)))));
+  await frame.locator('[data-view="solved"]').click();await frame.locator('#solved-plan').evaluate(x=>x.decode());assert(await frame.locator('#diagram').isHidden());
+  await frame.locator('[data-view="3d"]').click();
+  const angle=await frame.locator('canvas').evaluate(()=>OBTPStudioV3.renderer.angle);await frame.locator('#rotate').click();assert.notEqual(await frame.locator('canvas').evaluate(()=>OBTPStudioV3.renderer.angle),angle);await frame.locator('#reset').click();
+  await page.screenshot({path:'studio-fixed-'+program+'-desktop.png',fullPage:true});
+  await page.locator('#customer-drawings').click();await frame.locator('#drawing-plan').evaluate(x=>x.decode());
+  for(const [id,kind] of [['components-download','components'],['assembly-download','assembly']]){
+   assert(await frame.locator('#'+id).isEnabled());const downloading=page.waitForEvent('download');await frame.locator('#'+id).click();const download=await downloading;
+   assert.equal(download.suggestedFilename(),data.s.documents[kind]);const path=await download.path();const bytes=fs.readFileSync(path);assert.equal(bytes.subarray(0,5).toString(),'%PDF-');assert(bytes.length>10000);
+   const hash=require('node:crypto').createHash('sha256').update(bytes).digest('hex');assert.equal(hash,data.s.document_sha256[kind]);
+  }
+  await page.screenshot({path:'studio-fixed-'+program+'-drawings.png',fullPage:true});await page.locator('#customer-config').click();
  }
- assert.match(await v3.locator('#pdf-status').textContent(),language==='lt'?/Elementų žiniaraščio ir surinkimo PDF parengti/:/Part schedule and assembly PDFs are available only for default Studio M/);
-}
-async function ready(){await page.waitForFunction(()=>{const w=document.getElementById('v3').contentWindow;return Boolean(w?.OBTPStudioV3?.scene);},{},{timeout:60000});}
-await ready();assert.deepEqual(await v3.locator('canvas').evaluate(()=>Object.keys(OBTPStudioV3.scene.documents).sort()),['assembly','components']);assert(await v3.locator('#configurator').isVisible());assert(await v3.locator('#customer-product').isHidden());await page.locator('#customer-drawings').click();await assertPDFDisabled('en');await page.locator('#customer-config').click();
-assert.deepEqual(await v3.locator('canvas').evaluate(()=>OBTPStudioV3.scene.cell_spec.cell_mm),[900,1200]);
-assert.equal(await page.title(),'studio 9120');
-assert.equal(await v3.locator('#assembly-system').count(),0);
-assert.equal(await v3.locator('canvas').evaluate(()=>OBTPStudioV3.scene.dimensions.width_mm),2400);
-assert(await v3.locator('canvas').evaluate(()=>{const s=OBTPStudioV3.scene;return s.manufacturing.cladding.physical_pieces>0&&s.items.some(i=>i.stage==='facade')&&s.manufacturing.physical_pieces+s.manufacturing.cladding.physical_pieces===s.items.length;}));
-assert(await v3.locator('canvas').evaluate(()=>{const s=OBTPStudioV3.scene;return s.comparison.current.geometry_sha256===s.source_geometry_sha256&&s.comparison.previous.geometry_sha256!==s.source_geometry_sha256;}));
-assert.equal(await v3.locator('#program a[href*="review/index.html"]').count(),1);
-assert.equal(await page.locator('iframe:not([hidden])').getAttribute('id'),'v3');
-assert.deepEqual(await v3.locator('#studio-version option').evaluateAll(xs=>xs.map(x=>x.value)),['v2','v3']);
-assert.equal(await v3.locator('#preset option').count(),2);assert.match(await page.locator('#customer-product').textContent(),/Main/);
-assert.equal(await v3.locator('#terrace-depth').inputValue(),'1200');assert.equal(await v3.locator('#window-width').inputValue(),'1180');
-assert.equal(await v3.locator('#facade option').count(),1);assert(!(await v3.locator('#facade').isVisible()));assert.equal(await v3.locator('label[for="facade"], .material-sample').count(),0);for(const id of ['preset','foundation-type','sauna-size','sauna-roof','window-width'])assert(await v3.locator('#'+id+' + .choice-row').isVisible());
-assert(!(await v3.locator('#component-details').evaluate(x=>x.open)));assert(!(await v3.locator('#technical-notes').evaluate(x=>x.open)));
-assert.equal(await v3.locator('canvas').evaluate(()=>OBTPStudioV3.scene.config.system_type),0);
-assert.equal(await v3.locator('#preset').inputValue(),'studio');assert.equal(await v3.locator('canvas').evaluate(()=>OBTPStudioV3.scene.seasonal_spec.state),'open');assert(!(await v3.locator('#studio-season-field').isVisible()));assert(!(await v3.locator('.fixed-terrace-field').isVisible()));await choose('preset','sauna');await ready();
-await choose('sauna-roof','1');await ready();
-const initial=await v3.locator('canvas').evaluate(()=>OBTPStudioV3.scene.source_geometry_sha256);
-for(const size of ['s','m','l']){await choose('sauna-size',size);await ready();assert.equal(await v3.locator('canvas').evaluate(()=>OBTPStudioV3.selection.size),size);await page.screenshot({path:`studio-sauna-${size}.png`,fullPage:true});}
-await choose('sauna-storage','true');await ready();assert(await v3.locator('canvas').evaluate(()=>OBTPStudioV3.scene.config.storage));
-for(const width of ['580','880','1180']){await choose('window-width',width);await ready();assert.equal(await v3.locator('canvas').evaluate(()=>OBTPStudioV3.scene.config.window_width),Number(width));}
-assert.equal(await v3.locator('#terrace-depth option').count(),1);assert.equal(await v3.locator('canvas').evaluate(()=>OBTPStudioV3.scene.config.terrace_steps),2);
-for(const roof of ['0','1']){await choose('sauna-roof',roof);await ready();assert.equal(await v3.locator('canvas').evaluate(()=>OBTPStudioV3.scene.config.roof_type),Number(roof));}
-await v3.locator('[data-view="cut"]').click();assert(await v3.locator('canvas').evaluate(()=>{const s=OBTPStudioV3.scene,z=s.dimensions.floor_top_mm+1100;return s.cut.models.every(m=>m.assets.every(a=>a.vertices.every(v=>v[2]<=z+0.001)));}));assert(!(await v3.locator('canvas').evaluate(()=>OBTPStudioV3.renderer.items.some(x=>['roof','ceiling'].includes(x.stage)))));
-assert(await v3.locator('canvas').evaluate(()=>OBTPStudioV3.renderer.items.some(x=>x.stage==='interior')));
-const angle=await v3.locator('canvas').evaluate(()=>OBTPStudioV3.renderer.angle);await v3.locator('#rotate').click();assert(Math.abs(await v3.locator('canvas').evaluate(()=>OBTPStudioV3.renderer.angle)-(angle+Math.PI/2))<1e-9);
-await v3.locator('#reset').click();await page.screenshot({path:'studio-sauna-panels-cut.png',fullPage:true});
-await choose('sauna-size','m');await ready();await choose('sauna-storage','false');await ready();await choose('sauna-roof','1');await ready();
-assert.equal(await v3.locator('canvas').evaluate(()=>OBTPStudioV3.scene.source_geometry_sha256),initial);
-await page.locator('#customer-info').click();assert(await v3.locator('#customer-information').isVisible());await v3.locator('#supplier-information summary').click();assert((await v3.locator('#supplier-information .supplier-row').count())>=5);for(const img of await v3.locator('#supplier-information img').all())assert(await img.evaluate(async x=>{await x.decode();return x.naturalWidth>0;}));await page.screenshot({path:'studio-r06-suppliers.png',fullPage:true});
-await v3.locator('#component-details summary').click();assert(await v3.locator('#schedule tr').count()>0);
-assert.match(await v3.locator('#wood-total').textContent(),/Modeled wood: \d+[.]\d{3} m³/);
-await page.locator('#customer-config').click();assert(await v3.locator('#configurator').isVisible());
-await page.locator('#customer-info').click();await v3.locator('#studio-version').selectOption('v2');await v2.locator('#status').filter({hasText:/component instances · ready/}).waitFor();assert(await v2.locator('#bays').isVisible());await v2.locator('#studio-version').selectOption('v3');await page.locator('#customer-config').click();await ready();
-await page.setViewportSize({width:390,height:844});assert(!(await v3.locator('#configuration-panel').isVisible()));await v3.locator('#mobile-config-toggle').click();assert(await v3.locator('#configuration-panel').isVisible());assert.equal(await v3.locator('#mobile-config-toggle').getAttribute('aria-expanded'),'true');await choose('window-width','880');await ready();await page.screenshot({path:'studio-r05-mobile-overlay.png',fullPage:true});await v3.locator('#mobile-config-toggle').click();assert(!(await v3.locator('#configuration-panel').isVisible()));assert.equal(await v3.locator('canvas').evaluate(()=>OBTPStudioV3.scene.config.window_width),880);await v3.locator('#mobile-config-toggle').click();await choose('window-width','1180');await ready();await page.keyboard.press('Escape');assert.equal(await v3.locator('#mobile-config-toggle').getAttribute('aria-expanded'),'false');await v3.locator('[data-view="solved"]').click();await v3.locator('#solved-plan').evaluate(img=>img.decode());assert(await v3.locator('#solved-scroll').evaluate(x=>x.scrollWidth<=x.clientWidth && x.scrollHeight<=x.clientHeight));assert(await v3.locator('body').evaluate(()=>document.documentElement.scrollWidth<=innerWidth));await page.screenshot({path:'studio-sauna-plan-mobile.png',fullPage:true});
-await page.locator('#language').selectOption('lt');assert.equal(await v3.locator('html').getAttribute('lang'),'lt');assert.match(await v3.locator('h1').first().textContent(),/Susikurkite savo pirtį/);await page.locator('#customer-info').click();assert.match(await v3.locator('#customer-information h1').textContent(),/Techninė informacija/);await page.locator('#customer-config').click();assert.equal(await v3.locator('#window-width').inputValue(),'1180');await v3.locator('[data-view="3d"]').click();await page.screenshot({path:'studio-customer-lt-mobile.png',fullPage:true});await page.setViewportSize({width:1440,height:1100});await page.screenshot({path:'studio-customer-lt.png',fullPage:true});await page.locator('#customer-info').click();await page.screenshot({path:'studio-information-lt.png',fullPage:true});
-await page.locator('#customer-drawings').click();assert(await v3.locator('#customer-drawings').isVisible());assert.equal(await v3.locator('#pdf-preview, #customer-drawings iframe, #pdf-open').count(),0);await assertPDFDisabled('lt');await page.screenshot({path:'studio-r04-drawings.png',fullPage:true});await page.locator('#customer-config').click();assert.equal(await v3.locator('canvas').evaluate(()=>OBTPStudioV3.renderer.arctic),true);assert.equal(await v3.locator('#appearance').count(),0);assert.equal(await page.locator('#customer-product').getAttribute('href'),'./');await page.locator('#customer-config').click();await page.screenshot({path:'studio-r04-customer.png',fullPage:true});assert.deepEqual(await v3.locator('#sauna-roof option').evaluateAll(xs=>xs.map(x=>x.value)),['0','1']);assert.equal(await v3.locator('#sauna-roof + .choice-row [data-value="0"]').textContent(),'Plokščias');await choose('preset','studio');await ready();
-assert.equal(await v3.locator('canvas').evaluate(()=>OBTPStudioV3.scene.config.program_type),1);
-for(const size of ['s','m','l']){await choose('sauna-size',size);await ready();assert(await v3.locator('canvas').evaluate(()=>OBTPStudioV3.scene.metrics.building_area_bound_m2<=50));}
-await v3.locator('[data-view="cut"]').click();await page.screenshot({path:'studio-r07-creative-cut.png',fullPage:true});
-await v3.locator('[data-view="solved"]').click();await v3.locator('#solved-plan').evaluate(x=>x.decode());await page.screenshot({path:'studio-r07-creative-plan.png',fullPage:true});
-await choose('sauna-storage','true');await ready();assert(await v3.locator('canvas').evaluate(()=>OBTPStudioV3.scene.config.storage));
-await page.locator('#customer-drawings').click();await assertPDFDisabled('lt');await page.locator('#language').selectOption('en');await assertPDFDisabled('en');await page.locator('#language').selectOption('lt');
-await page.locator('#customer-config').click();await v3.locator('[data-view="3d"]').click();assert(!(await v3.locator('#sauna-roof + .choice-row button[data-value="1"]').isDisabled()));assert.equal(await v3.locator('canvas').evaluate(()=>OBTPStudioV3.scene.seasonal_spec.state),'open');await page.screenshot({path:'studio-r07-creative.png',fullPage:true});
-await page.setViewportSize({width:390,height:844});await v3.locator('#mobile-config-toggle').click();assert(await v3.locator('#preset + .choice-row').isVisible());await page.screenshot({path:'studio-r07-creative-mobile.png',fullPage:true});await choose('preset','sauna');await ready();await page.keyboard.press('Escape');
-assert.equal(await v3.locator('canvas').evaluate(()=>OBTPStudioV3.scene.config.program_type),0);
-assert.match(await v3.locator('h1').first().textContent(),/Susikurkite savo pirtį/);
-await page.locator('#customer-config').click();await page.setViewportSize({width:1440,height:1100});await choose('foundation-type','1');await ready();assert.equal(await v3.locator('canvas').evaluate(()=>OBTPStudioV3.scene.foundation_spec.type),1);assert(await v3.locator('canvas').evaluate(()=>OBTPStudioV3.scene.foundation_spec.connected_platform));assert.deepEqual(errors,[]);console.log('PASS: R04 exported-model defaults, all buyer controls, source identity roundtrip, cut, locked camera, wood, reference plans, mobile and WikiHouse version');
-await page.setViewportSize({width:1560,height:1000});
-await page.goto((process.env.OBTP_BASE_URL||'http://127.0.0.1:8765/')+'v3/generated/review/index.html');
-await page.waitForFunction(()=>window.REVIEW_READY,{},{timeout:60000});
-assert.equal(await page.locator('canvas').count(),6);
-await page.screenshot({path:'studio-r15-comparison.png',fullPage:true});
-await page.locator('#deck').click();await page.locator('.grid').screenshot({path:'studio-r15-terrace-direction.png'});
-assert.deepEqual(errors,[]);console.log('PASS: standalone three-system model comparison and terrace view');
+ await page.locator('#language').selectOption('lt');assert.match(await frame.locator('#preset + .choice-row').textContent(),/Pirtis M su sandėliuku/);
+ await page.setViewportSize({width:390,height:844});
+ for(const program of [0,1]){
+  await frame.locator('#mobile-config-toggle').click();await choose(program);await page.screenshot({path:'studio-fixed-'+program+'-mobile-controls.png',fullPage:true});await page.keyboard.press('Escape');
+  assert.equal(await frame.locator('#mobile-config-toggle').getAttribute('aria-expanded'),'false');
+  assert(await frame.locator('canvas').evaluate(()=>document.documentElement.scrollWidth<=innerWidth));
+  await page.screenshot({path:'studio-fixed-'+program+'-mobile.png',fullPage:true});
+  await page.locator('#customer-drawings').click();assert(await frame.locator('#assembly-download').isEnabled());assert(await frame.locator('#components-download').isEnabled());await page.locator('#customer-config').click();
+ }
+ assert.deepEqual(errors,[]);
+ await page.goto(base);assert.equal(await page.locator('.hero').count(),1);assert.equal(await page.locator('#presets .card').count(),3);
+ console.log('PASS: two locked presets, URL/state guards, preserved 3D/cut/plan, rotation, both real PDF downloads for both presets, LT/EN and desktop/mobile; homepage retained');
 }finally{await browser.close();}})().catch(e=>{console.error(e);process.exit(1)});

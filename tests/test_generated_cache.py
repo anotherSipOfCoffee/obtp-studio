@@ -19,15 +19,25 @@ class ExportCacheTests(unittest.TestCase):
         self.directory = pathlib.Path(self.temp.name)
         self.expected = {'source_revision': 'system-a', 'python': 'test-runtime'}
         self.geometry = b'compressed model fixture'
-        self.manifest = {'source_revision': 'system-a', 'pdf_enabled': False, 'document_kinds': ['components','assembly'], 'entries': [{
-            'key': 'studio-m-open-r0-t2-w1180-f0-b0-summer', 'file': 'studio-m-open-r0-t2-w1180-f0-b0-summer.json.gz',
-            'sha256': hashlib.sha256(self.geometry).hexdigest(), 'pdf': False, 'documents': {kind:'studio-m-open-r0-t2-w1180-f0-b0-summer-'+kind+'.pdf' for kind in ('components','assembly')}}]}
+        self.manifest = {'source_revision': 'system-a', 'pdf_enabled': True, 'document_kinds': ['components','assembly'], 'entries': [{
+            'key': 'studio-m-storage-r0-t2-w1180-f0-b0-summer', 'file': 'studio-m-storage-r0-t2-w1180-f0-b0-summer.json.gz',
+            'sha256': hashlib.sha256(self.geometry).hexdigest(), 'pdf': True, 'documents': {kind:'studio-m-storage-r0-t2-w1180-f0-b0-summer-'+kind+'.pdf' for kind in ('components','assembly')}}]}
+        self.manifest['entries'][0]['document_sha256']={kind:hashlib.sha256(b'%PDF-fixture').hexdigest() for kind in ('components','assembly')}
+        import copy
+        other=copy.deepcopy(self.manifest['entries'][0])
+        for key in ('key','file'):other[key]=other[key].replace('studio-m-storage-r0-t2-w1180-f0-b0-summer','sauna-m-storage-r0-t2-w1180-f0-b0')
+        other['documents']={kind:other['key']+'-'+kind+'.pdf' for kind in ('components','assembly')}
+        self.manifest['entries'].append(other)
+        for entry in self.manifest['entries']:
+            (self.directory/entry['file']).write_bytes(self.geometry)
+            (self.directory/(entry['key']+'-plan.svg')).write_bytes(b'drawing fixture')
+            for path in entry['documents'].values():(self.directory/path).write_bytes(b'%PDF-fixture')
         self.write_manifest()
         for kind in ('components','assembly'):
-            (self.directory/('studio-m-open-r0-t2-w1180-f0-b0-summer-'+kind+'.pdf')).write_bytes(b'%PDF-fixture')
-        (self.directory / 'studio-m-open-r0-t2-w1180-f0-b0-summer.json.gz').write_bytes(self.geometry)
+            (self.directory/('studio-m-storage-r0-t2-w1180-f0-b0-summer-'+kind+'.pdf')).write_bytes(b'%PDF-fixture')
+        (self.directory / 'studio-m-storage-r0-t2-w1180-f0-b0-summer.json.gz').write_bytes(self.geometry)
         for suffix in ('-plan.svg',):
-            (self.directory / ('studio-m-open-r0-t2-w1180-f0-b0-summer' + suffix)).write_bytes(b'drawing fixture')
+            (self.directory / ('studio-m-storage-r0-t2-w1180-f0-b0-summer' + suffix)).write_bytes(b'drawing fixture')
         for name in ('OBTP_Grasshopper_Source.zip', 'OBTP_Grasshopper_R12.zip'):
             (self.directory / name).write_bytes(b'package fixture')
         seal(self.directory, self.expected)
@@ -43,17 +53,17 @@ class ExportCacheTests(unittest.TestCase):
             self.assertFalse(reusable(self.directory, self.expected | change))
 
     def test_stale_pdf_is_rejected(self):
-        (self.directory / 'studio-m-open-r0-t2-w1180-f0-b0-summer-components.pdf').write_bytes(b'old revision')
+        (self.directory / 'studio-m-storage-r0-t2-w1180-f0-b0-summer-components.pdf').write_bytes(b'old revision')
         self.assertFalse(reusable(self.directory, self.expected))
 
     def test_missing_drawing_is_rejected(self):
-        (self.directory / 'studio-m-open-r0-t2-w1180-f0-b0-summer-plan.svg').unlink()
+        (self.directory / 'studio-m-storage-r0-t2-w1180-f0-b0-summer-plan.svg').unlink()
         self.assertFalse(reusable(self.directory, self.expected))
         with self.assertRaises(ValueError):
             seal(self.directory, self.expected)
 
     def test_geometry_corruption_is_rejected(self):
-        (self.directory / 'studio-m-open-r0-t2-w1180-f0-b0-summer.json.gz').write_bytes(b'corrupt')
+        (self.directory / 'studio-m-storage-r0-t2-w1180-f0-b0-summer.json.gz').write_bytes(b'corrupt')
         self.assertFalse(reusable(self.directory, self.expected))
         with self.assertRaises(ValueError):
             seal(self.directory, self.expected)

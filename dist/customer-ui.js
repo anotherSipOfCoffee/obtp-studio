@@ -1,6 +1,18 @@
 'use strict';
 (()=>{
  const exact={
+ 'Choose your space.':'Pasirinkite erdvę.',
+ 'Sauna M with storage':'Pirtis M su sandėliuku',
+ 'Studio M with storage':'Studija M su sandėliuku',
+ 'M · Storage included':'M · Su sandėliuku',
+ 'Flat roof · Timber foundation · 1180 mm window':'Plokščias stogas · Medinis pamatas · 1180 mm langas',
+ 'Drawings and PDFs':'Brėžiniai ir PDF',
+ 'Parts schedule PDF':'Detalių žiniaraštis PDF',
+ 'Assembly PDF':'Surinkimas PDF',
+ 'PDFs match the selected configuration.':'PDF atitinka pasirinktą konfigūraciją.',
+ 'Loading model…':'Įkeliamas modelis…',
+ 'Review documents — engineering and lifting remain unverified.':'Peržiūros dokumentai — konstrukcijos ir kėlimas dar nepatvirtinti.',
+
  'Three-system comparison':'Trijų sistemų palyginimas',
  'Provisional manufacturing types. Material grades, machining and connections remain unresolved. Only façade finish boards are excluded.':'Preliminarūs gamybinių detalių tipai. Medžiagų klasės, apdirbimas ir jungtys dar nepatvirtinti. Neįtrauktos tik fasado apdailos lentos.',
  'Original':'Pradinė','First cell system':'Pirmasis modulinis tinklas','Revised':'Atnaujinta',

@@ -30,11 +30,10 @@ started = time.monotonic()
 if reusable(generated, expected):
     print(f'Reused verified System export in {time.monotonic()-started:.1f}s', flush=True)
 else:
-    print('No complete matching export; generating the full catalogue.', flush=True)
+    print('No complete matching export; generating the two-preset public catalogue.', flush=True)
     if generated.exists():shutil.rmtree(generated)
     process = subprocess.Popen([sys.executable, '-u',
-        str(source / 'authoring/grasshopper/export_web.py'),
-        str(generated), '--revision', head])
+        str(root / 'tools/export_public.py'), str(generated), head])
     while True:
         try:
             code = process.wait(timeout=30)

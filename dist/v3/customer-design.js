@@ -11,28 +11,24 @@
   const sync=()=>{for(const [i,b]of [...row.children].entries()){const on=check?el.checked===Boolean(i):el.selectedIndex===i;b.disabled=!check&&el.options[i].disabled;b.setAttribute('aria-checked',on);b.tabIndex=on&&!b.disabled?0:-1;}};
   labels.forEach((text,i)=>{const b=document.createElement('button');b.type='button';b.role='radio';b.textContent=text;b.dataset.value=check?String(Boolean(i)):el.options[i].value;b.onclick=()=>{if(check)el.checked=Boolean(i);else el.selectedIndex=i;sync();el.dispatchEvent(new Event('change',{bubbles:true}));};b.onkeydown=e=>{if(!['ArrowRight','ArrowLeft','ArrowUp','ArrowDown','Home','End'].includes(e.key))return;e.preventDefault();const enabled=[...row.children].filter(x=>!x.disabled),index=enabled.indexOf(b),j=e.key==='Home'?0:e.key==='End'?enabled.length-1:(index+(['ArrowLeft','ArrowUp'].includes(e.key)?-1:1)+enabled.length)%enabled.length;enabled[j].click();enabled[j].focus();};row.append(b);});sync();choiceListeners.set(el,sync);el.addEventListener('change',sync);
  };
- const definitions=[['preset',['Sauna','Studio']],['foundation-type',['Timber beams','Concrete grillage · study']],['layer',['Complete cassette frame','Floor + walls + roof','Floor + walls','Floor only']],['studio-season',['Closed · winter','Open · summer']],['sauna-size',['S','M','L']],['sauna-storage',['No','Yes']],['sauna-roof',['Flat','Single slope']],['terrace-depth',['1200']],['window-width',['580','880','1180']]];
- for(const [id,labels]of definitions)OBTPChoiceRow(id,labels);
- document.querySelector('label[for="facade"]').remove();$('facade').hidden=true;
- const product=document.createElement('section');product.id='customer-product';product.className='customer-page';product.hidden=true;product.innerHTML='<p>studio 9120 / MODULAR SPACES</p><h1>Timber studios and saunas.</h1><p class="customer-note">We design timber studios and saunas using a shared modular frame. Choose a size, roof and layout.</p><button id="product-config">Configure</button><figure class="home-hero"><img src="images/studio-01.webp" width="2048" height="1228" fetchpriority="high" alt="Timber studio among trees, viewed from the terrace"></figure><div class="home-intro"><h2>One frame. Two uses.</h2><p>Compare the studio and sauna layouts, then view your selection in 3D and plan.</p></div><div class="photo-grid"><figure><img src="images/studio-02.webp" width="2016" height="1234" loading="lazy" alt="Front elevation of the timber studio"></figure><figure><img src="images/studio-03.webp" width="1981" height="1242" loading="lazy" alt="Side view of the timber studio in a woodland setting"></figure></div><p class="render-caption">Architectural visualisations. Final details follow the selected configuration.</p>' ;document.body.append(product);
- const drawings=document.createElement('section');drawings.id='customer-drawings';drawings.className='customer-page';drawings.hidden=true;drawings.innerHTML='<h1>Your drawings.</h1><p id="pdf-status" role="status">Part schedule and assembly PDFs are available only for default Studio M.</p><div class="drawing-actions"><button id="pdf-download" type="button" disabled aria-disabled="true" aria-describedby="pdf-status">Download PDF</button><button id="openings-download" type="button" disabled aria-disabled="true" aria-describedby="pdf-status">Windows and doors</button><button id="components-download" type="button" disabled aria-disabled="true" aria-describedby="pdf-status">Components and quantities</button><button id="assembly-download" type="button" disabled aria-disabled="true" aria-describedby="pdf-status">Assembly guide</button></div><p>Select Studio M, no storage, flat roof, timber foundation and 1180 mm window. Assembly guidance is for review only.</p>';document.body.append(drawings);
- window.OBTPCustomerView=(value)=>{const section=value===true?'info':value===false?'config':value;for(const [id,key]of [['configurator','config'],['customer-information','info'],['customer-product','product'],['customer-drawings','drawings']])$(id).hidden=section!==key;window.OBTPConfigOverlay?.(false);$('mobile-config-toggle').hidden=section!=='config';window.scrollTo(0,0);if(section==='drawings')window.OBTPUpdatePDF?.();};$('product-config').onclick=()=>OBTPCustomerView('config');$('back-config').onclick=()=>OBTPCustomerView('config');
- // PDF publishing is paused. Configuration changes must not restore download URLs.
+ OBTPChoiceRow('preset',['Sauna M with storage','Studio M with storage']);
+ const drawings=document.createElement('section');drawings.id='customer-drawings';drawings.className='customer-page';drawings.hidden=true;
+ drawings.innerHTML='<h1>Your drawings.</h1><h2 id="drawing-selection"></h2><div class="drawing-actions"><button id="components-download" type="button" disabled>Parts schedule PDF</button><button id="assembly-download" type="button" disabled>Assembly PDF</button><button id="back-config" type="button">Configurator</button></div><p id="pdf-status" role="status">Loading model…</p><img id="drawing-plan" alt="Plan matching the selected configuration"><p class="document-note">Review documents — engineering and lifting remain unverified.</p>';
+ document.body.append(drawings);
+ window.OBTPCustomerView=value=>{const section=value==='drawings'?'drawings':'config';$('configurator').hidden=section!=='config';drawings.hidden=section!=='drawings';window.OBTPConfigOverlay?.(false);$('mobile-config-toggle').hidden=section!=='config';window.scrollTo(0,0);if(section==='drawings')window.OBTPUpdatePDF?.();};
+ $('back-config').onclick=()=>OBTPCustomerView('config');$('show-drawings').onclick=()=>OBTPCustomerView('drawings');
  window.OBTPUpdatePDF=()=>{
    const scene=window.OBTPStudioV3?.scene;
+   $('pdf-status').textContent=scene?'PDFs match the selected configuration.':'Loading model…';
+   $('drawing-selection').textContent=scene?(scene.config.program_type===1?'Studio M with storage':'Sauna M with storage'):'';
+   $('drawing-plan').hidden=!scene;
+   if(scene)$('drawing-plan').src=$('solved-plan').src;else $('drawing-plan').removeAttribute('src');
    for(const [id,kind]of [['components-download','components'],['assembly-download','assembly']]){
     const b=$(id),file=scene?.documents?.[kind];b.disabled=!file;b.setAttribute('aria-disabled',String(!file));
-    b.onclick=file?()=>{const a=document.createElement('a');a.href='generated/'+file+'?build='+scene.source_revision;a.target='_blank';a.rel='noopener';a.download=file;a.click();}:null;
+    b.onclick=file?()=>{const a=document.createElement('a');a.href='generated/'+file+'?build='+scene.source_revision;a.download=file;document.body.append(a);a.click();a.remove();}:null;
    }
  };
- window.OBTPProgramRender=()=>{
-  const studio=$('preset').value==='studio';
-  document.querySelector('aside h1').textContent=studio?'Configure your studio.':'Configure your sauna.';
-  document.querySelector('label[for="sauna-size"]').textContent=studio?'Studio size':'Sauna size';
-  document.querySelector('label[for="sauna-storage"]')?.removeAttribute('data-unused');
-  const storageLabel=$('sauna-storage-label');if(storageLabel)storageLabel.textContent=studio?'Storage shelves':'External storage + outdoor seat';
-  const mark=document.querySelector('aside > p');if(mark)mark.textContent=studio?'studio 9120 / MODULAR STUDIO':'studio 9120 / TIMBER FRAME';
- };
+ window.OBTPProgramRender=()=>{};
  const main=$('configurator'),panel=main.querySelector('aside'),preview=main.querySelector('section');
  panel.id='configuration-panel';
  const toggle=document.createElement('button');toggle.id='mobile-config-toggle';toggle.type='button';toggle.setAttribute('aria-controls',panel.id);toggle.setAttribute('aria-expanded','false');toggle.innerHTML='<span class="open-label">Configure</span><span class="close-label" hidden>Close configuration</span>';main.append(toggle);

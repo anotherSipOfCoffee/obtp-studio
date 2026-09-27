@@ -6,7 +6,7 @@
  let scene=null,view='3d',turns=0,serial=0;
  const camera=()=>{renderer.angle=-Math.PI/4+turns*Math.PI/2;renderer.elev=.55;};
  for(const event of ['onpointerdown','onpointermove','onpointerup','onpointercancel'])$('diagram')[event]=null;
- const selection=()=>({foundation:Number($('foundation-type').value),program:$('preset').value,season:'summer',system:Number($('assembly-system')?.value||0),size:$('sauna-size').value,storage:$('sauna-storage').checked,roof:Number($('sauna-roof').value),terrace:Number($('terrace-depth').value)/600,window:Number($('window-width').value),facade:Number($('facade').value)});
+ const selection=()=>({foundation:0,program:$('preset').value==='sauna'?'sauna':'studio',season:'summer',system:0,size:'m',storage:true,roof:0,terrace:2,window:1180,facade:0});
  const key=s=>`${s.program}-${s.size}-${s.storage?'storage':'open'}-r${s.roof}-t${s.terrace}-w${s.window}-f${s.facade}-b${s.foundation}${s.program==='studio'&&s.season==='summer'?'-summer':''}`;
  const buildTag=new URL(location.href).searchParams.get('build')||'local';
  const manifest=fetch('generated/manifest.json?build='+encodeURIComponent(buildTag)).then(r=>{if(!r.ok)throw Error('Authoring catalogue unavailable');return r.json();});
@@ -25,13 +25,8 @@
   window.OBTPStudioV3={scene,renderer,metrics:scene.metrics,selection:s,sourceRevision:scene.source_revision};
  }
  async function load(){
-  const studio=$('preset').value==='studio';
-  for(const option of $('sauna-roof').options)option.disabled=false;
-
-  $('studio-season-field').hidden=true;
-  $('terrace-depth').closest('.fixed-terrace-field')?.setAttribute('hidden','');
-  for(const button of document.querySelectorAll('#sauna-roof + .choice-row button')){button.disabled=false;button.setAttribute('aria-checked',String(button.dataset.value===$('sauna-roof').value));}
-  const request=++serial;scene=null;window.OBTPStudioV3=null;window.OBTPUpdatePDF?.();clear();$('status').textContent='Loading script-authored model…';$('wood-total').textContent='';$('schedule').replaceChildren();
+  if(!['sauna','studio'].includes($('preset').value))$('preset').value='studio';
+  const request=++serial;scene=null;window.OBTPStudioV3=null;window.OBTPUpdatePDF?.();clear();$('status').textContent='Loading model…';
   try{
    const s=selection(),catalogue=await manifest,entry=catalogue.entries.find(e=>e.key===key(s));if(!entry)throw Error('Configuration is not in the verified export catalogue');
    const r=await fetch('generated/'+entry.file+'?sha='+entry.sha256);if(!r.ok)throw Error('Model export unavailable');const bytes=await r.arrayBuffer();
@@ -42,39 +37,14 @@
    if((next.config.program_type??0)!==(s.program==='studio'?1:0))throw Error('Requested program does not match export');
    if((next.config.system_type??0)!==s.system)throw Error('Requested construction system is not available');
    if(next.source_revision!==catalogue.source_revision||!Object.values(next.checks).every(Boolean))throw Error('Invalid or mismatched model export');scene=next;
-   const m=scene.metrics;$('status').textContent=s.program==='studio'?'Your studio preview.':'Your sauna preview.';
-   $('sauna-circulation-note').textContent=s.program==='studio'?'Creative workspace · heated central room with sliding glazing · preparation and storage.':`Outdoor shower · ${scene.cell_spec?1096:s.terrace*600} mm entrance terrace · ${s.window} mm sauna window on entrance façade.`;
-   $('wood-total').textContent=`Modeled wood: ${m.total_wood_m3.toFixed(3)} m³ · structure, plywood, lining, cladding and deck; furniture and waste excluded`;
-   $('envelope').replaceChildren();for(const text of ['LT I-group dimensional screen',`Conservative roof/terrace area bound: ${m.building_area_bound_m2.toFixed(2)} / 50.00 m² ✓`,`Height: ${(m.height_mm/1000).toFixed(2)} / 5.00 m ✓`,`Maximum support spacing: ${(m.max_bearing_line_span_mm/1000).toFixed(2)} / 6.00 m ✓`,`${scene.cell_spec||s.program==='studio'?'Enclosed floor area after wall finishes':'Main internal rectangle before finishes'}: ${m.main_clear_floor_less_partition_m2.toFixed(2)} m²`,`Terrace: ${m.terrace_area_m2.toFixed(2)} m²`,'Site and land-use conditions must be checked separately. The conservative area bound is not a certified legal area calculation.']){const p=document.createElement('p');p.textContent=text;$('envelope').append(p);}
-   $('program').replaceChildren();if(scene.envelope_spec){const p=document.createElement('p');p.textContent=s.program==='studio'?'Studio envelope study: heating, ventilation and vapour control remain to be specified.':'Envelope study: 195 mm wall insulation, 220 mm floor and ceiling insulation; sealed sauna foil and ventilated lining cavity. Heater, ventilation and moisture assessment remain to be confirmed.';$('program').append(p);}for(const text of scene.holds){const p=document.createElement('p');p.textContent=text;$('program').append(p);}
-   if(scene.comparison){
-    const heading=document.createElement('h3');heading.textContent='Three-system comparison';$('program').append(heading);
-    const note=document.createElement('p');note.textContent='Provisional manufacturing types. Material grades, machining and connections remain unresolved. Only façade finish boards are excluded.';$('program').append(note);
-    const versions=[scene.comparison.previous,scene.comparison.first_integrated,scene.comparison.current];
-    const table=document.createElement('table'),body=document.createElement('tbody');table.append(body);
-    const rows=[['Measure','Original','First cell system','Revised'],
-      ['Structural footprint',...versions.map(a=>`${a.dimensions.length_mm+a.dimensions.annex_length_mm} × ${a.dimensions.width_mm} mm`)],
-      ['Manufactured part candidates',...versions.map(a=>a.unique_manufactured_part_candidates)],
-      ['Physical pieces, excluding cladding',...versions.map(a=>a.physical_pieces)],
-      ['Assembly types / installed',...versions.map(a=>`${a.unique_assembly_candidates} / ${a.assemblies_installed}`)],
-      ['Façade cladding pieces — separate',...versions.map(a=>a.cladding.physical_pieces)],
-      ['Types removed by cladding exclusion',...versions.map(a=>a.cladding_exclusion_type_effect)]];
-    for(const [i,row]of rows.entries()){const tr=document.createElement('tr');for(const value of row){const td=document.createElement(i?'td':'th');td.textContent=value;tr.append(td);}body.append(tr);}$('program').append(table);
-    const same=document.createElement('p');same.textContent=`Same-footprint revised part candidates: ${scene.comparison.same_footprint.unique_manufactured_part_candidates}`;$('program').append(same);
-    if(scene.comparison.before_kit){const p=document.createElement('p');p.textContent=`Shared-cut revision at unchanged footprint (after geometry repairs): ${scene.comparison.before_kit.unique_manufactured_part_candidates} → ${scene.comparison.current.unique_manufactured_part_candidates} part candidates; ${scene.comparison.before_kit.physical_pieces} → ${scene.comparison.current.physical_pieces} pieces.`;$('program').append(p);}
-    for(const [label,path]of [['Three-system comparison report','review/index.html'],['Part and separate cladding schedules',scene.manufacturing.schedule_file],['Current system plan',key(s)+'-plan.svg']]){
-      const p=document.createElement('p'),a=document.createElement('a');a.textContent=label;a.href='generated/'+path+'?build='+scene.source_revision;a.target='_blank';a.rel='noopener';p.append(a);$('program').append(p);
-    }
-   }
-   const link=document.createElement('a');link.href=`https://github.com/anotherSipOfCoffee/obtp-system/tree/${scene.source_revision}/authoring/grasshopper`;link.target='_blank';link.rel='noopener';link.textContent=`Canonical Python/GH source · ${scene.source_revision.slice(0,12)}`;$('program').append(link);
-   const download=document.createElement('p');const a=document.createElement('a');a.href='generated/OBTP_Grasshopper_R12.zip';a.textContent='Download this revision’s GH authoring scripts';download.append(a);$('program').append(download);
-   $('function-screen').hidden=true;
-   const groups={};for(const i of scene.items)groups[i.stage]=(groups[i.stage]||0)+1;
-   for(const [role,count]of Object.entries(groups)){const tr=document.createElement('tr');for(const text of [role,'Modeled component',count]){const td=document.createElement('td');td.textContent=text;tr.append(td);}$('schedule').append(tr);}
-   show();window.OBTPProgramRender?.();window.OBTPUpdatePDF?.();window.OBTPSuppliersRender?.(scene);
-  }catch(e){if(request!==serial)return;clear();$('status').textContent='Model unavailable: '+e.message;$('envelope').textContent='No valid output loaded';}
+   if(next.config.size!=='M'||!next.config.storage||next.config.roof_type!==0||next.config.foundation_type!==0||next.config.window_width!==1180)throw Error('Unsupported public configuration');
+   if(next.source_geometry_sha256!==entry.geometry_sha256||next.documents_geometry_sha256!==entry.geometry_sha256)throw Error('Drawing/model identity mismatch');
+   if(!next.documents?.components||!next.documents?.assembly)throw Error('Missing configuration PDFs');
+   $('status').textContent=s.program==='studio'?'Your studio preview.':'Your sauna preview.';
+   show();window.OBTPProgramRender?.();window.OBTPUpdatePDF?.();
+  }catch(e){if(request!==serial)return;clear();$('status').textContent='Model unavailable: '+e.message;scene=null;window.OBTPStudioV3=null;window.OBTPUpdatePDF?.();}
  }
- for(const id of ['foundation-type','preset','studio-season','sauna-size','sauna-storage','sauna-roof','terrace-depth','window-width','facade'])$(id).addEventListener('change',load);
+ for(const id of ['preset'])$(id).addEventListener('change',load);
  $('layer').addEventListener('change',show);
 
  for(const b of document.querySelectorAll('[data-view]'))b.addEventListener('click',()=>{view=b.dataset.view;show();});
@@ -82,5 +52,5 @@
  $('rotate').addEventListener('click',()=>{turns=(turns+1)%4;camera();renderer.draw();});
  $('reset').addEventListener('click',()=>{turns=0;renderer.zoom=1;$('explode').value='0';$('amount').textContent='0%';renderer.explode=0;camera();renderer.draw();});
  window.OBTPReload=load;
- $('bays-field').hidden=true;$('matrix-fields').hidden=true;$('sauna-fields').hidden=false;camera();load();
+ camera();load();
 })();

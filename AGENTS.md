@@ -1,13 +1,11 @@
-# studio 9120 — current guidance, R16
+# studio 9120 — current public configurator
 
-R16 is published. Schedule and assembly PDF downloads are authorized only for default Studio M (open sliders); leave Drive and Architecture unchanged. Latest explicit user instructions supersede historical release notes.
+Latest user instructions authorize implementation, testing and publication of the two-preset configurator. Preserve the separate marketing homepage and other site content; leave Drive and Architecture unchanged.
 
-- Customer-facing name and metadata: **studio 9120**. Preserve existing presentation, Lithuanian default, choice-button parameters, Main-first navigation, Studio v1 reference and WikiHouse mode.
-- System's `authoring/grasshopper/obtp` owns all construction geometry, room dimensions, part identities, drawings and quantities. Studio consumes the exact commit in `system.lock.json`; never duplicate geometry in the browser.
-- The user permits measured grid/layout redesign; adopted R16 retains the 1200 × 900 planning grid after alternatives increased diversity. Both buildings have 2400 mm structural width; Sauna's room sequence and optional exterior storage/shower/seat remain. Studio centre remains a heated room with seasonal sliding glass.
-- Facade boards remain visible but have a separate quantity schedule. Primary counts retain battens, trims and all other categories. Three-version counts are provisional manufacturing candidates, never engineering certification. Report resizing separately with the same-footprint control.
-- Part-schedule and assembly PDFs are enabled; drawing/opening PDFs remain disabled; no gable option; Lithuanian `Plokščias`. Do not restore obsolete single-option or GH object-type-preview controls.
-- Read current System `AGENTS.md` and `authoring/grasshopper/review-r15/` for decisions, exact baseline commits, counts, rejected experiments and unresolved engineering.
-- Prepare the pinned System via `tools/prepare_system.py`; it verifies the checkout and caches byte-checked outputs. Tests cover source identity, cache integrity, both programs, languages, controls, drawings and mobile use.
-- Native Rhino/GH, engineering capacities, fastening, supplier fit, handling weights and permit eligibility remain unverified. No outreach or invented prices/approvals.
-- Preserve Git history. Remote writes use the GitHub connector. Historical documents remain references, not competing current instructions.
+- Public configuration offers exactly Sauna M with storage and Studio M with storage. Storage is mandatory. All other design values are fixed: flat roof (0), timber foundation (0), window frame width 1180 mm, terrace 1200 mm, vertical timber facade, Studio glazing open (summer). No size, storage, roof, foundation, window, construction-version or season controls. URL/saved state must not restore unsupported choices.
+- Keep 3D/cut/plan, zoom/rotation/reset, selected drawing and two PDF actions. Configuration and drawings only; no duplicate product/marketing/technical-info sections inside the configurator. Preset buttons are prominent; view/download controls compact. No Yes/No choices are needed while every binary design parameter is fixed.
+- Canonical geometry remains pinned in `system.lock.json`; do not change geometry formulas in Studio. `tools/export_public.py` invokes pinned System recipes for exactly two configurations and both actual PDFs per configuration. PDF/document geometry hashes, model checksums, schedule IDs and cache inventory must agree.
+- Assembly and parts schedule PDFs are enabled for both fixed presets. Retain separate cladding quantities and existing manufacturing identity rules. They are review documents, not engineered construction/lifting instructions.
+- `tools/prepare_system.py` prepares deployable assets; cached generated outputs are validated by `tools/generated_cache.py`. Test cache integrity, actual PDFs and `tests/variations.cjs` before release. Browser tests cover both presets, forced state, views, actual downloads, language and mobile.
+- Preserve Lithuanian default, `Plokščias`, visual identity, full Git history and repository homepage. Remote writes use GitHub connector. Current user authorization supersedes earlier review-only / disabled-PDF instructions.
+- Supplier installation fit, native Rhino/GH, structure, fasteners, safe handling and permits remain unverified. No invented engineering or prices.
