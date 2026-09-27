@@ -16,8 +16,8 @@ def digest(path):
 
 def identity(root, revision):
     return {
-        'schema': 3,
-        'pdf_enabled': False,
+        'schema': 4,
+        'pdf_enabled': True,
         'document_kinds': ['components', 'assembly'],
         'source_revision': revision,
         'python': platform.python_version(),
@@ -25,7 +25,7 @@ def identity(root, revision):
         'packages': {name: importlib.metadata.version(name) for name in
                      ('reportlab', 'pillow', 'rhino3dm', 'charset-normalizer')},
         'preparation': {name: digest(root / 'tools' / name) for name in
-                        ('prepare_system.py', 'generated_cache.py')},
+                        ('prepare_system.py', 'generated_cache.py', 'export_public.py')},
     }
 
 
@@ -43,10 +43,9 @@ def validate_catalogue(directory, revision):
     manifest = json.loads((directory / 'manifest.json').read_text(encoding='utf-8'))
     if manifest['source_revision'] != revision or not manifest['entries']:
         raise ValueError('Wrong source revision or empty catalogue')
-    if manifest.get('pdf_enabled') is not False or manifest.get('document_kinds') != ['components','assembly']:
-        raise ValueError('PDF generation must be disabled')
-    default_key='studio-m-open-r0-t2-w1180-f0-b0-summer'
-    expected_pdfs = {default_key+'-'+kind+'.pdf' for kind in ('components','assembly')}
+    if manifest.get('pdf_enabled') is not True or manifest.get('document_kinds') != ['components','assembly']:
+        raise ValueError('Both PDF kinds must be enabled')
+    expected_pdfs = {entry['key']+'-'+kind+'.pdf' for entry in manifest['entries'] for kind in ('components','assembly')}
     if {p.name for p in directory.glob('*.pdf')} != expected_pdfs:
         raise ValueError('Missing or unexpected PDF document')
     keys = set()
@@ -54,12 +53,16 @@ def validate_catalogue(directory, revision):
         key = entry['key']
         if key in keys or pathlib.PurePath(key).name != key or '/' in key or '\\' in key:
             raise ValueError('Invalid or duplicate configuration key')
+        if not key.startswith(('sauna-m-storage-', 'studio-m-storage-')):
+            raise ValueError('Unsupported public preset')
         keys.add(key)
-        if entry.get('pdf') is not False:
-            raise ValueError('PDF availability must be disabled')
-        if entry.get('documents') != ({kind:key+'-'+kind+'.pdf' for kind in ('components','assembly')} if key==default_key else {}):
+        if entry.get('pdf') is not True:
+            raise ValueError('PDF availability must be enabled')
+        if entry.get('documents') != {kind:key+'-'+kind+'.pdf' for kind in ('components','assembly')}:
             raise ValueError('Incorrect PDF mapping')
-        for name in entry['documents'].values():
+        for kind,name in entry['documents'].items():
+            if digest(directory/name) != entry.get('document_sha256',{}).get(kind):
+                raise ValueError('PDF checksum mismatch')
             if not (directory/name).read_bytes().startswith(b'%PDF-'):
                 raise ValueError('Invalid PDF document')
         if entry['file'] != key + '.json.gz':
@@ -69,9 +72,11 @@ def validate_catalogue(directory, revision):
         for suffix in ('-plan.svg',):
             if not (directory / (key + suffix)).is_file():
                 raise ValueError('Incomplete drawing set: ' + key + suffix)
-    for name in ('OBTP_Grasshopper_Source.zip', 'OBTP_Grasshopper_R12.zip'):
+    for name in ('OBTP_Grasshopper_Source.zip',):
         if not (directory / name).is_file():
             raise ValueError('Missing Grasshopper package: ' + name)
+    if keys != {'sauna-m-storage-r0-t2-w1180-f0-b0', 'studio-m-storage-r0-t2-w1180-f0-b0-summer'}:
+        raise ValueError('Public catalogue must contain exactly the two fixed presets')
     return len(keys)
 
 
