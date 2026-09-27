@@ -6,13 +6,17 @@ await page.goto(process.env.OBTP_BASE_URL||'http://127.0.0.1:8765/');const v3=pa
 assert.equal(await page.locator('html').getAttribute('lang'),'lt');await page.locator('#language').selectOption('en');
 async function choose(id,value){await v3.locator('#'+id+' + .choice-row [data-value="'+value+'"]').click();}
 async function assertPDFDisabled(language){
- for(const id of ['pdf-download','openings-download','components-download','assembly-download']){
+ const docs=await v3.locator('canvas').evaluate(()=>OBTPStudioV3.scene.documents);
+ for(const [id,kind]of [['components-download','components'],['assembly-download','assembly']])assert.equal(await v3.locator('#'+id).isEnabled(),Boolean(docs[kind]));
+ for(const kind of Object.keys(docs)){const url=new URL('v3/generated/'+docs[kind],page.url());const r=await page.request.get(url.href);assert(r.ok());assert.equal((await r.body()).subarray(0,5).toString(),'%PDF-');}
+
+ for(const id of ['pdf-download','openings-download']){
   const button=v3.locator('#'+id);assert(await button.isVisible());assert(await button.isDisabled());assert.equal(await button.getAttribute('href'),null);
  }
- assert.match(await v3.locator('#pdf-status').textContent(),language==='lt'?/PDF generavimas laikinai išjungtas/:/PDF generation is temporarily disabled/);
+ assert.match(await v3.locator('#pdf-status').textContent(),language==='lt'?/Elementų žiniaraščio ir surinkimo PDF parengti/:/Part schedule and assembly PDFs are available only for default Studio M/);
 }
 async function ready(){await page.waitForFunction(()=>{const w=document.getElementById('v3').contentWindow;return Boolean(w?.OBTPStudioV3?.scene);},{},{timeout:60000});}
-await ready();assert(await v3.locator('#customer-product').isVisible());await page.locator('#customer-config').click();
+await ready();assert.deepEqual(await v3.locator('canvas').evaluate(()=>Object.keys(OBTPStudioV3.scene.documents).sort()),['assembly','components']);assert(await v3.locator('#customer-product').isVisible());await page.locator('#customer-drawings').click();await assertPDFDisabled('en');await page.locator('#customer-config').click();
 assert.deepEqual(await v3.locator('canvas').evaluate(()=>OBTPStudioV3.scene.cell_spec.cell_mm),[900,1200]);
 assert.equal(await page.title(),'studio 9120');
 assert.equal(await v3.locator('#assembly-system').count(),0);

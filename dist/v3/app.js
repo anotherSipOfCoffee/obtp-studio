@@ -31,7 +31,7 @@
   $('studio-season-field').hidden=true;
   $('terrace-depth').closest('.fixed-terrace-field')?.setAttribute('hidden','');
   for(const button of document.querySelectorAll('#sauna-roof + .choice-row button')){button.disabled=false;button.setAttribute('aria-checked',String(button.dataset.value===$('sauna-roof').value));}
-  const request=++serial;scene=null;window.OBTPStudioV3=null;clear();$('status').textContent='Loading script-authored model…';$('wood-total').textContent='';$('schedule').replaceChildren();
+  const request=++serial;scene=null;window.OBTPStudioV3=null;window.OBTPUpdatePDF?.();clear();$('status').textContent='Loading script-authored model…';$('wood-total').textContent='';$('schedule').replaceChildren();
   try{
    const s=selection(),catalogue=await manifest,entry=catalogue.entries.find(e=>e.key===key(s));if(!entry)throw Error('Configuration is not in the verified export catalogue');
    const r=await fetch('generated/'+entry.file+'?sha='+entry.sha256);if(!r.ok)throw Error('Model export unavailable');const bytes=await r.arrayBuffer();

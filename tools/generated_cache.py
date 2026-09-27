@@ -16,8 +16,9 @@ def digest(path):
 
 def identity(root, revision):
     return {
-        'schema': 2,
+        'schema': 3,
         'pdf_enabled': False,
+        'document_kinds': ['components', 'assembly'],
         'source_revision': revision,
         'python': platform.python_version(),
         'platform': platform.system() + '-' + platform.machine(),
@@ -42,8 +43,12 @@ def validate_catalogue(directory, revision):
     manifest = json.loads((directory / 'manifest.json').read_text(encoding='utf-8'))
     if manifest['source_revision'] != revision or not manifest['entries']:
         raise ValueError('Wrong source revision or empty catalogue')
-    if manifest.get('pdf_enabled') is not False or any(directory.glob('*.pdf')):
+    if manifest.get('pdf_enabled') is not False or manifest.get('document_kinds') != ['components','assembly']:
         raise ValueError('PDF generation must be disabled')
+    default_key='studio-m-open-r0-t2-w1180-f0-b0-summer'
+    expected_pdfs = {default_key+'-'+kind+'.pdf' for kind in ('components','assembly')}
+    if {p.name for p in directory.glob('*.pdf')} != expected_pdfs:
+        raise ValueError('Missing or unexpected PDF document')
     keys = set()
     for entry in manifest['entries']:
         key = entry['key']
@@ -52,6 +57,11 @@ def validate_catalogue(directory, revision):
         keys.add(key)
         if entry.get('pdf') is not False:
             raise ValueError('PDF availability must be disabled')
+        if entry.get('documents') != ({kind:key+'-'+kind+'.pdf' for kind in ('components','assembly')} if key==default_key else {}):
+            raise ValueError('Incorrect PDF mapping')
+        for name in entry['documents'].values():
+            if not (directory/name).read_bytes().startswith(b'%PDF-'):
+                raise ValueError('Invalid PDF document')
         if entry['file'] != key + '.json.gz':
             raise ValueError('Unexpected geometry filename')
         if digest(directory / entry['file']) != entry['sha256']:

@@ -13,6 +13,8 @@
  'Part and separate cladding schedules':'Detalių ir atskiras fasado apdailos žiniaraštis',
 
  'Windows and doors':'Langai ir durys','Components and quantities':'Elementai ir kiekiai','Assembly guide':'Surinkimo gairės',
+ 'Part schedule and assembly PDFs are available only for default Studio M.':'Elementų žiniaraščio ir surinkimo PDF parengti tik numatytajai Studijai M.',
+ 'Select Studio M, no storage, flat roof, timber foundation and 1180 mm window. Assembly guidance is for review only.':'Pasirinkite Studiją M, be lentynų, plokščiu stogu, medinėmis pamatų sijomis ir 1180 mm langu. Surinkimo gairės skirtos tik peržiūrai.',
  'PDF generation is temporarily disabled.':'PDF generavimas laikinai išjungtas.',
  'PDF downloads are unavailable. The 3D model and plan remain available in the configurator.':'PDF atsisiųsti negalima. 3D modelį ir planą galite peržiūrėti konfigūratoriuje.',
  'studio 9120 / TIMBER FRAME':'studio 9120 / MEDINIS KARKASAS', 'Timber beams':'Medinės sijos','Concrete grillage · study':'Rostverkas · derinama','Foundation':'Pamatai','Piles + timber support frame':'Poliai ir medinės sijos','Piles + concrete grillage · study':'Poliai ir rostverkas · derinama','Timber studios and saunas.':'Medinės studijos ir pirtys.','We design timber studios and saunas using a shared modular frame. Choose a size, roof and layout.':'Projektuojame medines studijas ir pirtis, naudodami bendrą modulinį karkasą. Pasirinkite dydį, stogą ir planą.','One frame. Two uses.':'Bendras karkasas studijai ir pirčiai.','Compare the studio and sauna layouts, then view your selection in 3D and plan.':'Palyginkite studijos ir pirties planus. Pasirinktą variantą apžiūrėkite 3D vaizde ir plane.',
