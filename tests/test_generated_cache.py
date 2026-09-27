@@ -103,7 +103,7 @@ class ExportCacheTests(unittest.TestCase):
                 'commit': 'system-a', 'source_path': 'dist',
                 'deployment_path': 'dist/system-source'}))
             shutil.copytree(self.directory, root / 'dist/v3/generated')
-            for name in ('dist/index.html', 'dist/v2/index.html', 'dist/v2/app.js', 'dist/v3/index.html'):
+            for name in ('dist/index.html', 'dist/configurator.html', 'dist/v2/index.html', 'dist/v2/app.js', 'dist/v3/index.html'):
                 target = root / name
                 target.parent.mkdir(parents=True, exist_ok=True)
                 target.write_text('__STUDIO_BUILD__ / __SYSTEM_COMMIT__')
@@ -112,6 +112,7 @@ class ExportCacheTests(unittest.TestCase):
                  patch('subprocess.Popen', side_effect=AssertionError('Unexpected rebuild')):
                 runpy.run_path(str(root / 'tools/prepare_system.py'))
             self.assertEqual((root / 'dist/index.html').read_text(), 'new-studio / system-a')
+            self.assertEqual((root / 'dist/configurator.html').read_text(), 'new-studio / system-a')
             self.assertEqual((root / 'dist/system-source/renderer.js').read_text(), 'canonical renderer')
             self.assertTrue(reusable(root / 'dist/v3/generated', self.expected))
 
