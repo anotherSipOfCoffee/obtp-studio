@@ -16,9 +16,9 @@ def digest(path):
 
 def identity(root, revision):
     return {
-        'schema': 4,
+        'schema': 5,
         'pdf_enabled': True,
-        'document_kinds': ['components', 'assembly'],
+        'document_kinds': ['components', 'assembly', 'parts-layout'],
         'source_revision': revision,
         'python': platform.python_version(),
         'platform': platform.system() + '-' + platform.machine(),
@@ -43,9 +43,9 @@ def validate_catalogue(directory, revision):
     manifest = json.loads((directory / 'manifest.json').read_text(encoding='utf-8'))
     if manifest['source_revision'] != revision or not manifest['entries']:
         raise ValueError('Wrong source revision or empty catalogue')
-    if manifest.get('pdf_enabled') is not True or manifest.get('document_kinds') != ['components','assembly']:
-        raise ValueError('Both PDF kinds must be enabled')
-    expected_pdfs = {entry['key']+'-'+kind+'.pdf' for entry in manifest['entries'] for kind in ('components','assembly')}
+    if manifest.get('pdf_enabled') is not True or manifest.get('document_kinds') != ['components','assembly','parts-layout']:
+        raise ValueError('All PDF kinds must be enabled')
+    expected_pdfs = {entry['key']+'-'+kind+'.pdf' for entry in manifest['entries'] for kind in ('components','assembly','parts-layout')}
     if {p.name for p in directory.glob('*.pdf')} != expected_pdfs:
         raise ValueError('Missing or unexpected PDF document')
     keys = set()
@@ -58,7 +58,7 @@ def validate_catalogue(directory, revision):
         keys.add(key)
         if entry.get('pdf') is not True:
             raise ValueError('PDF availability must be enabled')
-        if entry.get('documents') != {kind:key+'-'+kind+'.pdf' for kind in ('components','assembly')}:
+        if entry.get('documents') != {kind:key+'-'+kind+'.pdf' for kind in ('components','assembly','parts-layout')}:
             raise ValueError('Incorrect PDF mapping')
         for kind,name in entry['documents'].items():
             if digest(directory/name) != entry.get('document_sha256',{}).get(kind):

@@ -32,7 +32,7 @@ try{
   const angle=await frame.locator('canvas').evaluate(()=>OBTPStudioV3.renderer.angle);await frame.locator('#rotate').click();assert.notEqual(await frame.locator('canvas').evaluate(()=>OBTPStudioV3.renderer.angle),angle);await frame.locator('#reset').click();
   await page.screenshot({path:'studio-fixed-'+program+'-desktop.png',fullPage:true});
   await page.locator('#customer-drawings').click();await frame.locator('#drawing-plan').evaluate(x=>x.decode());
-  for(const [id,kind] of [['components-download','components'],['assembly-download','assembly']]){
+  for(const [id,kind] of [['components-download','components'],['assembly-download','assembly'],['parts-layout-download','parts-layout']]){
    assert(await frame.locator('#'+id).isEnabled());const downloading=page.waitForEvent('download');await frame.locator('#'+id).click();const download=await downloading;
    assert.equal(download.suggestedFilename(),data.s.documents[kind]);const path=await download.path();const bytes=fs.readFileSync(path);assert.equal(bytes.subarray(0,5).toString(),'%PDF-');assert(bytes.length>10000);
    const hash=require('node:crypto').createHash('sha256').update(bytes).digest('hex');assert.equal(hash,data.s.document_sha256[kind]);

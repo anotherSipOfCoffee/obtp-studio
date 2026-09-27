@@ -39,7 +39,7 @@
    if(next.source_revision!==catalogue.source_revision||!Object.values(next.checks).every(Boolean))throw Error('Invalid or mismatched model export');scene=next;
    if(next.config.size!=='M'||!next.config.storage||next.config.roof_type!==0||next.config.foundation_type!==0||next.config.window_width!==1180)throw Error('Unsupported public configuration');
    if(next.source_geometry_sha256!==entry.geometry_sha256||next.documents_geometry_sha256!==entry.geometry_sha256)throw Error('Drawing/model identity mismatch');
-   if(!next.documents?.components||!next.documents?.assembly)throw Error('Missing configuration PDFs');
+   if(!next.documents?.components||!next.documents?.assembly||!next.documents?.['parts-layout'])throw Error('Missing configuration PDFs');
    $('status').textContent=s.program==='studio'?'Your studio preview.':'Your sauna preview.';
    show();window.OBTPProgramRender?.();window.OBTPUpdatePDF?.();
   }catch(e){if(request!==serial)return;clear();$('status').textContent='Model unavailable: '+e.message;scene=null;window.OBTPStudioV3=null;window.OBTPUpdatePDF?.();}
