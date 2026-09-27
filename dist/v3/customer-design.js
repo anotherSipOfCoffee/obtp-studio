@@ -42,5 +42,5 @@
  toggle.onclick=()=>OBTPConfigOverlay(toggle.getAttribute('aria-expanded')!=='true');backdrop.onclick=()=>{OBTPConfigOverlay(false);toggle.focus();};
  document.addEventListener('keydown',e=>{if(!main.classList.contains('config-open'))return;if(e.key==='Escape'){OBTPConfigOverlay(false);toggle.focus();}if(e.key==='Tab'){const focusable=[...panel.querySelectorAll('button,a,select,input')].filter(x=>!x.disabled&&x.tabIndex>=0&&x.getClientRects().length&&!x.classList.contains('native-choice'));focusable.push(toggle);const i=focusable.indexOf(document.activeElement);e.preventDefault();focusable[(i+(e.shiftKey?-1:1)+focusable.length)%focusable.length]?.focus();}});
  mobile.addEventListener('change',()=>OBTPConfigOverlay(false));OBTPConfigOverlay(false);
- OBTPCustomerView('product');
+ OBTPCustomerView('config');
 })();
