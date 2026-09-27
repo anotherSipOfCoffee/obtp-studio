@@ -13,3 +13,5 @@ R16 is published. Schedule and assembly PDF downloads are authorized only for de
 - Preserve Git history. Remote writes use the GitHub connector. Historical documents remain references, not competing current instructions.
 
 Current review pin uses the aligned terrace platform and 0–12 GH assembly sequence. Default Studio M PDFs show ground preparation/placement and a structure/panels/insulation schedule with part axonometrics. Complete-model metrics still count every non-facade part; do not present the narrower PDF scope as a manufacturing reduction. This revision remains a review PR until approved for publication.
+
+R19 review pin retains the floor bays, grid and door widths; terrace members align with actual bay-edge faces. Outdoor niches have full cladding returns and soffits. The default niche clear width is 537 mm: shower usability remains an explicit review concern. See System R19_REVIEW.md for measured count increases and unresolved detailing.
