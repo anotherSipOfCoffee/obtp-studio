@@ -10,7 +10,7 @@ from obtp.model import build,parameters,VERSION
 from obtp.export import browser_scene,COLORS
 from obtp.cut_view import parts_below
 from obtp.drawings import svg
-from obtp.manufacturing import analyse
+from obtp.manufacturing import analyse,cladding
 from obtp.schedule_pdf import write as schedule_pdf
 from obtp.documentation import assembly,parts_layout
 from obtp.ssp_preview import pdf
@@ -37,9 +37,10 @@ def export(target,revision):
    schedule_file=key+'-manufacturing.json.gz';(target/schedule_file).write_bytes(gzip.compress(json.dumps(counts,separators=(',',':')).encode(),mtime=0))
    web['manufacturing']={k:v for k,v in counts.items() if not k.endswith('_schedule')};web['manufacturing']['schedule_file']=schedule_file
    web['documents']={kind:key+'-'+kind+'.pdf' for kind in ('components','assembly','parts-layout')}
-   schedule_pdf(scene,target/web['documents']['components'],revision)
-   pdf(assembly(scene),target/web['documents']['assembly'])
-   pdf(parts_layout(scene),target/web['documents']['parts-layout'])
+   schedule_pdf(scene,target/web['documents']['components'],revision,include_cladding=False)
+   pdf(assembly(scene,include_cladding=False),target/web['documents']['assembly'])
+   pdf(parts_layout(scene,include_cladding=False),target/web['documents']['parts-layout'])
+   web['document_scope']={'facade_cladding':False,'excluded_part_ids':[p['id'] for p in scene['parts'] if cladding(p)]}
    web['documents_geometry_sha256']=scene['geometry_sha256']
    doc_hashes={kind:hashlib.sha256((target/file).read_bytes()).hexdigest() for kind,file in web['documents'].items()}
    web['document_sha256']=doc_hashes

@@ -13,16 +13,25 @@ try{
  assert.equal(await page.locator('#customer-info,#v2,#v1').count(),0);
  assert.equal(await frame.locator('#customer-information,#customer-product,#studio-version').count(),0);
  assert.deepEqual(await frame.locator('#preset option').evaluateAll(xs=>xs.map(x=>x.value)),['sauna','studio']);
- assert.equal(await frame.locator('.choice-row').count(),1);
+ assert.equal(await page.locator('header,#customer-config,#customer-drawings').count(),0);
+ assert.equal(await page.locator('#back-main').getAttribute('href'),'./');
+ assert.equal(await frame.locator('.locked-options').count(),8);
+ assert.equal(await frame.locator('.locked-alternative:not(:disabled)').count(),0);
+ assert.equal(await frame.locator('.fixed-selected').count(),8);
+ assert.match(await frame.locator('.locked-alternative').first().evaluate(x=>getComputedStyle(x).backgroundImage),/repeating-linear-gradient/);
  assert(!page.url().includes('workshop'));
- await page.locator('#language').selectOption('en');
+ await frame.locator('#language').selectOption('en');
  for(const program of [0,1]){
   await choose(program);
   const data=await frame.locator('canvas').evaluate(()=>({s:OBTPStudioV3.scene,selected:OBTPStudioV3.selection}));
   assert.equal(data.s.config.size,'M');assert.equal(data.s.config.storage,true);assert.equal(data.s.config.roof_type,0);assert.equal(data.s.config.foundation_type,0);assert.equal(data.s.config.window_width,1180);
   assert.equal(data.s.documents_geometry_sha256,data.s.source_geometry_sha256);
   assert(data.s.items.some(x=>x.stage==='facade'));assert.equal(data.s.manufacturing.physical_pieces+data.s.manufacturing.cladding.physical_pieces,data.s.items.length);
+  assert.equal(data.s.document_scope.facade_cladding,false);
+  assert(data.s.document_scope.excluded_part_ids.length>0);
   const before=data.s.source_geometry_sha256;
+  await frame.locator('.locked-alternative').first().evaluate(x=>x.click());
+  assert.equal(await frame.locator('canvas').evaluate(()=>OBTPStudioV3.scene.source_geometry_sha256),before);
   await frame.locator('canvas').evaluate(()=>{document.getElementById('sauna-size').value='l';document.getElementById('sauna-storage').checked=false;document.getElementById('sauna-roof').value='2';OBTPReload();});await ready(program);
   assert.equal(await frame.locator('canvas').evaluate(()=>OBTPStudioV3.scene.source_geometry_sha256),before);
   await frame.locator('[data-view="cut"]').click();
@@ -31,24 +40,24 @@ try{
   await frame.locator('[data-view="3d"]').click();
   const angle=await frame.locator('canvas').evaluate(()=>OBTPStudioV3.renderer.angle);await frame.locator('#rotate').click();assert.notEqual(await frame.locator('canvas').evaluate(()=>OBTPStudioV3.renderer.angle),angle);await frame.locator('#reset').click();
   await page.screenshot({path:'studio-fixed-'+program+'-desktop.png',fullPage:true});
-  await page.locator('#customer-drawings').click();await frame.locator('#drawing-plan').evaluate(x=>x.decode());
+  await frame.locator('#show-drawings').click();await frame.locator('#drawing-plan').evaluate(x=>x.decode());
   for(const [id,kind] of [['components-download','components'],['assembly-download','assembly'],['parts-layout-download','parts-layout']]){
    assert(await frame.locator('#'+id).isEnabled());const downloading=page.waitForEvent('download');await frame.locator('#'+id).click();const download=await downloading;
    assert.equal(download.suggestedFilename(),data.s.documents[kind]);const path=await download.path();const bytes=fs.readFileSync(path);assert.equal(bytes.subarray(0,5).toString(),'%PDF-');assert(bytes.length>10000);
    const hash=require('node:crypto').createHash('sha256').update(bytes).digest('hex');assert.equal(hash,data.s.document_sha256[kind]);
   }
-  await page.screenshot({path:'studio-fixed-'+program+'-drawings.png',fullPage:true});await page.locator('#customer-config').click();
+  await page.screenshot({path:'studio-fixed-'+program+'-drawings.png',fullPage:true});await frame.locator('#back-config').click();
  }
- await page.locator('#language').selectOption('lt');assert.match(await frame.locator('#preset + .choice-row').textContent(),/Pirtis M su sandėliuku/);
+ await frame.locator('#language').selectOption('lt');assert.match(await frame.locator('#preset + .choice-row').textContent(),/Pirtis M su sandėliuku/);
  await page.setViewportSize({width:390,height:844});
  for(const program of [0,1]){
   await frame.locator('#mobile-config-toggle').click();await choose(program);await page.screenshot({path:'studio-fixed-'+program+'-mobile-controls.png',fullPage:true});await page.keyboard.press('Escape');
   assert.equal(await frame.locator('#mobile-config-toggle').getAttribute('aria-expanded'),'false');
   assert(await frame.locator('canvas').evaluate(()=>document.documentElement.scrollWidth<=innerWidth));
   await page.screenshot({path:'studio-fixed-'+program+'-mobile.png',fullPage:true});
-  await page.locator('#customer-drawings').click();assert(await frame.locator('#assembly-download').isEnabled());assert(await frame.locator('#components-download').isEnabled());await page.locator('#customer-config').click();
+  await frame.locator('#show-drawings').click();assert(await frame.locator('#assembly-download').isEnabled());assert(await frame.locator('#components-download').isEnabled());await frame.locator('#back-config').click();
  }
  assert.deepEqual(errors,[]);
- await page.goto(base);assert.equal(await page.locator('.hero').count(),1);assert.equal(await page.locator('#presets .card').count(),3);
- console.log('PASS: two locked presets, URL/state guards, preserved 3D/cut/plan, rotation, both real PDF downloads for both presets, LT/EN and desktop/mobile; homepage retained');
+ await page.locator('#back-main').click();await page.waitForURL(base);assert.equal(await page.locator('.hero').count(),1);assert.equal(await page.locator('#presets .card').count(),3);
+ console.log('PASS: two locked presets, URL/state guards, preserved 3D/cut/plan, rotation, all three real PDF downloads for both presets, LT/EN and desktop/mobile; homepage retained');
 }finally{await browser.close();}})().catch(e=>{console.error(e);process.exit(1)});

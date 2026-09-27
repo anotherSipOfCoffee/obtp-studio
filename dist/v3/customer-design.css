@@ -33,3 +33,6 @@
 #drawing-plan{width:100%;height:auto;max-height:70vh;object-fit:contain;background:white;border:1px solid var(--line)}
 #customer-drawings h1{font-size:32px;margin-bottom:8px}#customer-drawings h2{font-size:20px}.document-note{font-size:12px;color:#68685f}
 @media(max-width:850px){#configurator.config-open>aside{bottom:auto;max-height:calc(100dvh - 100px)}}
+
+/* Fixed values stay visible; alternatives use hatching rather than disappearing. */
+.locked-options{border:0;padding:0;margin:18px 0;min-width:0}.locked-options legend{font-size:13px;padding:0}.locked-row{margin:9px 0 0;gap:8px}.locked-row button{min-height:36px;min-width:36px;font-size:13px;padding:7px 10px}.locked-row button:disabled{opacity:1;cursor:not-allowed}.locked-row .locked-alternative{background:repeating-linear-gradient(135deg,transparent 0 3px,#25251f35 3px 4px),var(--paper);color:var(--ink)}.locked-row .fixed-selected{background:var(--ink);color:var(--paper)}.fixed-note{font-size:12px;color:#68685f}.locked-options:has(button:only-child) .choice-row{justify-content:flex-start}.locked-options:has(button:only-child) button{flex:0 1 auto}#fixed-options .appearance{margin-top:24px}#configurator>aside>h1{font-size:32px;margin:14px 0}#configurator>section{position:sticky;top:16px;align-self:start}@media(max-width:850px){#configurator>section{position:static}}

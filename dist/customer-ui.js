@@ -1,6 +1,10 @@
 'use strict';
 (()=>{
  const exact={
+ 'Back to main':'Grįžti į pagrindinį',
+ 'Hatched options are unavailable for these presets.':'Brūkšniuoti variantai šiems modeliams nepasiekiami.',
+ 'Size':'Dydis','Storage':'Sandėliukas','Window width':'Lango plotis','Terrace depth':'Terasos gylis','Facade':'Fasadas',
+
  'Choose your space.':'Pasirinkite erdvę.',
  'Sauna M with storage':'Pirtis M su sandėliuku',
  'Studio M with storage':'Studija M su sandėliuku',
