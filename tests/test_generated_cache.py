@@ -19,21 +19,21 @@ class ExportCacheTests(unittest.TestCase):
         self.directory = pathlib.Path(self.temp.name)
         self.expected = {'source_revision': 'system-a', 'python': 'test-runtime'}
         self.geometry = b'compressed model fixture'
-        self.manifest = {'source_revision': 'system-a', 'pdf_enabled': True, 'document_kinds': ['components','assembly'], 'entries': [{
+        self.manifest = {'source_revision': 'system-a', 'pdf_enabled': True, 'document_kinds': ['components','assembly','parts-layout'], 'entries': [{
             'key': 'studio-m-storage-r0-t2-w1180-f0-b0-summer', 'file': 'studio-m-storage-r0-t2-w1180-f0-b0-summer.json.gz',
-            'sha256': hashlib.sha256(self.geometry).hexdigest(), 'pdf': True, 'documents': {kind:'studio-m-storage-r0-t2-w1180-f0-b0-summer-'+kind+'.pdf' for kind in ('components','assembly')}}]}
-        self.manifest['entries'][0]['document_sha256']={kind:hashlib.sha256(b'%PDF-fixture').hexdigest() for kind in ('components','assembly')}
+            'sha256': hashlib.sha256(self.geometry).hexdigest(), 'pdf': True, 'documents': {kind:'studio-m-storage-r0-t2-w1180-f0-b0-summer-'+kind+'.pdf' for kind in ('components','assembly','parts-layout')}}]}
+        self.manifest['entries'][0]['document_sha256']={kind:hashlib.sha256(b'%PDF-fixture').hexdigest() for kind in ('components','assembly','parts-layout')}
         import copy
         other=copy.deepcopy(self.manifest['entries'][0])
         for key in ('key','file'):other[key]=other[key].replace('studio-m-storage-r0-t2-w1180-f0-b0-summer','sauna-m-storage-r0-t2-w1180-f0-b0')
-        other['documents']={kind:other['key']+'-'+kind+'.pdf' for kind in ('components','assembly')}
+        other['documents']={kind:other['key']+'-'+kind+'.pdf' for kind in ('components','assembly','parts-layout')}
         self.manifest['entries'].append(other)
         for entry in self.manifest['entries']:
             (self.directory/entry['file']).write_bytes(self.geometry)
             (self.directory/(entry['key']+'-plan.svg')).write_bytes(b'drawing fixture')
             for path in entry['documents'].values():(self.directory/path).write_bytes(b'%PDF-fixture')
         self.write_manifest()
-        for kind in ('components','assembly'):
+        for kind in ('components','assembly','parts-layout'):
             (self.directory/('studio-m-storage-r0-t2-w1180-f0-b0-summer-'+kind+'.pdf')).write_bytes(b'%PDF-fixture')
         (self.directory / 'studio-m-storage-r0-t2-w1180-f0-b0-summer.json.gz').write_bytes(self.geometry)
         for suffix in ('-plan.svg',):

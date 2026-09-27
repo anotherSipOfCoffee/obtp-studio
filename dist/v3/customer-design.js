@@ -13,7 +13,7 @@
  };
  OBTPChoiceRow('preset',['Sauna M with storage','Studio M with storage']);
  const drawings=document.createElement('section');drawings.id='customer-drawings';drawings.className='customer-page';drawings.hidden=true;
- drawings.innerHTML='<h1>Your drawings.</h1><h2 id="drawing-selection"></h2><div class="drawing-actions"><button id="components-download" type="button" disabled>Parts schedule PDF</button><button id="assembly-download" type="button" disabled>Assembly PDF</button><button id="back-config" type="button">Configurator</button></div><p id="pdf-status" role="status">Loading model…</p><img id="drawing-plan" alt="Plan matching the selected configuration"><p class="document-note">Review documents — engineering and lifting remain unverified.</p>';
+ drawings.innerHTML='<h1>Your drawings.</h1><h2 id="drawing-selection"></h2><div class="drawing-actions"><button id="components-download" type="button" disabled>Parts schedule PDF</button><button id="assembly-download" type="button" disabled>Assembly PDF</button><button id="parts-layout-download" type="button" disabled>Loose parts layout PDF</button><button id="back-config" type="button">Configurator</button></div><p id="pdf-status" role="status">Loading model…</p><img id="drawing-plan" alt="Plan matching the selected configuration"><p class="document-note">Review documents — engineering and lifting remain unverified.</p>';
  document.body.append(drawings);
  window.OBTPCustomerView=value=>{const section=value==='drawings'?'drawings':'config';$('configurator').hidden=section!=='config';drawings.hidden=section!=='drawings';window.OBTPConfigOverlay?.(false);$('mobile-config-toggle').hidden=section!=='config';window.scrollTo(0,0);if(section==='drawings')window.OBTPUpdatePDF?.();};
  $('back-config').onclick=()=>OBTPCustomerView('config');$('show-drawings').onclick=()=>OBTPCustomerView('drawings');
@@ -23,7 +23,7 @@
    $('drawing-selection').textContent=scene?(scene.config.program_type===1?'Studio M with storage':'Sauna M with storage'):'';
    $('drawing-plan').hidden=!scene;
    if(scene)$('drawing-plan').src=$('solved-plan').src;else $('drawing-plan').removeAttribute('src');
-   for(const [id,kind]of [['components-download','components'],['assembly-download','assembly']]){
+   for(const [id,kind]of [['components-download','components'],['assembly-download','assembly'],['parts-layout-download','parts-layout']]){
     const b=$(id),file=scene?.documents?.[kind];b.disabled=!file;b.setAttribute('aria-disabled',String(!file));
     b.onclick=file?()=>{const a=document.createElement('a');a.href='generated/'+file+'?build='+scene.source_revision;a.download=file;document.body.append(a);a.click();a.remove();}:null;
    }

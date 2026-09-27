@@ -7,7 +7,7 @@
  'M · Storage included':'M · Su sandėliuku',
  'Flat roof · Timber foundation · 1180 mm window':'Plokščias stogas · Medinis pamatas · 1180 mm langas',
  'Drawings and PDFs':'Brėžiniai ir PDF',
- 'Parts schedule PDF':'Detalių žiniaraštis PDF',
+ 'Loose parts layout PDF':'Atskirų elementų išdėstymo PDF','Parts schedule PDF':'Detalių žiniaraštis PDF',
  'Assembly PDF':'Surinkimas PDF',
  'PDFs match the selected configuration.':'PDF atitinka pasirinktą konfigūraciją.',
  'Loading model…':'Įkeliamas modelis…',
