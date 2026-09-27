@@ -2,7 +2,7 @@
 const {chromium}=require('playwright'),assert=require('node:assert/strict');
 (async()=>{const browser=await chromium.launch({executablePath:process.env.OBTP_CHROMIUM_EXECUTABLE,headless:true,args:['--use-gl=angle','--use-angle=swiftshader','--enable-webgl']});
 try{const page=await browser.newPage({viewport:{width:1440,height:1100}}),errors=[];page.on('pageerror',e=>errors.push(e.message));
-await page.goto(process.env.OBTP_BASE_URL||'http://127.0.0.1:8765/');const v3=page.frameLocator('#v3'),v2=page.frameLocator('#v2');
+await page.goto((process.env.OBTP_BASE_URL||'http://127.0.0.1:8765/')+'configurator.html');const v3=page.frameLocator('#v3'),v2=page.frameLocator('#v2');
 assert.equal(await page.locator('html').getAttribute('lang'),'lt');await page.locator('#language').selectOption('en');
 async function choose(id,value){await v3.locator('#'+id+' + .choice-row [data-value="'+value+'"]').click();}
 async function assertPDFDisabled(language){
