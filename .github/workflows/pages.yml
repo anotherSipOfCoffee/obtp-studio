@@ -72,7 +72,17 @@ jobs:
         uses: actions/github-script@v7
         with:
           script: |
-            // Branch publishing is still enabled. Publish the prepared artifact last.
+            // Workflow publishing has no competing branch build to wait for.
+            // Keep the legacy guard only where branch publishing is still active.
+            try {
+              const {data: pages} = await github.rest.repos.getPages(context.repo);
+              if (pages.build_type === 'workflow') {
+                core.info('Workflow Pages publishing; no legacy wait required.');
+                return;
+              }
+            } catch (error) {
+              core.info('Pages mode unavailable; retaining conservative legacy guard.');
+            }
             for (let attempt = 0; attempt < 30; attempt++) {
               const {data} = await github.rest.actions.listWorkflowRunsForRepo({
                 ...context.repo, head_sha: context.sha, per_page: 100
