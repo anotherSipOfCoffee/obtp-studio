@@ -1,9 +1,14 @@
-# OBTP Studio
+# studio 9120 — OBTP Studio
 
-Three variations in the selector: v1 original conceptual reference, v2 WikiHouse, v3 independent OBTP Cassette 01 research prototype. The default remains v2.
+Customer website and configurator. The public configurator contains **Sauna M with storage** and **Studio M with storage**. Other design choices are fixed; alternatives remain visible but locked. The marketing homepage remains separate.
 
-System is the source for v2/v3 geometry and assembly rules. system.lock.json pins its exact commit; tools/prepare_system.py verifies the checked-out commit and copies its dist tree to dist/system-source. Do not commit that reproducible copy. Studio v1 remains byte-identical to the pre-task reference.
+Model/drawing views and assembly, parts-schedule and loose-parts-layout PDFs use the same pinned System geometry. Public PDFs exclude facade cladding; the 3D model retains it. All are review outputs, not engineered construction instructions.
 
-Read 00_START_HERE.md and AGENTS.md for the Drive master / GitHub development policy. Changes are on dev/obtp-independent-v1-20260923; main/live are unchanged. The new read-only Check Studio development variations workflow builds and tests a downloadable preview, without deploying.
+- [Start here](00_START_HERE.md) and [project rules](AGENTS.md).
+- `system.lock.json` pins System; `tools/prepare_system.py` prepares assets and `tools/export_public.py` generates the two configurations/documents.
+- `tools/generated_cache.py` checks cached output consistency. Run relevant tests and PDF/download checks when changing those outputs.
+- Historical v1/v2 references are retained in source; they are not additional public preset choices.
 
-The existing Pages workflow publishes on main or manual execution. It is preserved but not authorized to run in this task. For local inspection of a prepared preview, serve its dist folder with python -m http.server 8765 --directory dist and open http://localhost:8765/#v3.
+GitHub owns this application's code. [Drive project documents](https://drive.google.com/drive/folders/1w4ZBlEJSDoW2iE9MoSV8V_f9AOT2Ja-C) hold planning/references, not a competing editable source tree. System GH R25 remains [separate review work](https://github.com/anotherSipOfCoffee/obtp-system/pull/24); cleanup does not repin Studio.
+
+Pages publishes on main/manual dispatch. Documentation cleanup stays on a review branch and does not deploy.

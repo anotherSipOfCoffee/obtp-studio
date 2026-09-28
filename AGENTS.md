@@ -1,3 +1,9 @@
+## Current storage/cleanup direction — 28 September 2026
+
+The user authorizes cleanup across System (including GH), Studio and Architecture and their Drive folders. This supersedes earlier task-local instructions to leave sibling documentation/Drive unchanged. GitHub owns editable technical source; Drive owns planning, reference and collaboration documents. Historical ZIPs are read-only recovery, not masters. Read the [shared policy](https://github.com/anotherSipOfCoffee/obtp-system/blob/docs/storage-cleanup-20260928/project/STORAGE_POLICY.md).
+
+Preserve project-specific implementation rules below. No geometry/UI changes, Studio repin, R25 merge, website deployment, branch deletion or supplier outreach is authorized by this cleanup. Review branches and history remain intact.
+
 # studio 9120 — current public configurator
 
 Latest user instructions authorize implementation, testing and publication of the two-preset configurator. Preserve the separate marketing homepage and other site content; leave Drive and Architecture unchanged.
