@@ -15,9 +15,13 @@ try{
  assert.deepEqual(await frame.locator('#preset option').evaluateAll(xs=>xs.map(x=>x.value)),['sauna','studio']);
  assert.equal(await page.locator('header,#customer-config,#customer-drawings').count(),0);
  assert.equal(await page.locator('#back-main').getAttribute('href'),'./');
- assert.equal(await frame.locator('.locked-options').count(),8);
+ assert.equal(await frame.locator('.locked-options').count(),4);
  assert.equal(await frame.locator('.locked-alternative:not(:disabled)').count(),0);
- assert.equal(await frame.locator('.fixed-selected').count(),8);
+ assert.equal(await frame.locator('.fixed-selected').count(),4);
+ assert.match(await frame.locator('.fixed-selected').first().evaluate(x=>getComputedStyle(x).backgroundImage),/repeating-linear-gradient/);
+ await frame.locator('#language').selectOption('en');
+ assert.deepEqual(await frame.locator('.locked-options legend').allTextContents(),['Size','Extension','Sloped roof','Terrace']);
+ assert.equal(await frame.locator('.locked-row button:not(:disabled)').count(),0);
  assert.match(await frame.locator('.locked-alternative').first().evaluate(x=>getComputedStyle(x).backgroundImage),/repeating-linear-gradient/);
  assert(!page.url().includes('workshop'));
  await frame.locator('#language').selectOption('en');
@@ -59,5 +63,14 @@ try{
  }
  assert.deepEqual(errors,[]);
  await page.locator('#back-main').click();await page.waitForURL(base);assert.equal(await page.locator('.hero').count(),1);assert.equal(await page.locator('#presets .card').count(),3);
+ assert.equal(await page.locator('#process .reserved-grid article').count(),4);
+ await page.locator('[data-lang=en]').click();assert.equal(await page.locator('html').getAttribute('lang'),'en');
+ assert.match(await page.locator('#process h2').textContent(),/From your idea/);
+ await page.locator('[data-lang=lt]').click();assert.equal(await page.locator('html').getAttribute('lang'),'lt');
+ assert.match(await page.locator('#process h2').textContent(),/Nuo idėjos/);
+ assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));
+ await page.screenshot({path:'studio-home-mobile.png',fullPage:true});
+ await page.setViewportSize({width:1440,height:1000});await page.locator('[data-lang=en]').click();
+ await page.screenshot({path:'studio-home-desktop.png',fullPage:true});
  console.log('PASS: two locked presets, URL/state guards, preserved 3D/cut/plan, rotation, all three real PDF downloads for both presets, LT/EN and desktop/mobile; homepage retained');
 }finally{await browser.close();}})().catch(e=>{console.error(e);process.exit(1)});
