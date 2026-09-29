@@ -13,17 +13,17 @@
  };
  OBTPChoiceRow('preset',['Sauna M with storage','Studio M with storage']);
  const fixed=document.createElement('div');fixed.id='fixed-options';
- const options=[['Size',['S','M','L'],1],['Storage',['No','Yes'],1],['Foundation',['Timber beams','Concrete grillage · study'],0],['Roof',['Flat','Single slope'],0],['Window width',['580 mm','880 mm','1180 mm'],2],['Terrace depth',['1200 mm'],0],['Facade',['Vertical timber'],0],['Sliding glass doors',['Open · summer','Closed · winter'],0]];
+ const options=[['Size',['S','M','L'],1],['Extension',['No','Yes'],1],['Sloped roof',['No','Yes'],0],['Terrace',['No','Yes'],1]];
  for(const [name,values,selected] of options){
   const group=document.createElement('fieldset');group.className='locked-options';if(name==='Sliding glass doors')group.id='locked-season';
   const legend=document.createElement('legend');legend.textContent=name;group.append(legend);
   const row=document.createElement('div');row.className='choice-row locked-row'+(values.some(v=>v.length>5)?' text-choice':'');row.setAttribute('role','radiogroup');row.setAttribute('aria-label',name);
   values.forEach((value,i)=>{const button=document.createElement('button');button.type='button';button.role='radio';button.disabled=true;button.setAttribute('aria-checked',String(i===selected));button.className=i===selected?'fixed-selected':'locked-alternative';button.textContent=value;row.append(button);});group.append(row);fixed.append(group);
  }
- const note=document.createElement('p');note.className='fixed-note';note.textContent='Hatched options are unavailable for these presets.';fixed.prepend(note);
+ const note=document.createElement('p');note.className='fixed-note';note.textContent='Preview only. These settings are locked.';fixed.prepend(note);
  const language=document.createElement('div');language.className='appearance';language.innerHTML='<label for="language">Language</label><select id="language"><option value="lt">Lietuvių</option><option value="en">English</option></select>';fixed.append(language);
  $('preset-field').after(fixed);$('language').value=OBTPLang.get();$('language').onchange=e=>{OBTPLang.set(e.target.value);if(parent!==window)parent.OBTPLang?.set(e.target.value);};
- const syncFixed=()=>{$('locked-season').hidden=$('preset').value!=='studio';};$('preset').addEventListener('change',syncFixed);syncFixed();
+
 
  const drawings=document.createElement('section');drawings.id='customer-drawings';drawings.className='customer-page';drawings.hidden=true;
  drawings.innerHTML='<h1>Your drawings.</h1><h2 id="drawing-selection"></h2><div class="drawing-actions"><button id="components-download" type="button" disabled>Parts schedule PDF</button><button id="assembly-download" type="button" disabled>Assembly PDF</button><button id="parts-layout-download" type="button" disabled>Loose parts layout PDF</button><button id="back-config" type="button">Configurator</button></div><p id="pdf-status" role="status">Loading model…</p><img id="drawing-plan" alt="Plan matching the selected configuration"><p class="document-note">Review documents — engineering and lifting remain unverified.</p>';
